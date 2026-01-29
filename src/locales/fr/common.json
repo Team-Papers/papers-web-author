@@ -1,0 +1,44 @@
+{
+  "appName": "Paper's Auteur",
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "myBooks": "Mes livres",
+    "newBook": "Nouveau livre",
+    "earnings": "Revenus",
+    "stats": "Statistiques",
+    "settings": "Paramètres"
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "confirm": "Confirmer",
+    "submit": "Soumettre",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "upload": "Importer",
+    "publish": "Publier",
+    "search": "Rechercher...",
+    "close": "Fermer",
+    "logout": "Déconnexion"
+  },
+  "status": {
+    "draft": "Brouillon",
+    "pending": "En attente",
+    "approved": "Approuvé",
+    "rejected": "Rejeté",
+    "published": "Publié",
+    "active": "Actif"
+  },
+  "pagination": {
+    "previous": "Précédent",
+    "next": "Suivant",
+    "showing": "{{from}} - {{to}} sur {{total}}"
+  },
+  "empty": {
+    "books": "Vous n'avez pas encore de livres",
+    "transactions": "Aucune transaction"
+  }
+}
