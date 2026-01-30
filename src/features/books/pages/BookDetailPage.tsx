@@ -141,9 +141,12 @@ export function BookDetailPage() {
               <div>
                 <p className="text-xs text-on-surface-variant mb-2">Catégories</p>
                 <div className="flex flex-wrap gap-2">
-                  {book.categories.map((c) => (
-                    <span key={c.id} className="px-3 py-1 bg-surface-container rounded-full text-xs font-medium text-on-surface-variant">{c.name}</span>
-                  ))}
+                  {book.categories.map((c: any) => {
+                    const cat = c.category || c;
+                    return (
+                      <span key={cat.id} className="px-3 py-1 bg-surface-container rounded-full text-xs font-medium text-on-surface-variant">{cat.name}</span>
+                    );
+                  })}
                 </div>
               </div>
             )}
