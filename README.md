@@ -1,73 +1,58 @@
-# React + TypeScript + Vite
+# Papers — Espace Auteur
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Portail web dédié aux auteurs de la plateforme **Papers - Livres et Histoires**.
+Permet aux auteurs de publier leurs livres, suivre leurs ventes et gérer leurs revenus.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 19** + **TypeScript** (Vite 7)
+- **Tailwind CSS v4**
+- **Zustand** (state management)
+- **Axios** (API client avec JWT refresh)
+- **React Router** (SPA routing)
+- **Recharts** (graphiques)
+- **i18next** (internationalisation — FR)
 
-## React Compiler
+## Liens
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Environnement | URL |
+|---------------|-----|
+| **Production** | https://author.papers237.duckdns.org |
+| **API** | https://api.papers237.duckdns.org/api/v1 |
 
-## Expanding the ESLint configuration
+## Développement
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# Installation
+npm install
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Serveur de développement
+npm run dev
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# Build de production
+npm run build
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Preview du build
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Variables d'environnement
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# .env
+VITE_API_URL=http://localhost:8000/api/v1
 ```
+
+## Fonctionnalités
+
+- Inscription / Connexion (email + Google OAuth)
+- Demande de statut auteur
+- Dashboard avec KPIs (ventes, revenus, notes)
+- Publication de livres (multi-étapes : infos, upload, catégories, soumission)
+- Suivi des ventes et revenus
+- Demande de retrait (MTN/Orange Money)
+- Gestion du profil auteur
+
+## Déploiement
+
+Voir [DEPLOYMENT.md](./DEPLOYMENT.md) pour les détails d'hébergement et CI/CD.
