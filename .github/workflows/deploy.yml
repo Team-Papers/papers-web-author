@@ -1,0 +1,24 @@
+name: Deploy Papers Web Author
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            source ~/.nvm/nvm.sh
+            cd /home/softengine/papers-web-author
+            git pull origin develop
+            echo 'VITE_API_URL=https://api.papers237.duckdns.org/api/v1' > .env
+            npm ci
+            npm run build
