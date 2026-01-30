@@ -3,7 +3,7 @@ name: Deploy Papers Web Author
 on:
   push:
     branches:
-      - develop
+      - main
 
 jobs:
   deploy:
@@ -18,7 +18,7 @@ jobs:
           script: |
             source ~/.nvm/nvm.sh
             cd /home/softengine/papers-web-author
-            git pull origin develop
+            git pull origin main
             echo 'VITE_API_URL=https://api.papers237.duckdns.org/api/v1' > .env
             npm ci
             npm run build
