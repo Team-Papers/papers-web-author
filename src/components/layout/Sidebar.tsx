@@ -27,7 +27,7 @@ export function Sidebar() {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-6">
-        <img src="/logo.svg" alt="Paper's" className="h-8 w-8" />
+        <img src="/logo.png" alt="Paper's" className="h-8 w-8" />
         <span className="text-lg font-bold text-on-surface tracking-tight">Paper's</span>
       </div>
 
