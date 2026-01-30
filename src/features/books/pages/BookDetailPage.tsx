@@ -27,6 +27,7 @@ export function BookDetailPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!id) return;
@@ -40,10 +41,18 @@ export function BookDetailPage() {
 
   const handleSubmit = async () => {
     if (!book) return;
+    setError('');
     setActionLoading(true);
     try {
       const updated = await submitBook(book.id);
       setBook(updated);
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      if (msg?.includes('file is required')) {
+        setError('Vous devez ajouter un fichier (PDF ou ePub) avant de soumettre votre livre.');
+      } else {
+        setError(msg || 'Erreur lors de la soumission');
+      }
     } finally {
       setActionLoading(false);
     }
@@ -139,9 +148,15 @@ export function BookDetailPage() {
               </div>
             )}
 
+            {error && (
+              <div className="bg-error-container rounded-xl px-4 py-3">
+                <p className="text-sm text-error">{error}</p>
+              </div>
+            )}
+
             {/* Actions */}
             <div className="flex gap-3 pt-4 border-t border-outline-variant">
-              {book.status === BookStatus.DRAFT && (
+              {(book.status === BookStatus.DRAFT || book.status === BookStatus.REJECTED) && (
                 <Button onClick={handleSubmit} isLoading={actionLoading} leftIcon={<Send className="h-4 w-4" />}>
                   Soumettre pour révision
                 </Button>

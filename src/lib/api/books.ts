@@ -43,18 +43,18 @@ export async function getCategories(): Promise<Category[]> {
 
 export async function uploadCover(file: File): Promise<string> {
   const fd = new FormData();
-  fd.append('cover', file);
+  fd.append('file', file);
   const res = await apiClient.post<ApiResponse<{ url: string }>>('/upload/cover', fd, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return res.data.data.url;
 }
 
-export async function uploadBookFile(file: File): Promise<string> {
+export async function uploadBookFile(file: File): Promise<{ url: string; size: number; format: string }> {
   const fd = new FormData();
-  fd.append('book', file);
-  const res = await apiClient.post<ApiResponse<{ url: string }>>('/upload/book', fd, {
+  fd.append('file', file);
+  const res = await apiClient.post<ApiResponse<{ url: string; size: number; format: string }>>('/upload/book', fd, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
-  return res.data.data.url;
+  return res.data.data;
 }

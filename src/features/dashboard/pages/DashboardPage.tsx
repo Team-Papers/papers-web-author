@@ -80,8 +80,8 @@ export function DashboardPage() {
           {/* Chart */}
           <Card className="lg:col-span-2 p-6">
             <h3 className="text-sm font-semibold text-on-surface mb-4">Revenus mensuels</h3>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-64 min-h-[256px] w-full">
+              <ResponsiveContainer width="100%" height={256} minWidth={0}>
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">

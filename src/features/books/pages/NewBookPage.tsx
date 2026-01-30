@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Card } from '@/components/ui/Card';
 import { FileDropzone } from '@/components/ui/FileDropzone';
-import { createBook, getCategories } from '@/lib/api/books';
+import { createBook, getCategories, uploadCover, uploadBookFile } from '@/lib/api/books';
 import { cn } from '@/lib/utils/cn';
 import { formatCurrency } from '@/lib/utils/formatters';
 import type { Category } from '@/types/models';
@@ -51,11 +51,29 @@ export function NewBookPage() {
     if (selectedCats.length === 0) { setError('Sélectionnez au moins une catégorie'); return; }
     setLoading(true);
     try {
+      let coverUrl: string | undefined;
+      let fileUrl: string | undefined;
+      let fileSize: number | undefined;
+      let fileFormat: string | undefined;
+
+      if (coverFile) {
+        coverUrl = await uploadCover(coverFile);
+      }
+
+      if (bookFile) {
+        const result = await uploadBookFile(bookFile);
+        fileUrl = result.url;
+        fileSize = result.size;
+        fileFormat = result.format;
+      }
+
       await createBook({
         title,
         description,
         price: Number(price),
         categoryIds: selectedCats,
+        coverUrl,
+        fileUrl,
       });
       navigate('/books');
     } catch {
