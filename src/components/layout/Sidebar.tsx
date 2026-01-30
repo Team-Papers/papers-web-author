@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router';
-import { LayoutDashboard, BookOpen, PlusCircle, Wallet, BarChart3, Settings, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, BookOpen, PlusCircle, Wallet, BarChart3, Settings, LogOut, Menu, X, Presentation } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useAuthStore } from '@/features/auth/store/authStore';
 
@@ -16,6 +16,7 @@ const navItems = [
 export function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const logout = useAuthStore((s) => s.logout);
+  const authorProfile = useAuthStore((s) => s.authorProfile);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -53,8 +54,19 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Logout */}
-      <div className="px-3 pb-6">
+      {/* Showcase + Logout */}
+      <div className="px-3 pb-6 space-y-1">
+        {authorProfile?.id && (
+          <a
+            href={`https://showcase.papers237.duckdns.org/${authorProfile.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container transition-all duration-200 w-full"
+          >
+            <Presentation className="h-5 w-5" />
+            <span>Ma vitrine</span>
+          </a>
+        )}
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-error-container hover:text-error transition-all duration-200 w-full"
