@@ -119,12 +119,16 @@ export function BookDetailPage() {
                 <p className="text-lg font-bold text-on-surface">{formatCurrency(book.price)}</p>
               </div>
               <div>
+                <p className="text-xs text-on-surface-variant">Revenu/vente (70%)</p>
+                <p className="text-lg font-bold text-success">{formatCurrency(book.price * 0.7)}</p>
+              </div>
+              <div>
                 <p className="text-xs text-on-surface-variant">Ventes</p>
                 <p className="text-lg font-bold text-on-surface">{book.totalSales ?? 0}</p>
               </div>
               <div>
-                <p className="text-xs text-on-surface-variant">Revenus</p>
-                <p className="text-lg font-bold text-success">{formatCurrency(book.totalRevenue ?? 0)}</p>
+                <p className="text-xs text-on-surface-variant">Revenus totaux</p>
+                <p className="text-lg font-bold text-success">{formatCurrency((book.totalSales ?? 0) * book.price * 0.7)}</p>
               </div>
               <div>
                 <p className="text-xs text-on-surface-variant">Note</p>
