@@ -124,3 +124,30 @@ export interface Withdrawal {
   status: WithdrawalStatus;
   createdAt: string;
 }
+
+export enum NotificationType {
+  BOOK_APPROVED = 'BOOK_APPROVED',
+  BOOK_REJECTED = 'BOOK_REJECTED',
+  BOOK_SUBMITTED = 'BOOK_SUBMITTED',
+  AUTHOR_APPROVED = 'AUTHOR_APPROVED',
+  AUTHOR_REJECTED = 'AUTHOR_REJECTED',
+  BOOK_PURCHASED = 'BOOK_PURCHASED',
+  NEW_SALE = 'NEW_SALE',
+  NEW_REVIEW = 'NEW_REVIEW',
+  WITHDRAWAL_APPROVED = 'WITHDRAWAL_APPROVED',
+  WITHDRAWAL_REJECTED = 'WITHDRAWAL_REJECTED',
+  WITHDRAWAL_COMPLETED = 'WITHDRAWAL_COMPLETED',
+  SYSTEM_ANNOUNCEMENT = 'SYSTEM_ANNOUNCEMENT',
+  ACCOUNT_WARNING = 'ACCOUNT_WARNING',
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message?: string;
+  data?: Record<string, unknown>;
+  read: boolean;
+  createdAt: string;
+}

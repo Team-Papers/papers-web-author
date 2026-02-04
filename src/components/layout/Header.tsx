@@ -1,5 +1,6 @@
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { Avatar } from '@/components/ui/Avatar';
+import { NotificationDropdown } from '@/components/ui/NotificationDropdown';
 
 interface HeaderProps {
   title: string;
@@ -17,12 +18,15 @@ export function Header({ title, subtitle }: HeaderProps) {
           {subtitle && <p className="text-sm text-on-surface-variant mt-0.5">{subtitle}</p>}
         </div>
         {user && (
-          <div className="flex items-center gap-3">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-on-surface">{user.firstName} {user.lastName}</p>
-              <p className="text-xs text-on-surface-variant">{user.email}</p>
+          <div className="flex items-center gap-4">
+            <NotificationDropdown />
+            <div className="flex items-center gap-3">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-medium text-on-surface">{user.firstName} {user.lastName}</p>
+                <p className="text-xs text-on-surface-variant">{user.email}</p>
+              </div>
+              <Avatar name={`${user.firstName} ${user.lastName}`} src={user.avatarUrl} size="sm" />
             </div>
-            <Avatar name={`${user.firstName} ${user.lastName}`} src={user.avatarUrl} size="sm" />
           </div>
         )}
       </div>
