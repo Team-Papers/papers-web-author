@@ -53,8 +53,6 @@ export function NewBookPage() {
     try {
       let coverUrl: string | undefined;
       let fileUrl: string | undefined;
-      let fileSize: number | undefined;
-      let fileFormat: string | undefined;
 
       if (coverFile) {
         coverUrl = await uploadCover(coverFile);
@@ -63,8 +61,7 @@ export function NewBookPage() {
       if (bookFile) {
         const result = await uploadBookFile(bookFile);
         fileUrl = result.url;
-        fileSize = result.size;
-        fileFormat = result.format;
+        // fileSize and fileFormat available for future use
       }
 
       await createBook({
