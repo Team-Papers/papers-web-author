@@ -120,15 +120,18 @@ export function BookDetailPage() {
               </div>
               <div>
                 <p className="text-xs text-on-surface-variant">Ventes</p>
-                <p className="text-lg font-bold text-on-surface">{book.totalSales}</p>
+                <p className="text-lg font-bold text-on-surface">{book.totalSales ?? 0}</p>
               </div>
               <div>
                 <p className="text-xs text-on-surface-variant">Revenus</p>
-                <p className="text-lg font-bold text-success">{formatCurrency(book.totalRevenue)}</p>
+                <p className="text-lg font-bold text-success">{formatCurrency(book.totalRevenue ?? 0)}</p>
               </div>
               <div>
                 <p className="text-xs text-on-surface-variant">Note</p>
-                <p className="text-lg font-bold text-on-surface">{book.averageRating?.toFixed(1) || '—'} ({book.reviewCount} avis)</p>
+                <p className="text-lg font-bold text-on-surface">
+                  {book.averageRating && book.averageRating > 0 ? book.averageRating.toFixed(1) : '—'}
+                  {' '}({book.reviewCount ?? 0} avis)
+                </p>
               </div>
             </div>
 
