@@ -80,6 +80,11 @@ export interface Book {
   description: string;
   coverUrl?: string;
   fileUrl?: string;
+  fileFormat?: string;
+  fileSize?: number;
+  pageCount?: number;
+  language?: string;
+  isbn?: string;
   price: number;
   status: BookStatus;
   rejectionReason?: string;

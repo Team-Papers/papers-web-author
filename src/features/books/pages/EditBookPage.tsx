@@ -1,25 +1,30 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import { Check, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router';
+import { Check, ChevronLeft, ChevronRight, Upload, ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Card } from '@/components/ui/Card';
+import { Spinner } from '@/components/ui/Spinner';
 import { FileDropzone } from '@/components/ui/FileDropzone';
-import { createBook, getCategories, uploadCover, uploadBookFile } from '@/lib/api/books';
+import { getBookById, updateBook, getCategories, uploadCover, uploadBookFile } from '@/lib/api/books';
 import { cn } from '@/lib/utils/cn';
 import { formatCurrency } from '@/lib/utils/formatters';
-import type { Category } from '@/types/models';
+import type { Book, Category } from '@/types/models';
+import { BookStatus } from '@/types/models';
 
 const steps = ['Informations', 'Détails', 'Couverture', 'Fichier', 'Résumé'];
 
-export function NewBookPage() {
+export function EditBookPage() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [book, setBook] = useState<Book | null>(null);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -31,10 +36,33 @@ export function NewBookPage() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState('');
   const [bookFile, setBookFile] = useState<File | null>(null);
+  const [existingCoverUrl, setExistingCoverUrl] = useState('');
+  const [existingFileUrl, setExistingFileUrl] = useState('');
 
   useEffect(() => {
-    getCategories().then(setCategories).catch(() => {});
-  }, []);
+    if (!id) return;
+    Promise.all([getBookById(id), getCategories()])
+      .then(([bookData, cats]) => {
+        setBook(bookData);
+        setCategories(cats);
+        // Populate form
+        setTitle(bookData.title);
+        setDescription(bookData.description || '');
+        setPrice(String(bookData.price));
+        setIsbn(bookData.isbn || '');
+        setLanguage(bookData.language || 'fr');
+        setPageCount(bookData.pageCount ? String(bookData.pageCount) : '');
+        setExistingCoverUrl(bookData.coverUrl || '');
+        setExistingFileUrl(bookData.fileUrl || '');
+        // Extract category IDs
+        const catIds = (bookData.categories || []).map((c: any) =>
+          'category' in c ? c.category.id : c.id
+        );
+        setSelectedCats(catIds);
+      })
+      .catch(() => setBook(null))
+      .finally(() => setLoading(false));
+  }, [id]);
 
   const handleCover = (file: File) => {
     setCoverFile(file);
@@ -45,17 +73,18 @@ export function NewBookPage() {
     setBookFile(file);
   };
 
-  const toggleCat = (id: string) => {
-    setSelectedCats((prev) => prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]);
+  const toggleCat = (catId: string) => {
+    setSelectedCats((prev) => prev.includes(catId) ? prev.filter((c) => c !== catId) : [...prev, catId]);
   };
 
   const handleSubmit = async () => {
+    if (!id || !book) return;
     setError('');
     if (selectedCats.length === 0) { setError('Sélectionnez au moins une catégorie'); return; }
-    setLoading(true);
+    setSaving(true);
     try {
-      let coverUrl: string | undefined;
-      let fileUrl: string | undefined;
+      let coverUrl = existingCoverUrl;
+      let fileUrl = existingFileUrl;
       let fileSize: number | undefined;
       let fileFormat: string | undefined;
 
@@ -70,39 +99,66 @@ export function NewBookPage() {
         fileFormat = result.format;
       }
 
-      await createBook({
+      await updateBook(id, {
         title,
         description,
         price: Number(price),
         categoryIds: selectedCats,
-        coverUrl,
-        fileUrl,
+        coverUrl: coverUrl || undefined,
+        fileUrl: fileUrl || undefined,
         fileSize,
         fileFormat,
         isbn: isbn || undefined,
         language,
         pageCount: pageCount ? Number(pageCount) : undefined,
       });
-      navigate('/books');
+      navigate(`/books/${id}`);
     } catch {
-      setError('Erreur lors de la création du livre');
+      setError('Erreur lors de la modification du livre');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   const canNext = () => {
     if (step === 0) return title && description && price && selectedCats.length > 0;
-    if (step === 1) return true; // details optional
-    if (step === 2) return true; // cover optional
-    if (step === 3) return true; // file optional for draft
     return true;
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!book) {
+    return (
+      <div className="p-8 text-center text-on-surface-variant">
+        Livre introuvable
+      </div>
+    );
+  }
+
+  // Only DRAFT and REJECTED books can be edited
+  if (book.status !== BookStatus.DRAFT && book.status !== BookStatus.REJECTED) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-on-surface-variant mb-4">Ce livre ne peut pas être modifié car il est en cours de révision ou déjà publié.</p>
+        <Button onClick={() => navigate(`/books/${id}`)}>Retour au livre</Button>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <Header title="Nouveau livre" subtitle="Publiez votre œuvre" />
+      <Header title="Modifier le livre" subtitle={book.title} />
       <div className="p-6 lg:p-8 max-w-3xl mx-auto">
+        <Button variant="text" onClick={() => navigate(`/books/${id}`)} leftIcon={<ArrowLeft className="h-4 w-4" />} className="mb-4">
+          Retour aux détails
+        </Button>
+
         {/* Stepper */}
         <div className="flex items-center justify-between mb-8">
           {steps.map((s, i) => (
@@ -128,7 +184,7 @@ export function NewBookPage() {
         {error && <div className="bg-error-container text-error rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
 
         <Card className="p-6">
-          {/* Step 1: Info */}
+          {/* Step 1: Basic Info */}
           {step === 0 && (
             <div className="space-y-4">
               <Input label="Titre du livre" value={title} onChange={(e) => setTitle(e.target.value)} required />
@@ -190,10 +246,10 @@ export function NewBookPage() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-on-surface">Image de couverture</h3>
               <p className="text-sm text-on-surface-variant">Formats acceptés: JPG, PNG. Taille recommandée: 600x900px</p>
-              {coverPreview ? (
+              {coverPreview || existingCoverUrl ? (
                 <div className="flex flex-col items-center gap-4">
-                  <img src={coverPreview} alt="Preview" className="h-64 rounded-xl shadow-md object-cover" />
-                  <Button variant="outlined" onClick={() => { setCoverFile(null); setCoverPreview(''); }}>Changer l'image</Button>
+                  <img src={coverPreview || existingCoverUrl} alt="Preview" className="h-64 rounded-xl shadow-md object-cover" />
+                  <Button variant="outlined" onClick={() => { setCoverFile(null); setCoverPreview(''); setExistingCoverUrl(''); }}>Changer l'image</Button>
                 </div>
               ) : (
                 <FileDropzone onFile={handleCover} accept={{ 'image/*': ['.jpg', '.jpeg', '.png'] }} maxSize={5 * 1024 * 1024} label="Glissez votre image de couverture ici" />
@@ -212,6 +268,12 @@ export function NewBookPage() {
                   <span className="text-sm text-on-surface font-medium">{bookFile.name}</span>
                   <Button variant="text" size="sm" onClick={() => setBookFile(null)} className="ml-auto">Supprimer</Button>
                 </div>
+              ) : existingFileUrl ? (
+                <div className="flex items-center gap-3 p-4 bg-surface-container rounded-xl">
+                  <Upload className="h-5 w-5 text-primary" />
+                  <span className="text-sm text-on-surface font-medium">Fichier actuel: {existingFileUrl}</span>
+                  <Button variant="text" size="sm" onClick={() => setExistingFileUrl('')} className="ml-auto">Remplacer</Button>
+                </div>
               ) : (
                 <FileDropzone onFile={handleBookFile} accept={{ 'application/pdf': ['.pdf'], 'application/epub+zip': ['.epub'] }} maxSize={50 * 1024 * 1024} label="Glissez votre fichier ici" icon="file" />
               )}
@@ -221,7 +283,7 @@ export function NewBookPage() {
           {/* Step 5: Review */}
           {step === 4 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-on-surface">Résumé</h3>
+              <h3 className="text-lg font-semibold text-on-surface">Résumé des modifications</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-on-surface-variant">Titre</p>
@@ -245,21 +307,21 @@ export function NewBookPage() {
                 </div>
                 <div>
                   <p className="text-xs text-on-surface-variant">Couverture</p>
-                  <p className="text-sm text-on-surface">{coverFile ? coverFile.name : 'Aucune'}</p>
+                  <p className="text-sm text-on-surface">{coverFile ? coverFile.name : existingCoverUrl ? 'Existante' : 'Aucune'}</p>
                 </div>
                 <div>
                   <p className="text-xs text-on-surface-variant">Fichier</p>
-                  <p className="text-sm text-on-surface">{bookFile ? bookFile.name : 'Aucun'}</p>
+                  <p className="text-sm text-on-surface">{bookFile ? bookFile.name : existingFileUrl ? 'Existant' : 'Aucun'}</p>
                 </div>
               </div>
-              {coverPreview && <img src={coverPreview} alt="Cover" className="h-40 rounded-xl object-cover" />}
+              {(coverPreview || existingCoverUrl) && <img src={coverPreview || existingCoverUrl} alt="Cover" className="h-40 rounded-xl object-cover" />}
             </div>
           )}
         </Card>
 
         {/* Navigation */}
         <div className="flex justify-between mt-6">
-          <Button variant="outlined" onClick={() => step > 0 ? setStep(step - 1) : navigate('/books')} leftIcon={<ChevronLeft className="h-4 w-4" />}>
+          <Button variant="outlined" onClick={() => step > 0 ? setStep(step - 1) : navigate(`/books/${id}`)} leftIcon={<ChevronLeft className="h-4 w-4" />}>
             {step === 0 ? 'Annuler' : 'Précédent'}
           </Button>
           {step < 4 ? (
@@ -267,8 +329,8 @@ export function NewBookPage() {
               Suivant
             </Button>
           ) : (
-            <Button onClick={handleSubmit} isLoading={loading}>
-              Créer le livre
+            <Button onClick={handleSubmit} isLoading={saving}>
+              Enregistrer les modifications
             </Button>
           )}
         </div>

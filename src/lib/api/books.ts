@@ -15,6 +15,25 @@ export interface CreateBookData {
   categoryIds: string[];
   coverUrl?: string;
   fileUrl?: string;
+  fileSize?: number;
+  fileFormat?: string;
+  isbn?: string;
+  language?: string;
+  pageCount?: number;
+}
+
+export interface UpdateBookData {
+  title?: string;
+  description?: string;
+  price?: number;
+  categoryIds?: string[];
+  coverUrl?: string;
+  fileUrl?: string;
+  fileSize?: number;
+  fileFormat?: string;
+  isbn?: string;
+  language?: string;
+  pageCount?: number;
 }
 
 export async function createBook(data: CreateBookData): Promise<Book> {
@@ -22,9 +41,17 @@ export async function createBook(data: CreateBookData): Promise<Book> {
   return res.data.data;
 }
 
-export async function updateBook(id: string, data: Record<string, unknown>): Promise<Book> {
+export async function updateBook(id: string, data: UpdateBookData): Promise<Book> {
   const res = await apiClient.put<ApiResponse<Book>>(`/books/${id}`, data);
   return res.data.data;
+}
+
+export async function getBookById(id: string): Promise<Book> {
+  // Use getMyBooks and filter - there's no dedicated endpoint for single book fetch by author
+  const res = await getMyBooks({ limit: 100 });
+  const book = res.data.find((b) => b.id === id);
+  if (!book) throw new Error('Book not found');
+  return book;
 }
 
 export async function deleteBook(id: string): Promise<void> {

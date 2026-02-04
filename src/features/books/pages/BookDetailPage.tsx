@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Send, Trash2, BookOpen } from 'lucide-react';
+import { ArrowLeft, Send, Trash2, BookOpen, Pencil } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -165,16 +165,19 @@ export function BookDetailPage() {
             )}
 
             {/* Actions */}
-            <div className="flex gap-3 pt-4 border-t border-outline-variant">
+            <div className="flex flex-wrap gap-3 pt-4 border-t border-outline-variant">
               {(book.status === BookStatus.DRAFT || book.status === BookStatus.REJECTED) && (
-                <Button onClick={handleSubmit} isLoading={actionLoading} leftIcon={<Send className="h-4 w-4" />}>
-                  Soumettre pour révision
-                </Button>
-              )}
-              {(book.status === BookStatus.DRAFT || book.status === BookStatus.REJECTED) && (
-                <Button variant="danger" onClick={() => setShowDelete(true)} leftIcon={<Trash2 className="h-4 w-4" />}>
-                  Supprimer
-                </Button>
+                <>
+                  <Button variant="outlined" onClick={() => navigate(`/books/${book.id}/edit`)} leftIcon={<Pencil className="h-4 w-4" />}>
+                    Modifier
+                  </Button>
+                  <Button onClick={handleSubmit} isLoading={actionLoading} leftIcon={<Send className="h-4 w-4" />}>
+                    Soumettre pour révision
+                  </Button>
+                  <Button variant="danger" onClick={() => setShowDelete(true)} leftIcon={<Trash2 className="h-4 w-4" />}>
+                    Supprimer
+                  </Button>
+                </>
               )}
             </div>
           </Card>
