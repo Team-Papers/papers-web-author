@@ -88,6 +88,7 @@ export interface Book {
   price: number;
   status: BookStatus;
   rejectionReason?: string;
+  rejectionHistory?: Array<{ reason: string; date: string }>;
   authorId: string;
   categories?: Category[];
   totalSales: number;

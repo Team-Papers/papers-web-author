@@ -33,7 +33,7 @@ export function RegisterPage() {
   return (
     <div>
       <h2 className="text-2xl font-bold text-on-surface mb-1">Inscription</h2>
-      <p className="text-sm text-on-surface-variant mb-6">Créez votre compte Paper's</p>
+      <p className="text-sm text-on-surface-variant mb-6">Créez votre compte Papers</p>
 
       {error && <div className="bg-error-container text-error rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
 

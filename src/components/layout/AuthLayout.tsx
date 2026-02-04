@@ -6,8 +6,8 @@ export function AuthLayout() {
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Paper's" className="h-10 w-10" />
-            <span className="text-2xl font-bold text-on-surface tracking-tight">Paper's</span>
+            <img src="/logo.png" alt="Papers" className="h-10 w-10" />
+            <span className="text-2xl font-bold text-on-surface tracking-tight">Papers</span>
           </div>
         </div>
         <div className="bg-surface rounded-3xl shadow-lg border border-outline-variant p-8">

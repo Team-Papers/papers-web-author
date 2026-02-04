@@ -113,6 +113,21 @@ export function BookDetailPage() {
               </div>
             )}
 
+            {/* Rejection History */}
+            {book.rejectionHistory && book.rejectionHistory.length > 0 && (
+              <div className="bg-warning-container rounded-xl px-4 py-3">
+                <p className="text-sm font-medium text-warning mb-2">Historique des rejets ({book.rejectionHistory.length})</p>
+                <div className="space-y-2">
+                  {book.rejectionHistory.map((rejection, index) => (
+                    <div key={index} className="text-sm border-l-2 border-warning pl-3">
+                      <p className="text-on-surface">{rejection.reason}</p>
+                      <p className="text-xs text-on-surface-variant">{formatDate(rejection.date)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs text-on-surface-variant">Prix</p>
