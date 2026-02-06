@@ -28,8 +28,13 @@ export function Sidebar() {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-6">
-        <img src="/logo.png" alt="Papers" className="h-8 w-8" />
-        <span className="text-lg font-bold text-on-surface tracking-tight">Papers</span>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-lg">
+          <img src="/logo.png" alt="Papers" className="h-6 w-6" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-lg font-bold text-on-surface tracking-tight">Papers</span>
+          <span className="text-xs text-on-surface-variant">Auteur</span>
+        </div>
       </div>
 
       {/* Nav Items */}
@@ -41,38 +46,48 @@ export function Sidebar() {
             onClick={() => setMobileOpen(false)}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200',
+                'group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200',
                 isActive
-                  ? 'bg-primary-container text-on-primary-container'
-                  : 'text-on-surface-variant hover:bg-surface-container-high'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
               )
             }
           >
-            <item.icon className="h-5 w-5 flex-shrink-0" />
-            <span>{item.label}</span>
+            {({ isActive }) => (
+              <>
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full" />
+                )}
+                <item.icon className={cn(
+                  'h-5 w-5 flex-shrink-0 transition-transform group-hover:scale-110',
+                  isActive && 'drop-shadow-sm'
+                )} />
+                <span>{item.label}</span>
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
 
       {/* Showcase + Logout */}
-      <div className="px-3 pb-6 space-y-1">
+      <div className="px-3 pb-6 space-y-2">
         {authorProfile?.id && (
           <a
             href={`https://showcase.papers237.duckdns.org/${authorProfile.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container transition-all duration-200 w-full"
+            className="group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-accent/10 text-accent-600 hover:bg-accent hover:text-white transition-all duration-200 w-full"
           >
-            <Presentation className="h-5 w-5" />
+            <Presentation className="h-5 w-5 transition-transform group-hover:scale-110" />
             <span>Ma vitrine</span>
           </a>
         )}
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-error-container hover:text-error transition-all duration-200 w-full"
+          className="group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-error-container hover:text-error transition-all duration-200 w-full"
         >
-          <LogOut className="h-5 w-5" />
-          <span>Déconnexion</span>
+          <LogOut className="h-5 w-5 transition-transform group-hover:scale-110" />
+          <span>Deconnexion</span>
         </button>
       </div>
     </div>
