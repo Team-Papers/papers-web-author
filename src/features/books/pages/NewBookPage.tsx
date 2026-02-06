@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Check, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Upload, FileText, Image, Info, BookOpen, Sparkles } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -12,7 +12,13 @@ import { cn } from '@/lib/utils/cn';
 import { formatCurrency } from '@/lib/utils/formatters';
 import type { Category } from '@/types/models';
 
-const steps = ['Informations', 'Détails', 'Couverture', 'Fichier', 'Résumé'];
+const steps = [
+  { label: 'Informations', icon: FileText },
+  { label: 'Details', icon: Info },
+  { label: 'Couverture', icon: Image },
+  { label: 'Fichier', icon: BookOpen },
+  { label: 'Resume', icon: Sparkles },
+];
 
 export function NewBookPage() {
   const navigate = useNavigate();
@@ -99,35 +105,73 @@ export function NewBookPage() {
     return true;
   };
 
+  const progress = ((step + 1) / steps.length) * 100;
+
   return (
     <div>
-      <Header title="Nouveau livre" subtitle="Publiez votre œuvre" />
+      <Header title="Nouveau livre" subtitle="Publiez votre oeuvre" />
       <div className="p-6 lg:p-8 max-w-3xl mx-auto">
-        {/* Stepper */}
-        <div className="flex items-center justify-between mb-8">
-          {steps.map((s, i) => (
-            <div key={s} className="flex items-center flex-1 last:flex-initial">
-              <div className="flex flex-col items-center">
-                <div className={cn(
-                  'w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all',
-                  i < step ? 'bg-primary text-on-primary' :
-                  i === step ? 'bg-primary text-on-primary ring-4 ring-primary-container' :
-                  'bg-surface-container-high text-on-surface-variant'
-                )}>
-                  {i < step ? <Check className="h-5 w-5" /> : i + 1}
-                </div>
-                <span className={cn('text-xs mt-2 hidden sm:block', i <= step ? 'text-primary font-medium' : 'text-on-surface-variant')}>{s}</span>
-              </div>
-              {i < steps.length - 1 && (
-                <div className={cn('flex-1 h-0.5 mx-3', i < step ? 'bg-primary' : 'bg-surface-container-high')} />
-              )}
-            </div>
-          ))}
+        {/* Progress bar */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-on-surface">Etape {step + 1} sur {steps.length}</span>
+            <span className="text-sm text-on-surface-variant">{Math.round(progress)}%</span>
+          </div>
+          <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-primary to-primary-400 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
 
-        {error && <div className="bg-error-container text-error rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
+        {/* Stepper */}
+        <div className="flex items-center justify-between mb-8 overflow-x-auto pb-2">
+          {steps.map((s, i) => {
+            const Icon = s.icon;
+            return (
+              <div key={s.label} className="flex items-center flex-1 last:flex-initial min-w-0">
+                <div className="flex flex-col items-center">
+                  <div className={cn(
+                    'w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300',
+                    i < step ? 'bg-primary text-white shadow-md' :
+                    i === step ? 'bg-primary text-white shadow-lg scale-110 ring-4 ring-primary-container' :
+                    'bg-surface-container text-on-surface-variant'
+                  )}>
+                    {i < step ? <Check className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
+                  </div>
+                  <span className={cn(
+                    'text-xs mt-2 hidden sm:block font-medium transition-colors',
+                    i <= step ? 'text-primary' : 'text-on-surface-variant'
+                  )}>
+                    {s.label}
+                  </span>
+                </div>
+                {i < steps.length - 1 && (
+                  <div className="flex-1 mx-3 h-1 rounded-full overflow-hidden bg-surface-container-high">
+                    <div
+                      className={cn(
+                        'h-full bg-primary transition-all duration-500',
+                        i < step ? 'w-full' : 'w-0'
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
 
-        <Card className="p-6">
+        {error && (
+          <div className="bg-error-container text-error rounded-xl px-4 py-3 text-sm mb-4 flex items-center gap-2 animate-fade-up">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-error/10">
+              <Info className="h-4 w-4" />
+            </div>
+            {error}
+          </div>
+        )}
+
+        <Card variant="elevated" className="p-6 animate-fade-up">
           {/* Step 1: Info */}
           {step === 0 && (
             <div className="space-y-4">
@@ -220,39 +264,56 @@ export function NewBookPage() {
 
           {/* Step 5: Review */}
           {step === 4 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-on-surface">Résumé</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-on-surface-variant">Titre</p>
-                  <p className="text-sm font-medium text-on-surface">{title}</p>
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success-container">
+                  <Sparkles className="h-5 w-5 text-success" />
                 </div>
                 <div>
-                  <p className="text-xs text-on-surface-variant">Prix</p>
-                  <p className="text-sm font-medium text-on-surface">{formatCurrency(Number(price))}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-on-surface-variant">Langue</p>
-                  <p className="text-sm font-medium text-on-surface uppercase">{language}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-on-surface-variant">Pages</p>
-                  <p className="text-sm font-medium text-on-surface">{pageCount || 'Non spécifié'}</p>
-                </div>
-                <div className="sm:col-span-2">
-                  <p className="text-xs text-on-surface-variant">Description</p>
-                  <p className="text-sm text-on-surface line-clamp-3">{description}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-on-surface-variant">Couverture</p>
-                  <p className="text-sm text-on-surface">{coverFile ? coverFile.name : 'Aucune'}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-on-surface-variant">Fichier</p>
-                  <p className="text-sm text-on-surface">{bookFile ? bookFile.name : 'Aucun'}</p>
+                  <h3 className="text-lg font-semibold text-on-surface">Pret a publier!</h3>
+                  <p className="text-sm text-on-surface-variant">Verifiez les informations avant de creer votre livre</p>
                 </div>
               </div>
-              {coverPreview && <img src={coverPreview} alt="Cover" className="h-40 rounded-xl object-cover" />}
+
+              <div className="flex flex-col sm:flex-row gap-6">
+                {/* Cover preview */}
+                {coverPreview && (
+                  <div className="flex-shrink-0">
+                    <div className="relative group">
+                      <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 opacity-20 blur group-hover:opacity-30 transition-opacity" />
+                      <img src={coverPreview} alt="Cover" className="relative h-48 w-32 rounded-xl object-cover shadow-lg" />
+                    </div>
+                  </div>
+                )}
+
+                {/* Details */}
+                <div className="flex-1 grid grid-cols-2 gap-4">
+                  <div className="col-span-2 p-4 rounded-xl bg-surface-container">
+                    <p className="text-xs text-on-surface-variant uppercase tracking-wider">Titre</p>
+                    <p className="text-base font-semibold text-on-surface mt-1">{title}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-surface-container">
+                    <p className="text-xs text-on-surface-variant uppercase tracking-wider">Prix</p>
+                    <p className="text-lg font-bold text-primary mt-1">{formatCurrency(Number(price))}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-surface-container">
+                    <p className="text-xs text-on-surface-variant uppercase tracking-wider">Langue</p>
+                    <p className="text-base font-medium text-on-surface mt-1 uppercase">{language}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-surface-container">
+                    <p className="text-xs text-on-surface-variant uppercase tracking-wider">Pages</p>
+                    <p className="text-base font-medium text-on-surface mt-1">{pageCount || '—'}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-surface-container">
+                    <p className="text-xs text-on-surface-variant uppercase tracking-wider">Fichier</p>
+                    <p className="text-sm font-medium text-on-surface mt-1 truncate">{bookFile ? bookFile.name : 'Aucun'}</p>
+                  </div>
+                  <div className="col-span-2 p-4 rounded-xl bg-surface-container">
+                    <p className="text-xs text-on-surface-variant uppercase tracking-wider">Description</p>
+                    <p className="text-sm text-on-surface mt-1 line-clamp-3">{description}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </Card>
