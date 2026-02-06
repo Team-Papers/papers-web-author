@@ -1,46 +1,145 @@
 @import "tailwindcss";
 
+/**
+ * Papers Author Dashboard - Design System 2.0
+ * Primary: Papers Turquoise (#00B4D8)
+ * Accent: Papers Gold (#F5A623)
+ */
+
 @theme {
-  --color-primary: #4285F4;
-  --color-primary-light: #d2e3fc;
-  --color-primary-dark: #1a73e8;
-  --color-primary-container: #d3e3fd;
-  --color-on-primary: #ffffff;
-  --color-on-primary-container: #041e49;
+  /* ============================================
+     PRIMARY - Papers Turquoise
+     ============================================ */
+  --color-primary-50: #E6F7FB;
+  --color-primary-100: #CAF0F8;
+  --color-primary-200: #ADE8F4;
+  --color-primary-300: #7DD8ED;
+  --color-primary-400: #48CAE4;
+  --color-primary-500: #00B4D8;
+  --color-primary-600: #0096B4;
+  --color-primary-700: #008A9A;
+  --color-primary-800: #006B7A;
+  --color-primary-900: #004D5A;
+  --color-primary: #00B4D8;
+  --color-primary-light: #ADE8F4;
+  --color-primary-dark: #0096B4;
+  --color-primary-container: #E6F7FB;
+  --color-on-primary: #004D5A;
+  --color-on-primary-container: #006B7A;
 
-  --color-secondary: #5f6368;
-  --color-secondary-container: #e8eaed;
-  --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #1f1f1f;
+  /* ============================================
+     ACCENT - Papers Gold (Secondary)
+     ============================================ */
+  --color-accent-100: #FFF3DB;
+  --color-accent-400: #FFD166;
+  --color-accent-500: #FFBE45;
+  --color-accent-600: #F5A623;
+  --color-accent-700: #E09000;
+  --color-accent: #F5A623;
 
-  --color-surface: #ffffff;
-  --color-surface-dim: #f8f9fa;
-  --color-surface-container: #f1f3f4;
-  --color-surface-container-high: #e8eaed;
-  --color-surface-container-highest: #dadce0;
-  --color-on-surface: #1f1f1f;
-  --color-on-surface-variant: #5f6368;
-  --color-outline: #dadce0;
-  --color-outline-variant: #e8eaed;
+  --color-secondary: #475569;
+  --color-secondary-container: #E2E8F0;
+  --color-on-secondary: #FFFFFF;
+  --color-on-secondary-container: #1E293B;
 
-  --color-success: #34a853;
-  --color-success-container: #d4edda;
-  --color-warning: #fbbc04;
-  --color-warning-container: #fff3cd;
-  --color-error: #ea4335;
-  --color-error-container: #fce8e6;
-  --color-info: #4285f4;
+  /* ============================================
+     SURFACES
+     ============================================ */
+  --color-surface: #FFFFFF;
+  --color-surface-dim: #F8FAFC;
+  --color-surface-container: #F1F5F9;
+  --color-surface-container-high: #E2E8F0;
+  --color-surface-container-highest: #CBD5E1;
+  --color-on-surface: #0F172A;
+  --color-on-surface-variant: #475569;
+  --color-outline: #E2E8F0;
+  --color-outline-variant: #F1F5F9;
 
-  --font-sans: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
+  /* ============================================
+     SEMANTIC
+     ============================================ */
+  --color-success: #10B981;
+  --color-success-container: #D1FAE5;
+  --color-warning: #F59E0B;
+  --color-warning-container: #FEF3C7;
+  --color-error: #EF4444;
+  --color-error-container: #FEE2E2;
+  --color-info: #3B82F6;
+
+  /* ============================================
+     TYPOGRAPHY
+     ============================================ */
+  --font-sans: 'Inter', 'Roboto', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: 'Poppins', var(--font-sans);
+
+  /* ============================================
+     BORDER RADIUS
+     ============================================ */
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
-  --radius-xl: 1.75rem;
+  --radius-xl: 1.5rem;
   --radius-full: 9999px;
+
+  /* ============================================
+     EFFECTS
+     ============================================ */
+  --shadow-glow: 0 0 20px rgba(0, 180, 216, 0.25);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-blur: 12px;
 }
 
+/* ============================================
+   DARK MODE
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-surface: #0F172A;
+    --color-surface-dim: #1E293B;
+    --color-surface-container: #334155;
+    --color-surface-container-high: #475569;
+    --color-surface-container-highest: #64748B;
+    --color-on-surface: #F8FAFC;
+    --color-on-surface-variant: #CBD5E1;
+    --color-outline: #334155;
+    --color-outline-variant: #1E293B;
+    --color-primary-container: #004D5A;
+    --color-on-primary-container: #CAF0F8;
+    --color-secondary-container: #334155;
+    --color-on-secondary-container: #E2E8F0;
+    --glass-bg: rgba(15, 23, 42, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.1);
+  }
+}
+
+[data-theme="dark"],
+.dark {
+  --color-surface: #0F172A;
+  --color-surface-dim: #1E293B;
+  --color-surface-container: #334155;
+  --color-surface-container-high: #475569;
+  --color-surface-container-highest: #64748B;
+  --color-on-surface: #F8FAFC;
+  --color-on-surface-variant: #CBD5E1;
+  --color-outline: #334155;
+  --color-outline-variant: #1E293B;
+  --color-primary-container: #004D5A;
+  --color-on-primary-container: #CAF0F8;
+  --color-secondary-container: #334155;
+  --color-on-secondary-container: #E2E8F0;
+  --glass-bg: rgba(15, 23, 42, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
 @layer base {
-  *, *::before, *::after { box-sizing: border-box; }
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
   body {
     margin: 0;
     font-family: var(--font-sans);
@@ -49,8 +148,172 @@
     background: var(--color-surface-dim);
     line-height: 1.5;
   }
+
   ::selection {
     background: var(--color-primary-container);
     color: var(--color-on-primary-container);
   }
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Glass morphism */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+/* Glow effects */
+.glow-primary {
+  box-shadow: var(--shadow-glow);
+}
+
+/* Welcome card gradient */
+.welcome-card {
+  background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-500) 100%);
+  color: white;
+  border-radius: var(--radius-xl);
+}
+
+/* Earnings card styles */
+.earnings-positive {
+  color: var(--color-success);
+}
+
+.earnings-negative {
+  color: var(--color-error);
+}
+
+/* Book stepper styles */
+.stepper-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stepper-step-number {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.stepper-step-number.active {
+  background: var(--color-primary-500);
+  color: white;
+}
+
+.stepper-step-number.completed {
+  background: var(--color-success);
+  color: white;
+}
+
+.stepper-step-number.pending {
+  background: var(--color-surface-container);
+  color: var(--color-on-surface-variant);
+}
+
+/* Dropzone styles */
+.dropzone {
+  border: 2px dashed var(--color-outline);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.2s ease;
+  background: var(--color-surface);
+}
+
+.dropzone:hover,
+.dropzone.active {
+  border-color: var(--color-primary-400);
+  background: var(--color-primary-50);
+}
+
+[data-theme="dark"] .dropzone:hover,
+[data-theme="dark"] .dropzone.active {
+  background: var(--color-primary-900);
+}
+
+/* Stats overview */
+.stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  border-color: var(--color-primary-200);
+  box-shadow: 0 4px 12px rgba(0, 180, 216, 0.1);
+}
+
+/* Charts */
+.chart-gradient-fill {
+  fill: url(#chartGradient);
+}
+
+/* Focus states */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Animations */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes count-up {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.3s ease-out;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface-container);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-on-surface-variant);
 }
