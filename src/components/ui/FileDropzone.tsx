@@ -29,42 +29,53 @@ export function FileDropzone({ accept, maxSize, onFile, label, hint, preview, ic
       <div
         {...getRootProps()}
         className={cn(
-          'relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 transition-all duration-200 cursor-pointer',
-          isDragActive ? 'border-primary bg-primary-container/20' : 'border-outline-variant hover:border-primary hover:bg-primary-container/10',
+          'dropzone relative flex flex-col items-center justify-center p-8 cursor-pointer',
+          isDragActive && 'active',
           error && 'border-error',
         )}
       >
         <input {...getInputProps()} />
         {preview ? (
-          <div className="relative">
-            <img src={preview} alt="Preview" className="h-32 w-auto rounded-xl object-cover" />
+          <div className="relative group">
+            <img
+              src={preview}
+              alt="Preview"
+              className="h-40 w-auto rounded-xl object-cover shadow-md transition-transform group-hover:scale-105"
+            />
             <button
               onClick={(e) => { e.stopPropagation(); setFileName(null); }}
-              className="absolute -top-2 -right-2 rounded-full bg-error p-1 text-white shadow"
+              className="absolute -top-2 -right-2 rounded-full bg-error p-1.5 text-white shadow-lg transition-transform hover:scale-110"
+              aria-label="Supprimer"
             >
               <X size={14} />
             </button>
           </div>
         ) : (
           <>
-            <div className="rounded-xl bg-surface-container p-3 mb-3">
-              <Icon size={24} className="text-on-surface-variant" />
+            <div className={cn(
+              'rounded-2xl p-4 mb-4 transition-all duration-300',
+              isDragActive
+                ? 'bg-primary text-white scale-110'
+                : 'bg-surface-container text-on-surface-variant'
+            )}>
+              <Icon size={28} />
             </div>
             <div className="text-center">
-              <p className="text-sm font-medium text-on-surface">
-                {isDragActive ? 'Déposez le fichier ici' : label}
+              <p className="text-sm font-semibold text-on-surface">
+                {isDragActive ? 'Deposez le fichier ici' : label}
               </p>
-              {hint && <p className="mt-1 text-xs text-on-surface-variant">{hint}</p>}
+              {hint && <p className="mt-1.5 text-xs text-on-surface-variant">{hint}</p>}
               {fileName && (
-                <p className="mt-2 text-xs font-medium text-primary flex items-center gap-1">
-                  <Upload size={12} /> {fileName}
-                </p>
+                <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary-container px-3 py-1 text-xs font-medium text-on-primary-container">
+                  <Upload size={12} />
+                  <span className="max-w-[200px] truncate">{fileName}</span>
+                </div>
               )}
             </div>
           </>
         )}
       </div>
-      {error && <p className="mt-1.5 text-xs text-error">{error}</p>}
+      {error && <p className="mt-2 text-xs font-medium text-error">{error}</p>}
     </div>
   );
 }

@@ -2,11 +2,12 @@ import { type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/lib/utils/cn';
 
 const variants = {
-  filled: 'bg-primary text-on-primary hover:bg-primary-dark shadow-sm hover:shadow-md',
-  tonal: 'bg-primary-container text-on-primary-container hover:bg-primary-light',
-  outlined: 'border border-outline text-primary bg-transparent hover:bg-primary-container/30',
+  filled: 'bg-primary text-white hover:bg-primary-600 shadow-sm hover:shadow-lg glow-primary-hover',
+  tonal: 'bg-primary-container text-on-primary-container hover:bg-primary-100',
+  outlined: 'border border-outline text-primary bg-transparent hover:bg-primary-container/30 hover:border-primary-300',
   text: 'text-primary bg-transparent hover:bg-primary-container/20',
-  danger: 'bg-error text-white hover:bg-red-600 shadow-sm',
+  danger: 'bg-error text-white hover:bg-red-600 shadow-sm hover:shadow-lg',
+  accent: 'bg-accent text-white hover:bg-accent-700 shadow-sm hover:shadow-lg',
 } as const;
 
 const sizes = {
