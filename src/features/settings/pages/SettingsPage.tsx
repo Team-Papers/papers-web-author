@@ -1,18 +1,18 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Save, PenLine, Lock } from 'lucide-react';
+import { Save, PenLine, Lock, User, Globe, Phone, CheckCircle, AlertCircle, Shield, Smartphone } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
-import { Tabs } from '@/components/ui/Tabs';
 import { Spinner } from '@/components/ui/Spinner';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { updateMyProfile, getMyProfile } from '@/lib/api/authors';
+import { cn } from '@/lib/utils/cn';
 
 const tabs = [
-  { key: 'author', label: 'Profil auteur' },
-  { key: 'password', label: 'Mot de passe' },
+  { key: 'author', label: 'Profil auteur', icon: User },
+  { key: 'password', label: 'Securite', icon: Shield },
 ];
 
 export function SettingsPage() {
@@ -77,39 +77,139 @@ export function SettingsPage() {
 
   return (
     <div>
-      <Header title="Paramètres" subtitle="Gérez votre compte" />
-      <div className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6">
-        <Tabs tabs={tabs} active={activeTab} onChange={(t: string) => { setActiveTab(t); setError(''); setSuccess(''); }} />
+      <Header title="Parametres" subtitle="Gerez votre compte" />
+      <div className="p-6 lg:p-8 max-w-4xl mx-auto">
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Sidebar Tabs */}
+          <div className="lg:w-64 flex-shrink-0">
+            <Card variant="elevated" className="p-2 sticky top-6">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => { setActiveTab(tab.key); setError(''); setSuccess(''); }}
+                    className={cn(
+                      'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all',
+                      activeTab === tab.key
+                        ? 'bg-primary text-white shadow-md'
+                        : 'text-on-surface-variant hover:bg-surface-container'
+                    )}
+                  >
+                    <Icon size={18} />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </Card>
+          </div>
 
-        {success && <div className="bg-success-container text-success rounded-xl px-4 py-3 text-sm">{success}</div>}
-        {error && <div className="bg-error-container text-error rounded-xl px-4 py-3 text-sm">{error}</div>}
-
-        {activeTab === 'author' && (
-          <Card className="p-6">
-            <form onSubmit={handleSaveProfile} className="space-y-4">
-              <Input label="Nom de plume" value={penName} onChange={(e) => setPenName(e.target.value)} leftIcon={<PenLine className="h-4 w-4" />} />
-              <Textarea label="Biographie" value={bio} onChange={(e) => setBio(e.target.value)} rows={4} />
-              <Input label="Site web" value={website} onChange={(e) => setWebsite(e.target.value)} />
-              <Input label="Twitter" value={twitter} onChange={(e) => setTwitter(e.target.value)} />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input label="Numéro MTN" value={mtnNumber} onChange={(e) => setMtnNumber(e.target.value)} />
-                <Input label="Numéro OM" value={omNumber} onChange={(e) => setOmNumber(e.target.value)} />
+          {/* Content */}
+          <div className="flex-1 space-y-6">
+            {success && (
+              <div className="bg-success-container text-success rounded-xl px-4 py-3 text-sm flex items-center gap-2 animate-fade-up">
+                <CheckCircle size={18} />
+                {success}
               </div>
-              <Button type="submit" isLoading={saving} leftIcon={<Save className="h-4 w-4" />}>Enregistrer</Button>
-            </form>
-          </Card>
-        )}
+            )}
+            {error && (
+              <div className="bg-error-container text-error rounded-xl px-4 py-3 text-sm flex items-center gap-2 animate-fade-up">
+                <AlertCircle size={18} />
+                {error}
+              </div>
+            )}
 
-        {activeTab === 'password' && (
-          <Card className="p-6">
-            <form onSubmit={handleChangePassword} className="space-y-4">
-              <Input label="Mot de passe actuel" type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} leftIcon={<Lock className="h-4 w-4" />} />
-              <Input label="Nouveau mot de passe" type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} leftIcon={<Lock className="h-4 w-4" />} />
-              <Input label="Confirmer" type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} leftIcon={<Lock className="h-4 w-4" />} />
-              <Button type="submit" isLoading={saving} leftIcon={<Save className="h-4 w-4" />}>Changer le mot de passe</Button>
-            </form>
-          </Card>
-        )}
+            {activeTab === 'author' && (
+              <form onSubmit={handleSaveProfile} className="space-y-6 animate-fade-up">
+                {/* Identity Section */}
+                <Card variant="elevated">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-container">
+                      <PenLine className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-semibold text-on-surface">Identite</h3>
+                      <p className="text-sm text-on-surface-variant">Votre nom de plume et biographie</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <Input label="Nom de plume" value={penName} onChange={(e) => setPenName(e.target.value)} leftIcon={<PenLine className="h-4 w-4" />} />
+                    <Textarea label="Biographie" value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Parlez de vous aux lecteurs..." />
+                  </div>
+                </Card>
+
+                {/* Social Section */}
+                <Card variant="elevated">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-info-container">
+                      <Globe className="h-5 w-5 text-info" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-semibold text-on-surface">Reseaux sociaux</h3>
+                      <p className="text-sm text-on-surface-variant">Liens vers vos profils en ligne</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <Input label="Site web" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://monsite.com" leftIcon={<Globe className="h-4 w-4" />} />
+                    <Input label="Twitter / X" value={twitter} onChange={(e) => setTwitter(e.target.value)} placeholder="@monpseudo" />
+                  </div>
+                </Card>
+
+                {/* Payment Section */}
+                <Card variant="elevated">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success-container">
+                      <Smartphone className="h-5 w-5 text-success" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-semibold text-on-surface">Paiement Mobile</h3>
+                      <p className="text-sm text-on-surface-variant">Numeros pour recevoir vos gains</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Input label="Numero MTN Mobile Money" value={mtnNumber} onChange={(e) => setMtnNumber(e.target.value)} placeholder="6XXXXXXXX" leftIcon={<Phone className="h-4 w-4" />} />
+                    <Input label="Numero Orange Money" value={omNumber} onChange={(e) => setOmNumber(e.target.value)} placeholder="6XXXXXXXX" leftIcon={<Phone className="h-4 w-4" />} />
+                  </div>
+                </Card>
+
+                <div className="flex justify-end">
+                  <Button type="submit" isLoading={saving} leftIcon={<Save className="h-4 w-4" />} className="shadow-lg">
+                    Enregistrer les modifications
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {activeTab === 'password' && (
+              <form onSubmit={handleChangePassword} className="space-y-6 animate-fade-up">
+                <Card variant="elevated">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-warning-container">
+                      <Lock className="h-5 w-5 text-warning" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-semibold text-on-surface">Changer le mot de passe</h3>
+                      <p className="text-sm text-on-surface-variant">Protegez votre compte avec un mot de passe fort</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <Input label="Mot de passe actuel" type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} leftIcon={<Lock className="h-4 w-4" />} />
+                    <div className="border-t border-outline-variant pt-4">
+                      <Input label="Nouveau mot de passe" type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} leftIcon={<Lock className="h-4 w-4" />} />
+                    </div>
+                    <Input label="Confirmer le nouveau mot de passe" type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} leftIcon={<Lock className="h-4 w-4" />} />
+                  </div>
+                </Card>
+
+                <div className="flex justify-end">
+                  <Button type="submit" isLoading={saving} leftIcon={<Save className="h-4 w-4" />} className="shadow-lg">
+                    Mettre a jour le mot de passe
+                  </Button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
