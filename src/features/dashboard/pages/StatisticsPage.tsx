@@ -42,13 +42,13 @@ export function StatisticsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Books by status */}
           <Card className="p-6">
-            <h3 className="text-sm font-semibold text-on-surface mb-4">Livres par statut</h3>
+            <h3 className="text-sm font-display font-semibold text-on-surface mb-4">Livres par statut</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={statusCounts}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e8eaed" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#5f6368' }} />
-                  <YAxis tick={{ fontSize: 12, fill: '#5f6368' }} allowDecimals={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-outline)" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--color-on-surface-variant)' }} />
+                  <YAxis tick={{ fontSize: 12, fill: 'var(--color-on-surface-variant)' }} allowDecimals={false} />
                   <Tooltip />
                   <Bar dataKey="count" radius={[8, 8, 0, 0]}>
                     {statusCounts.map((entry, i) => (
@@ -62,17 +62,17 @@ export function StatisticsPage() {
 
           {/* Top books */}
           <Card className="p-6">
-            <h3 className="text-sm font-semibold text-on-surface mb-4">Top livres par ventes</h3>
+            <h3 className="text-sm font-display font-semibold text-on-surface mb-4">Top livres par ventes</h3>
             {topBooks.length === 0 ? (
-              <p className="text-sm text-on-surface-variant text-center py-8">Aucun livre avec des ventes</p>
+              <p className="text-sm text-on-surface-muted text-center py-8">Aucun livre avec des ventes</p>
             ) : (
               <div className="space-y-3">
                 {topBooks.map((book, i) => (
                   <div key={book.id} className="flex items-center gap-3 py-2">
-                    <span className="text-lg font-bold text-on-surface-variant w-6">{i + 1}</span>
+                    <span className="text-lg font-bold text-on-surface-muted w-6">{i + 1}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-on-surface truncate">{book.title}</p>
-                      <p className="text-xs text-on-surface-variant">{book.totalSales} ventes · {formatCurrency(book.totalRevenue)}</p>
+                      <p className="text-xs text-on-surface-muted">{book.totalSales} ventes · {formatCurrency(book.totalRevenue)}</p>
                     </div>
                   </div>
                 ))}
@@ -84,23 +84,23 @@ export function StatisticsPage() {
         {/* Summary */}
         {stats && (
           <Card className="p-6">
-            <h3 className="text-sm font-semibold text-on-surface mb-4">Résumé</h3>
+            <h3 className="text-sm font-display font-semibold text-on-surface mb-4">Résumé</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-surface-container rounded-2xl">
-                <p className="text-2xl font-bold text-primary">{stats.totalBooks}</p>
-                <p className="text-xs text-on-surface-variant mt-1">Livres</p>
+                <p className="text-2xl font-display font-bold text-primary">{stats.totalBooks}</p>
+                <p className="text-xs text-on-surface-muted mt-1">Livres</p>
               </div>
               <div className="text-center p-4 bg-surface-container rounded-2xl">
-                <p className="text-2xl font-bold text-success">{stats.totalSales}</p>
-                <p className="text-xs text-on-surface-variant mt-1">Ventes</p>
+                <p className="text-2xl font-display font-bold text-success">{stats.totalSales}</p>
+                <p className="text-xs text-on-surface-muted mt-1">Ventes</p>
               </div>
               <div className="text-center p-4 bg-surface-container rounded-2xl">
-                <p className="text-2xl font-bold text-warning">{formatCurrency(stats.totalRevenue)}</p>
-                <p className="text-xs text-on-surface-variant mt-1">Revenus total</p>
+                <p className="text-2xl font-display font-bold text-warning">{formatCurrency(stats.totalRevenue)}</p>
+                <p className="text-xs text-on-surface-muted mt-1">Revenus total</p>
               </div>
               <div className="text-center p-4 bg-surface-container rounded-2xl">
-                <p className="text-2xl font-bold text-on-surface">{stats.averageRating?.toFixed(1) || '—'}</p>
-                <p className="text-xs text-on-surface-variant mt-1">Note moyenne</p>
+                <p className="text-2xl font-display font-bold text-on-surface">{stats.averageRating?.toFixed(1) || '—'}</p>
+                <p className="text-xs text-on-surface-muted mt-1">Note moyenne</p>
               </div>
             </div>
           </Card>

@@ -29,3 +29,8 @@ export async function forgotPassword(email: string): Promise<void> {
 export async function resetPassword(token: string, password: string): Promise<void> {
   await apiClient.post('/auth/reset-password', { token, password });
 }
+
+export async function googleAuth(idToken: string): Promise<LoginResponse> {
+  const res = await apiClient.post<ApiResponse<LoginResponse>>('/auth/google', { idToken });
+  return res.data.data;
+}

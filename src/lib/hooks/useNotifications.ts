@@ -1,8 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { Notification } from '@/types/models';
+import type { Notification, NotificationType } from '@/types/models';
 import * as notificationsApi from '@/lib/api/notifications';
 
 const POLLING_INTERVAL = 30000; // 30 seconds
+
+// Only show author-relevant notifications in the author dashboard
+const AUTHOR_NOTIFICATION_TYPES: NotificationType[] = [
+  'BOOK_APPROVED' as NotificationType,
+  'BOOK_REJECTED' as NotificationType,
+  'BOOK_SUBMITTED' as NotificationType,
+  'AUTHOR_APPROVED' as NotificationType,
+  'AUTHOR_REJECTED' as NotificationType,
+  'NEW_SALE' as NotificationType,
+  'NEW_REVIEW' as NotificationType,
+  'WITHDRAWAL_APPROVED' as NotificationType,
+  'WITHDRAWAL_REJECTED' as NotificationType,
+  'WITHDRAWAL_COMPLETED' as NotificationType,
+  'SYSTEM_ANNOUNCEMENT' as NotificationType,
+  'ACCOUNT_WARNING' as NotificationType,
+];
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -22,10 +38,12 @@ export function useNotifications() {
   const fetchNotifications = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await notificationsApi.getNotifications({ limit: 20 });
-      setNotifications(response.data);
-      // Update unread count from fetched data
-      const unread = response.data.filter((n) => !n.read).length;
+      const response = await notificationsApi.getNotifications({ limit: 50 });
+      const authorNotifs = response.data.filter((n) =>
+        AUTHOR_NOTIFICATION_TYPES.includes(n.type as NotificationType),
+      );
+      setNotifications(authorNotifs);
+      const unread = authorNotifs.filter((n) => !n.read).length;
       setUnreadCount(unread);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);

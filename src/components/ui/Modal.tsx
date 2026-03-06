@@ -22,10 +22,10 @@ export function Modal({ isOpen, onClose, title, children, footer, size = 'md' }:
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative w-full ${sizeMap[size]} rounded-3xl bg-surface shadow-2xl`}>
+      <div className={`relative w-full ${sizeMap[size]} rounded-2xl bg-surface shadow-2xl border border-outline/50 animate-fade-up`}>
         <div className="flex items-center justify-between px-6 pt-6 pb-4">
-          <h2 className="text-xl font-semibold text-on-surface">{title}</h2>
-          <button onClick={onClose} className="rounded-full p-1.5 text-on-surface-variant hover:bg-surface-container transition-colors">
+          <h2 className="text-xl font-display font-bold text-on-surface">{title}</h2>
+          <button onClick={onClose} className="rounded-xl p-1.5 text-on-surface-muted hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer">
             <X size={20} />
           </button>
         </div>

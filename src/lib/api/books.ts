@@ -63,6 +63,11 @@ export async function submitBook(id: string): Promise<Book> {
   return res.data.data;
 }
 
+export async function unpublishBook(id: string): Promise<Book> {
+  const res = await apiClient.post<ApiResponse<Book>>(`/books/${id}/unpublish`);
+  return res.data.data;
+}
+
 export async function getCategories(): Promise<Category[]> {
   const res = await apiClient.get<ApiResponse<Category[]>>('/categories');
   return res.data.data;

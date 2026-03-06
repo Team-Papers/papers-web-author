@@ -1,8 +1,10 @@
 import { create } from 'zustand';
+import { signInWithPopup } from 'firebase/auth';
 import type { User, AuthorProfile } from '@/types/models';
 import { AuthorStatus } from '@/types/models';
 import * as authApi from '@/lib/api/auth';
 import * as authorApi from '@/lib/api/authors';
+import { getFirebaseAuth, getGoogleProvider } from '@/lib/firebase';
 import type { LoginRequest, RegisterRequest, AuthorApplyRequest } from '@/types/api';
 
 interface AuthState {
@@ -13,6 +15,7 @@ interface AuthState {
   isLoading: boolean;
   isAuthorApproved: boolean;
   login: (data: LoginRequest) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
@@ -34,6 +37,21 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.setItem('refreshToken', res.refreshToken);
     set({ user: res.user, accessToken: res.accessToken, isAuthenticated: true });
     // Try to fetch author profile
+    try {
+      const profile = await authorApi.getMyProfile();
+      set({ authorProfile: profile, isAuthorApproved: profile.status === AuthorStatus.APPROVED });
+    } catch {
+      set({ authorProfile: null, isAuthorApproved: false });
+    }
+  },
+
+  loginWithGoogle: async () => {
+    const result = await signInWithPopup(getFirebaseAuth(), getGoogleProvider());
+    const idToken = await result.user.getIdToken();
+    const res = await authApi.googleAuth(idToken);
+    localStorage.setItem('accessToken', res.accessToken);
+    localStorage.setItem('refreshToken', res.refreshToken);
+    set({ user: res.user, accessToken: res.accessToken, isAuthenticated: true });
     try {
       const profile = await authorApi.getMyProfile();
       set({ authorProfile: profile, isAuthorApproved: profile.status === AuthorStatus.APPROVED });

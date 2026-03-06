@@ -31,12 +31,12 @@ export function AuthorApplyPage() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
           <PenLine className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-on-surface">Devenir auteur</h2>
-          <p className="text-sm text-on-surface-variant">Remplissez votre profil d'auteur</p>
+          <h2 className="text-xl font-display font-bold text-on-surface">Devenir auteur</h2>
+          <p className="text-sm text-on-surface-muted">Remplissez votre profil d&apos;auteur</p>
         </div>
       </div>
 

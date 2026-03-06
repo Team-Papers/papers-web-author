@@ -115,7 +115,7 @@ export function NewBookPage() {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-on-surface">Etape {step + 1} sur {steps.length}</span>
-            <span className="text-sm text-on-surface-variant">{Math.round(progress)}%</span>
+            <span className="text-sm text-on-surface-muted">{Math.round(progress)}%</span>
           </div>
           <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
             <div
@@ -206,8 +206,8 @@ export function NewBookPage() {
           {/* Step 2: Details */}
           {step === 1 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-on-surface">Détails supplémentaires</h3>
-              <p className="text-sm text-on-surface-variant">Ces informations sont optionnelles mais aident les lecteurs.</p>
+              <h3 className="text-lg font-display font-semibold text-on-surface">Détails supplémentaires</h3>
+              <p className="text-sm text-on-surface-muted">Ces informations sont optionnelles mais aident les lecteurs.</p>
               <Input label="ISBN (optionnel)" value={isbn} onChange={(e) => setIsbn(e.target.value)} placeholder="978-..." />
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -232,8 +232,8 @@ export function NewBookPage() {
           {/* Step 3: Cover */}
           {step === 2 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-on-surface">Image de couverture</h3>
-              <p className="text-sm text-on-surface-variant">Formats acceptés: JPG, PNG. Taille recommandée: 600x900px</p>
+              <h3 className="text-lg font-display font-semibold text-on-surface">Image de couverture</h3>
+              <p className="text-sm text-on-surface-muted">Formats acceptés: JPG, PNG. Taille recommandée: 600x900px</p>
               {coverPreview ? (
                 <div className="flex flex-col items-center gap-4">
                   <img src={coverPreview} alt="Preview" className="h-64 rounded-xl shadow-md object-cover" />
@@ -248,8 +248,8 @@ export function NewBookPage() {
           {/* Step 4: File */}
           {step === 3 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-on-surface">Fichier du livre</h3>
-              <p className="text-sm text-on-surface-variant">Formats acceptés: PDF, EPUB. Taille max: 50MB</p>
+              <h3 className="text-lg font-display font-semibold text-on-surface">Fichier du livre</h3>
+              <p className="text-sm text-on-surface-muted">Formats acceptés: PDF, EPUB. Taille max: 50MB</p>
               {bookFile ? (
                 <div className="flex items-center gap-3 p-4 bg-surface-container rounded-xl">
                   <Upload className="h-5 w-5 text-primary" />
@@ -270,8 +270,8 @@ export function NewBookPage() {
                   <Sparkles className="h-5 w-5 text-success" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-on-surface">Pret a publier!</h3>
-                  <p className="text-sm text-on-surface-variant">Verifiez les informations avant de creer votre livre</p>
+                  <h3 className="text-lg font-display font-semibold text-on-surface">Pret a publier!</h3>
+                  <p className="text-sm text-on-surface-muted">Verifiez les informations avant de creer votre livre</p>
                 </div>
               </div>
 

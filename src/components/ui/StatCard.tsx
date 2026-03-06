@@ -28,8 +28,8 @@ export function StatCard({
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 space-y-1">
-          <p className="text-sm font-medium text-on-surface-variant">{title}</p>
-          <p className="text-3xl font-bold text-on-surface tracking-tight">{value}</p>
+          <p className="text-sm font-medium text-on-surface-muted">{title}</p>
+          <p className="text-3xl font-display font-bold text-on-surface tracking-tight">{value}</p>
           {trend && (
             <div className={cn(
               'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold',

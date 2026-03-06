@@ -32,7 +32,7 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none',
+        'inline-flex items-center justify-center font-display font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none hover:scale-[1.02] active:scale-[0.98]',
         variants[variant], sizes[size], fullWidth && 'w-full', className,
       )}
       disabled={disabled || isLoading}

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Send, Trash2, BookOpen, Pencil } from 'lucide-react';
+import { ArrowLeft, Send, Trash2, BookOpen, Pencil, EyeOff } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';
 import { Modal } from '@/components/ui/Modal';
-import { getMyBooks, submitBook, deleteBook } from '@/lib/api/books';
+import { getMyBooks, submitBook, deleteBook, unpublishBook } from '@/lib/api/books';
 import { formatCurrency, formatDate } from '@/lib/utils/formatters';
 import type { Book } from '@/types/models';
 import { BookStatus } from '@/types/models';
@@ -27,6 +27,7 @@ export function BookDetailPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [showUnpublish, setShowUnpublish] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -69,6 +70,22 @@ export function BookDetailPage() {
     }
   };
 
+  const handleUnpublish = async () => {
+    if (!book) return;
+    setError('');
+    setActionLoading(true);
+    try {
+      const updated = await unpublishBook(book.id);
+      setBook(updated);
+      setShowUnpublish(false);
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(msg || 'Erreur lors du retrait');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) return <div className="flex items-center justify-center h-96"><Spinner size="lg" /></div>;
   if (!book) return <div className="p-8 text-center text-on-surface-variant">Livre introuvable</div>;
 
@@ -100,7 +117,7 @@ export function BookDetailPage() {
           <Card className="md:col-span-2 p-6 space-y-4">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-on-surface">{book.title}</h2>
+                <h2 className="text-2xl font-display font-bold text-on-surface">{book.title}</h2>
                 <p className="text-sm text-on-surface-variant mt-1">Créé le {formatDate(book.createdAt)}</p>
               </div>
               <Badge variant={sb.variant}>{sb.label}</Badge>
@@ -131,23 +148,23 @@ export function BookDetailPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs text-on-surface-variant">Prix</p>
-                <p className="text-lg font-bold text-on-surface">{formatCurrency(book.price)}</p>
+                <p className="text-lg font-display font-bold text-on-surface">{formatCurrency(book.price)}</p>
               </div>
               <div>
                 <p className="text-xs text-on-surface-variant">Revenu/vente (70%)</p>
-                <p className="text-lg font-bold text-success">{formatCurrency(book.price * 0.7)}</p>
+                <p className="text-lg font-display font-bold text-success">{formatCurrency(book.price * 0.7)}</p>
               </div>
               <div>
                 <p className="text-xs text-on-surface-variant">Ventes</p>
-                <p className="text-lg font-bold text-on-surface">{book.totalSales ?? 0}</p>
+                <p className="text-lg font-display font-bold text-on-surface">{book.totalSales ?? 0}</p>
               </div>
               <div>
                 <p className="text-xs text-on-surface-variant">Revenus totaux</p>
-                <p className="text-lg font-bold text-success">{formatCurrency((book.totalSales ?? 0) * book.price * 0.7)}</p>
+                <p className="text-lg font-display font-bold text-success">{formatCurrency((book.totalSales ?? 0) * book.price * 0.7)}</p>
               </div>
               <div>
                 <p className="text-xs text-on-surface-variant">Note</p>
-                <p className="text-lg font-bold text-on-surface">
+                <p className="text-lg font-display font-bold text-on-surface">
                   {book.averageRating && book.averageRating > 0 ? book.averageRating.toFixed(1) : '—'}
                   {' '}({book.reviewCount ?? 0} avis)
                 </p>
@@ -181,6 +198,7 @@ export function BookDetailPage() {
 
             {/* Actions */}
             <div className="flex flex-wrap gap-3 pt-4 border-t border-outline-variant">
+              {/* DRAFT / REJECTED: Edit, Submit, Delete */}
               {(book.status === BookStatus.DRAFT || book.status === BookStatus.REJECTED) && (
                 <>
                   <Button variant="outlined" onClick={() => navigate(`/books/${book.id}/edit`)} leftIcon={<Pencil className="h-4 w-4" />}>
@@ -189,11 +207,25 @@ export function BookDetailPage() {
                   <Button onClick={handleSubmit} isLoading={actionLoading} leftIcon={<Send className="h-4 w-4" />}>
                     Soumettre pour révision
                   </Button>
-                  <Button variant="danger" onClick={() => setShowDelete(true)} leftIcon={<Trash2 className="h-4 w-4" />}>
-                    Supprimer
-                  </Button>
                 </>
               )}
+
+              {/* PUBLISHED: Unpublish */}
+              {book.status === BookStatus.PUBLISHED && (
+                <Button variant="outlined" onClick={() => setShowUnpublish(true)} leftIcon={<EyeOff className="h-4 w-4" />}>
+                  Retirer de la publication
+                </Button>
+              )}
+
+              {/* PENDING: info only */}
+              {book.status === BookStatus.PENDING && (
+                <p className="text-sm text-on-surface-variant italic">En attente de validation par l'équipe Papers.</p>
+              )}
+
+              {/* Delete available for all statuses */}
+              <Button variant="danger" onClick={() => setShowDelete(true)} leftIcon={<Trash2 className="h-4 w-4" />}>
+                Supprimer
+              </Button>
             </div>
           </Card>
         </div>
@@ -208,6 +240,17 @@ export function BookDetailPage() {
         }
       >
         <p className="text-sm text-on-surface-variant">Cette action est irréversible. Le livre "{book.title}" sera définitivement supprimé.</p>
+      </Modal>
+
+      <Modal isOpen={showUnpublish} onClose={() => setShowUnpublish(false)} title="Retirer de la publication ?"
+        footer={
+          <div className="flex gap-3 justify-end">
+            <Button variant="outlined" onClick={() => setShowUnpublish(false)}>Annuler</Button>
+            <Button onClick={handleUnpublish} isLoading={actionLoading}>Confirmer</Button>
+          </div>
+        }
+      >
+        <p className="text-sm text-on-surface-variant">Le livre "{book.title}" ne sera plus visible dans le catalogue. Vous pourrez le republier plus tard.</p>
       </Modal>
     </div>
   );

@@ -26,8 +26,8 @@ export function ForgotPasswordPage() {
         <div className="w-16 h-16 rounded-full bg-success-container flex items-center justify-center mx-auto mb-4">
           <Mail className="h-8 w-8 text-success" />
         </div>
-        <h2 className="text-xl font-bold text-on-surface mb-2">Email envoyé</h2>
-        <p className="text-sm text-on-surface-variant mb-6">Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.</p>
+        <h2 className="text-xl font-display font-bold text-on-surface mb-2">Email envoye</h2>
+        <p className="text-sm text-on-surface-muted mb-6">Si un compte existe avec cet email, vous recevrez un lien de reinitialisation.</p>
         <Link to="/login" className="text-primary font-medium hover:underline text-sm">Retour à la connexion</Link>
       </div>
     );
@@ -35,8 +35,8 @@ export function ForgotPasswordPage() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-on-surface mb-1">Mot de passe oublié</h2>
-      <p className="text-sm text-on-surface-variant mb-6">Entrez votre email pour recevoir un lien de réinitialisation</p>
+      <h2 className="text-2xl font-display font-bold text-on-surface mb-1">Mot de passe oublie</h2>
+      <p className="text-sm text-on-surface-muted mb-6">Entrez votre email pour recevoir un lien de reinitialisation</p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} leftIcon={<Mail className="h-4 w-4" />} required />
         <Button type="submit" fullWidth isLoading={loading}>Envoyer le lien</Button>

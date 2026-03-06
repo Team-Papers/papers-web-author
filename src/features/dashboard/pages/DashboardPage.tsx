@@ -120,7 +120,7 @@ export function DashboardPage() {
         {/* Chart */}
         <Card className="lg:col-span-2" variant="elevated">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-base font-semibold text-on-surface">Revenus mensuels</h3>
+            <h3 className="text-base font-display font-semibold text-on-surface">Revenus mensuels</h3>
             <span className="text-xs text-on-surface-variant bg-surface-container px-2.5 py-1 rounded-full">
               6 derniers mois
             </span>
@@ -171,7 +171,7 @@ export function DashboardPage() {
         {/* Recent transactions */}
         <Card variant="elevated">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold text-on-surface">Activite recente</h3>
+            <h3 className="text-base font-display font-semibold text-on-surface">Activite recente</h3>
             <Clock className="h-4 w-4 text-on-surface-variant" />
           </div>
           {transactions.length === 0 ? (
@@ -179,8 +179,8 @@ export function DashboardPage() {
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container mb-3">
                 <ShoppingCart className="h-6 w-6 text-on-surface-variant" />
               </div>
-              <p className="text-sm text-on-surface-variant">Aucune activite recente</p>
-              <p className="text-xs text-on-surface-variant/70 mt-1">
+              <p className="text-sm text-on-surface-muted">Aucune activite recente</p>
+              <p className="text-xs text-on-surface-muted mt-1">
                 Les ventes apparaitront ici
               </p>
             </div>

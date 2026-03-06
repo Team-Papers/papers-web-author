@@ -64,7 +64,7 @@ export function EarningsPage() {
       .sort(([a], [b]) => a.localeCompare(b))
       .slice(-6)
       .map(([month, amount]) => {
-        const [year, m] = month.split('-');
+        const [, m] = month.split('-');
         const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
         return { month: monthNames[parseInt(m) - 1], amount };
       });
@@ -74,41 +74,40 @@ export function EarningsPage() {
 
   return (
     <div>
-      <Header title="Revenus" subtitle="Gérez vos gains" />
+      <Header title="Revenus" subtitle="Gerez vos gains" />
       <div className="p-6 lg:p-8 space-y-6 max-w-5xl mx-auto">
         {/* Balance Card */}
-        <Card className="welcome-card relative overflow-hidden p-8 animate-fade-up">
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/20 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
-          </div>
+        <div className="welcome-card relative overflow-hidden p-8 rounded-2xl animate-fade-up">
+          <div className="absolute inset-0 pattern-african" />
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/15 rounded-full blur-[80px]" />
+          <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-accent/15 rounded-full blur-[80px]" />
           <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10">
                 <Wallet className="h-7 w-7 text-white" />
               </div>
               <div>
-                <p className="text-sm text-white/70">Solde disponible</p>
-                <p className="text-3xl lg:text-4xl font-bold text-white mt-1">{formatCurrency(balance)}</p>
+                <p className="text-xs text-primary-300 uppercase tracking-widest">Solde disponible</p>
+                <p className="text-3xl lg:text-4xl font-display font-bold text-white mt-1">{formatCurrency(balance)}</p>
               </div>
             </div>
             <Button
-              variant="filled"
+              variant="text"
               onClick={() => setShowWithdraw(true)}
               leftIcon={<ArrowDownToLine className="h-4 w-4" />}
-              className="bg-white text-primary-600 hover:bg-white/90 shadow-lg"
+              className="!bg-white !text-primary-700 hover:!bg-white/90 shadow-lg font-semibold"
             >
               Retirer
             </Button>
           </div>
-        </Card>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Chart */}
           {chartData.length > 0 && (
             <Card className="lg:col-span-2" variant="elevated">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-base font-semibold text-on-surface">Évolution des revenus</h3>
+                <h3 className="text-base font-display font-semibold text-on-surface">Evolution des revenus</h3>
                 <span className="text-xs text-on-surface-variant bg-surface-container px-2.5 py-1 rounded-full">
                   {chartData.length} mois
                 </span>
@@ -160,7 +159,7 @@ export function EarningsPage() {
           {/* Transactions */}
           <Card variant="elevated" className={chartData.length === 0 ? 'lg:col-span-3' : ''}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold text-on-surface">Historique</h3>
+              <h3 className="text-base font-display font-semibold text-on-surface">Historique</h3>
               <Clock className="h-4 w-4 text-on-surface-variant" />
             </div>
             {transactions.length === 0 ? (
@@ -168,8 +167,8 @@ export function EarningsPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container mb-3">
                   <Wallet className="h-6 w-6 text-on-surface-variant" />
                 </div>
-                <p className="text-sm text-on-surface-variant">Aucune transaction</p>
-                <p className="text-xs text-on-surface-variant/70 mt-1">Vos ventes apparaîtront ici</p>
+                <p className="text-sm text-on-surface-muted">Aucune transaction</p>
+                <p className="text-xs text-on-surface-muted mt-1">Vos ventes apparaitront ici</p>
               </div>
             ) : (
               <div className="space-y-3 max-h-[400px] overflow-y-auto">
@@ -217,7 +216,7 @@ export function EarningsPage() {
           {wError && <div className="bg-error-container text-error rounded-xl px-4 py-3 text-sm">{wError}</div>}
           <Input label="Montant (FCFA)" type="number" value={wAmount} onChange={(e) => setWAmount(e.target.value)} />
           <div>
-            <label className="block text-sm font-medium text-on-surface mb-2">Méthode</label>
+            <label className="block text-sm font-medium text-on-surface mb-2">Methode</label>
             <div className="flex gap-3">
               {['MTN', 'OM'].map((m) => (
                 <button key={m} type="button" onClick={() => setWMethod(m)}

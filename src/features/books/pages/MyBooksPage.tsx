@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { Plus, Search, BookOpen } from 'lucide-react';
+import { Plus, Search, BookOpen, ShoppingCart } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Tabs } from '@/components/ui/Tabs';
@@ -17,17 +16,17 @@ import { BookStatus } from '@/types/models';
 const statusBadge: Record<BookStatus, { variant: 'success' | 'warning' | 'error' | 'info' | 'neutral'; label: string }> = {
   [BookStatus.DRAFT]: { variant: 'neutral', label: 'Brouillon' },
   [BookStatus.PENDING]: { variant: 'warning', label: 'En attente' },
-  [BookStatus.APPROVED]: { variant: 'info', label: 'Approuvé' },
-  [BookStatus.REJECTED]: { variant: 'error', label: 'Rejeté' },
-  [BookStatus.PUBLISHED]: { variant: 'success', label: 'Publié' },
+  [BookStatus.APPROVED]: { variant: 'info', label: 'Approuve' },
+  [BookStatus.REJECTED]: { variant: 'error', label: 'Rejete' },
+  [BookStatus.PUBLISHED]: { variant: 'success', label: 'Publie' },
 };
 
 const tabs = [
   { key: '', label: 'Tous' },
   { key: BookStatus.DRAFT, label: 'Brouillon' },
   { key: BookStatus.PENDING, label: 'En attente' },
-  { key: BookStatus.PUBLISHED, label: 'Publiés' },
-  { key: BookStatus.REJECTED, label: 'Rejetés' },
+  { key: BookStatus.PUBLISHED, label: 'Publies' },
+  { key: BookStatus.REJECTED, label: 'Rejetes' },
 ];
 
 export function MyBooksPage() {
@@ -75,33 +74,43 @@ export function MyBooksPage() {
             icon={<BookOpen className="h-12 w-12" />}
             title="Aucun livre"
             description="Commencez par publier votre premier livre"
-            action={{ label: 'Créer un livre', onClick: () => navigate('/books/new') }}
+            action={{ label: 'Creer un livre', onClick: () => navigate('/books/new') }}
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {books.map((book) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {books.map((book, i) => (
               <Link key={book.id} to={`/books/${book.id}`}>
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer group">
-                  <div className="aspect-[3/4] bg-surface-container-high relative overflow-hidden">
+                <div
+                  className="bg-surface rounded-2xl border border-outline/50 overflow-hidden hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 cursor-pointer group animate-fade-up"
+                  style={{ animationDelay: `${i * 50}ms` }}
+                >
+                  <div className="aspect-[3/4] bg-surface-container relative overflow-hidden">
                     {book.coverUrl ? (
-                      <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <BookOpen className="h-12 w-12 text-on-surface-variant/30" />
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
+                        <BookOpen className="h-12 w-12 text-on-surface-muted" />
                       </div>
                     )}
-                    <div className="absolute top-2 right-2">
+                    {/* Status badge */}
+                    <div className="absolute top-3 right-3">
                       <Badge variant={statusBadge[book.status].variant}>{statusBadge[book.status].label}</Badge>
+                    </div>
+                    {/* Price overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-8">
+                      <span className="text-sm font-display font-bold text-white">{formatCurrency(book.price)}</span>
                     </div>
                   </div>
                   <div className="p-4">
-                    <h3 className="font-semibold text-on-surface text-sm line-clamp-1">{book.title}</h3>
-                    <p className="text-xs text-on-surface-variant mt-1">{formatCurrency(book.price)}</p>
+                    <h3 className="font-display font-semibold text-on-surface text-sm line-clamp-1">{book.title}</h3>
                     {book.totalSales > 0 && (
-                      <p className="text-xs text-success mt-1">{book.totalSales} vente(s)</p>
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        <ShoppingCart className="h-3 w-3 text-success" />
+                        <p className="text-xs font-medium text-success">{book.totalSales} vente(s)</p>
+                      </div>
                     )}
                   </div>
-                </Card>
+                </div>
               </Link>
             ))}
           </div>

@@ -218,8 +218,8 @@ export function EditBookPage() {
           {/* Step 2: Details */}
           {step === 1 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-on-surface">Détails supplémentaires</h3>
-              <p className="text-sm text-on-surface-variant">Ces informations sont optionnelles mais aident les lecteurs.</p>
+              <h3 className="text-lg font-display font-semibold text-on-surface">Détails supplémentaires</h3>
+              <p className="text-sm text-on-surface-muted">Ces informations sont optionnelles mais aident les lecteurs.</p>
               <Input label="ISBN (optionnel)" value={isbn} onChange={(e) => setIsbn(e.target.value)} placeholder="978-..." />
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -244,8 +244,8 @@ export function EditBookPage() {
           {/* Step 3: Cover */}
           {step === 2 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-on-surface">Image de couverture</h3>
-              <p className="text-sm text-on-surface-variant">Formats acceptés: JPG, PNG. Taille recommandée: 600x900px</p>
+              <h3 className="text-lg font-display font-semibold text-on-surface">Image de couverture</h3>
+              <p className="text-sm text-on-surface-muted">Formats acceptés: JPG, PNG. Taille recommandée: 600x900px</p>
               {coverPreview || existingCoverUrl ? (
                 <div className="flex flex-col items-center gap-4">
                   <img src={coverPreview || existingCoverUrl} alt="Preview" className="h-64 rounded-xl shadow-md object-cover" />
@@ -260,8 +260,8 @@ export function EditBookPage() {
           {/* Step 4: File */}
           {step === 3 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-on-surface">Fichier du livre</h3>
-              <p className="text-sm text-on-surface-variant">Formats acceptés: PDF, EPUB. Taille max: 50MB</p>
+              <h3 className="text-lg font-display font-semibold text-on-surface">Fichier du livre</h3>
+              <p className="text-sm text-on-surface-muted">Formats acceptés: PDF, EPUB. Taille max: 50MB</p>
               {bookFile ? (
                 <div className="flex items-center gap-3 p-4 bg-surface-container rounded-xl">
                   <Upload className="h-5 w-5 text-primary" />
@@ -283,7 +283,7 @@ export function EditBookPage() {
           {/* Step 5: Review */}
           {step === 4 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-on-surface">Résumé des modifications</h3>
+              <h3 className="text-lg font-display font-semibold text-on-surface">Résumé des modifications</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-on-surface-variant">Titre</p>

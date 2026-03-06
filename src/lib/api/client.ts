@@ -5,9 +5,14 @@ const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+const publicPaths = ['/auth/login', '/auth/register', '/auth/google', '/auth/forgot-password', '/auth/reset-password'];
+
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  const isPublic = publicPaths.some((p) => config.url?.includes(p));
+  if (!isPublic) {
+    const token = localStorage.getItem('accessToken');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 

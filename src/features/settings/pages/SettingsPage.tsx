@@ -90,7 +90,7 @@ export function SettingsPage() {
                     key={tab.key}
                     onClick={() => { setActiveTab(tab.key); setError(''); setSuccess(''); }}
                     className={cn(
-                      'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all',
+                      'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-display font-medium transition-all',
                       activeTab === tab.key
                         ? 'bg-primary text-white shadow-md'
                         : 'text-on-surface-variant hover:bg-surface-container'
@@ -128,8 +128,8 @@ export function SettingsPage() {
                       <PenLine className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-on-surface">Identite</h3>
-                      <p className="text-sm text-on-surface-variant">Votre nom de plume et biographie</p>
+                      <h3 className="text-base font-display font-semibold text-on-surface">Identite</h3>
+                      <p className="text-sm text-on-surface-muted">Votre nom de plume et biographie</p>
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -145,8 +145,8 @@ export function SettingsPage() {
                       <Globe className="h-5 w-5 text-info" />
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-on-surface">Reseaux sociaux</h3>
-                      <p className="text-sm text-on-surface-variant">Liens vers vos profils en ligne</p>
+                      <h3 className="text-base font-display font-semibold text-on-surface">Reseaux sociaux</h3>
+                      <p className="text-sm text-on-surface-muted">Liens vers vos profils en ligne</p>
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -162,8 +162,8 @@ export function SettingsPage() {
                       <Smartphone className="h-5 w-5 text-success" />
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-on-surface">Paiement Mobile</h3>
-                      <p className="text-sm text-on-surface-variant">Numeros pour recevoir vos gains</p>
+                      <h3 className="text-base font-display font-semibold text-on-surface">Paiement Mobile</h3>
+                      <p className="text-sm text-on-surface-muted">Numeros pour recevoir vos gains</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -188,8 +188,8 @@ export function SettingsPage() {
                       <Lock className="h-5 w-5 text-warning" />
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-on-surface">Changer le mot de passe</h3>
-                      <p className="text-sm text-on-surface-variant">Protegez votre compte avec un mot de passe fort</p>
+                      <h3 className="text-base font-display font-semibold text-on-surface">Changer le mot de passe</h3>
+                      <p className="text-sm text-on-surface-muted">Protegez votre compte avec un mot de passe fort</p>
                     </div>
                   </div>
                   <div className="space-y-4">
