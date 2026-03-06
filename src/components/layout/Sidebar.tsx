@@ -4,6 +4,8 @@ import { LayoutDashboard, BookOpen, PlusCircle, Wallet, BarChart3, Settings, Log
 import { cn } from '@/lib/utils/cn';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { Avatar } from '@/components/ui/Avatar';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
@@ -16,6 +18,7 @@ const navItems = [
 
 export function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
   const authorProfile = useAuthStore((s) => s.authorProfile);
@@ -107,7 +110,7 @@ export function Sidebar() {
 
         {/* Logout */}
         <button
-          onClick={handleLogout}
+          onClick={() => setShowLogout(true)}
           className="group flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:bg-error/10 hover:text-error transition-all duration-200 w-full"
         >
           <LogOut className="h-[18px] w-[18px] transition-transform group-hover:scale-110" />
@@ -144,6 +147,24 @@ export function Sidebar() {
           {navContent}
         </div>
       </aside>
+
+      <Modal isOpen={showLogout} onClose={() => setShowLogout(false)} title="Se deconnecter ?"
+        footer={
+          <div className="flex gap-3 justify-end">
+            <Button variant="outlined" onClick={() => setShowLogout(false)}>Annuler</Button>
+            <Button variant="danger" onClick={handleLogout}>Se deconnecter</Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col items-center text-center py-2">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-error/10 mb-4">
+            <LogOut className="h-7 w-7 text-error" />
+          </div>
+          <p className="text-sm text-on-surface-variant">
+            Vous etes sur le point de vous deconnecter de votre espace auteur. Souhaitez-vous continuer ?
+          </p>
+        </div>
+      </Modal>
     </>
   );
 }
