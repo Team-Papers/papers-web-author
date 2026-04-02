@@ -5,7 +5,7 @@
 | Élément | Détail |
 |---------|--------|
 | **Serveur** | VPS Contabo (Ubuntu) — `84.247.183.206` |
-| **URL de production** | https://author.papers237.duckdns.org |
+| **URL de production** | https://auteur-papers.seed-innov.com |
 | **Technologie** | Vite + React (build statique) servi par Nginx |
 | **SSL** | Let's Encrypt (Certbot, renouvellement automatique) |
 | **Reverse proxy** | Nginx (fichiers statiques) |
@@ -30,7 +30,7 @@ papers-web-author/
 
 | Variable | Valeur |
 |----------|--------|
-| `VITE_API_URL` | `https://api.papers237.duckdns.org/api/v1` |
+| `VITE_API_URL` | `https://api-papers.seed-innov.com/api/v1` |
 
 Le fichier `.env` est créé automatiquement lors du déploiement CI/CD. La variable est injectée au moment du `npm run build` (build-time, pas runtime).
 
@@ -40,7 +40,7 @@ Fichier : `/etc/nginx/sites-enabled/papers-web-author`
 
 ```nginx
 server {
-    server_name author.papers237.duckdns.org;
+    server_name auteur-papers.seed-innov.com;
 
     root /home/softengine/papers-web-author/dist;
     index index.html;
@@ -87,7 +87,7 @@ ssh softengine@84.247.183.206
 source ~/.nvm/nvm.sh
 cd /home/softengine/papers-web-author
 git pull origin main
-echo 'VITE_API_URL=https://api.papers237.duckdns.org/api/v1' > .env
+echo 'VITE_API_URL=https://api-papers.seed-innov.com/api/v1' > .env
 npm ci
 npm run build
 ```
@@ -96,7 +96,7 @@ npm run build
 
 ```bash
 # Accès direct
-curl -sf https://author.papers237.duckdns.org | head -5
+curl -sf https://auteur-papers.seed-innov.com | head -5
 
 # Vérifier que le build existe
 ls -la /home/softengine/papers-web-author/dist/

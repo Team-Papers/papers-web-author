@@ -17,8 +17,8 @@ Permet aux auteurs de publier leurs livres, suivre leurs ventes et gérer leurs 
 
 | Environnement | URL |
 |---------------|-----|
-| **Production** | https://author.papers237.duckdns.org |
-| **API** | https://api.papers237.duckdns.org/api/v1 |
+| **Production** | https://auteur-papers.seed-innov.com |
+| **API** | https://api-papers.seed-innov.com/api/v1 |
 
 ## Développement
 

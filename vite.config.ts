@@ -11,7 +11,7 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'https://api.papers237.duckdns.org',
+        target: 'https://api-papers.seed-innov.com',
         changeOrigin: true,
         secure: true,
         configure: (proxy) => {

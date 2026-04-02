@@ -84,7 +84,7 @@ export function Sidebar() {
         {/* Showcase link */}
         {authorProfile?.id && (
           <a
-            href={`https://showcase.papers237.duckdns.org/${authorProfile.id}`}
+            href={`https://showcase-papers.seed-innov.com/${authorProfile.id}`}
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium bg-accent/10 text-accent-400 hover:bg-accent/20 transition-all duration-200 w-full border border-accent/10"

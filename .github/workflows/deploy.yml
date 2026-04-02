@@ -19,6 +19,6 @@ jobs:
             source ~/.nvm/nvm.sh
             cd /home/softengine/papers-web-author
             git pull origin main
-            echo 'VITE_API_URL=https://api.papers237.duckdns.org/api/v1' > .env
+            echo 'VITE_API_URL=https://api-papers.seed-innov.com/api/v1' > .env
             npm ci
             npm run build
