@@ -35,7 +35,7 @@ export function ForgotPasswordPage() {
 
   return (
     <div>
-      <h2 className="text-2xl font-display font-bold text-on-surface mb-1">Mot de passe oublie</h2>
+      <h2 className="text-2xl font-display font-bold text-on-surface mb-1">Mot de passe oublié</h2>
       <p className="text-sm text-on-surface-muted mb-6">Entrez votre email pour recevoir un lien de reinitialisation</p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} leftIcon={<Mail className="h-4 w-4" />} required />

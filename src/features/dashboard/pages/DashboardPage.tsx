@@ -65,7 +65,7 @@ export function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Livres publies"
+          title="Livres publiés"
           value={stats?.totalBooks ?? 0}
           icon={<BookOpen className="h-5 w-5" />}
           index={0}
@@ -174,7 +174,7 @@ export function DashboardPage() {
         {/* Recent transactions */}
         <Card variant="elevated">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-display font-semibold text-on-surface">Activite recente</h3>
+            <h3 className="text-base font-display font-semibold text-on-surface">Activité récente</h3>
             <Clock className="h-4 w-4 text-on-surface-variant" />
           </div>
           {transactions.length === 0 ? (

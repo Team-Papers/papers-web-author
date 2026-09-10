@@ -32,7 +32,7 @@ export function LoginPage() {
   return (
     <div>
       <h2 className="text-2xl font-display font-bold text-on-surface mb-1">Connexion</h2>
-      <p className="text-sm text-on-surface-muted mb-6">Accedez a votre espace auteur</p>
+      <p className="text-sm text-on-surface-muted mb-6">Accédez à votre espace auteur</p>
 
       {error && (
         <div className="bg-error-container text-error rounded-xl px-4 py-3 text-sm mb-4 animate-fade-up">{error}</div>
@@ -95,7 +95,7 @@ export function LoginPage() {
           required
         />
         <div className="text-right">
-          <Link to="/forgot-password" className="text-sm text-primary hover:underline">Mot de passe oublie ?</Link>
+          <Link to="/forgot-password" className="text-sm text-primary hover:underline">Mot de passe oublié ?</Link>
         </div>
         <Button type="submit" fullWidth isLoading={loading} rightIcon={<ArrowRight className="h-4 w-4" />}>
           Se connecter

@@ -34,7 +34,7 @@ export function WelcomeCard({
             {authorName}
           </h1>
           <p className="mt-2 text-sm text-white/50 max-w-md leading-relaxed">
-            Voici un apercu de vos performances. Continuez a publier pour atteindre plus de lecteurs.
+            Voici un apercu de vos performances. Continuez à publier pour atteindre plus de lecteurs.
           </p>
 
           <Link

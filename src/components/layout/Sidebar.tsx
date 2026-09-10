@@ -13,7 +13,7 @@ const navItems = [
   { to: '/books/new', icon: PlusCircle, label: 'Nouveau livre' },
   { to: '/earnings', icon: Wallet, label: 'Revenus' },
   { to: '/statistics', icon: BarChart3, label: 'Statistiques' },
-  { to: '/settings', icon: Settings, label: 'Parametres' },
+  { to: '/settings', icon: Settings, label: 'Paramètres' },
 ];
 
 export function Sidebar() {
@@ -114,7 +114,7 @@ export function Sidebar() {
           className="group flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:bg-error/10 hover:text-error transition-all duration-200 w-full"
         >
           <LogOut className="h-[18px] w-[18px] transition-transform group-hover:scale-110" />
-          <span>Deconnexion</span>
+          <span>Déconnexion</span>
         </button>
       </div>
     </div>
@@ -148,7 +148,7 @@ export function Sidebar() {
         </div>
       </aside>
 
-      <Modal isOpen={showLogout} onClose={() => setShowLogout(false)} title="Se deconnecter ?"
+      <Modal isOpen={showLogout} onClose={() => setShowLogout(false)} title="Se déconnecter ?"
         footer={
           <div className="flex gap-3 justify-end">
             <Button variant="outlined" onClick={() => setShowLogout(false)}>Annuler</Button>

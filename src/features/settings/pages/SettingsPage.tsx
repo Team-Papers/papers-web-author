@@ -77,7 +77,7 @@ export function SettingsPage() {
 
   return (
     <div>
-      <Header title="Parametres" subtitle="Gerez votre compte" />
+      <Header title="Paramètres" subtitle="Gerez votre compte" />
       <div className="p-6 lg:p-8 max-w-4xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Tabs */}
@@ -167,8 +167,8 @@ export function SettingsPage() {
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input label="Numero MTN Mobile Money" value={mtnNumber} onChange={(e) => setMtnNumber(e.target.value)} placeholder="6XXXXXXXX" leftIcon={<Phone className="h-4 w-4" />} />
-                    <Input label="Numero Orange Money" value={omNumber} onChange={(e) => setOmNumber(e.target.value)} placeholder="6XXXXXXXX" leftIcon={<Phone className="h-4 w-4" />} />
+                    <Input label="Numéro MTN Mobile Money" value={mtnNumber} onChange={(e) => setMtnNumber(e.target.value)} placeholder="6XXXXXXXX" leftIcon={<Phone className="h-4 w-4" />} />
+                    <Input label="Numéro Orange Money" value={omNumber} onChange={(e) => setOmNumber(e.target.value)} placeholder="6XXXXXXXX" leftIcon={<Phone className="h-4 w-4" />} />
                   </div>
                 </Card>
 

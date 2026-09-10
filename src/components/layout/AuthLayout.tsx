@@ -34,25 +34,37 @@ export function AuthLayout() {
               </span>
             </h2>
             <p className="text-white/50 leading-relaxed">
-              Rejoignez la communaute d&apos;auteurs Papers. Publiez, gerez vos ventes et recevez vos revenus directement par Mobile Money.
+              Rejoignez la communauté d&apos;auteurs Papers. Publiez gratuitement, gérez
+              vos ventes et recevez vos revenus directement par Mobile Money.
+            </p>
+            <p className="mt-4 text-sm text-white/70">
+              Vendez votre livre <span className="font-semibold text-white">3 000 F</span>,
+              vous touchez <span className="font-semibold text-primary-300">2 100 F</span>.
             </p>
           </div>
 
-          {/* Stats */}
+          {/*
+            These three figures are properties of the platform, not counters.
+            They replace "200+ auteurs actifs" and "1500+ lecteurs", which were
+            hardcoded and therefore unverifiable — weak proof next to the 70%,
+            which is real and is the actual differentiator (Amazon KDP pays 70%
+            only between $2.99 and $9.99, and 35% otherwise).
+            Put real counts back here the day the API can serve them.
+          */}
           <div className="flex gap-6">
             <div>
-              <p className="text-2xl font-display font-bold text-white">200+</p>
-              <p className="text-xs text-white/40">Auteurs actifs</p>
-            </div>
-            <div className="w-px bg-white/10" />
-            <div>
               <p className="text-2xl font-display font-bold text-white">70%</p>
-              <p className="text-xs text-white/40">Revenus a l&apos;auteur</p>
+              <p className="text-xs text-white/40">reversés à l&apos;auteur</p>
             </div>
             <div className="w-px bg-white/10" />
             <div>
-              <p className="text-2xl font-display font-bold text-white">1500+</p>
-              <p className="text-xs text-white/40">Lecteurs</p>
+              <p className="text-2xl font-display font-bold text-white">0 F</p>
+              <p className="text-xs text-white/40">pour publier</p>
+            </div>
+            <div className="w-px bg-white/10" />
+            <div>
+              <p className="text-2xl font-display font-bold text-white">OM · MoMo</p>
+              <p className="text-xs text-white/40">paiement direct</p>
             </div>
           </div>
         </div>
