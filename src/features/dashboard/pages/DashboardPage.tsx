@@ -9,7 +9,7 @@ import { WelcomeCard } from '@/components/ui/WelcomeCard';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { getMyStats, getMyEarnings } from '@/lib/api/authors';
 import { getMyBooks } from '@/lib/api/books';
-import { formatCurrency, formatDate } from '@/lib/utils/formatters';
+import { formatCurrency, formatDate, toNumber } from '@/lib/utils/formatters';
 import type { AuthorStats, Transaction, Book } from '@/types/models';
 import { BookStatus } from '@/types/models';
 
@@ -59,7 +59,7 @@ export function DashboardPage() {
       <WelcomeCard
         authorName={authorProfile?.penName || 'Auteur'}
         booksCount={stats?.totalBooks ?? 0}
-        monthlyRevenue={stats?.monthlyRevenue ?? 0}
+        monthlyRevenue={toNumber(stats?.monthlyRevenue)}
       />
 
       {/* Stats */}

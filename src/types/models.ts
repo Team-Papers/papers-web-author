@@ -99,40 +99,21 @@ export interface Book {
   updatedAt: string;
 }
 
-export interface Transaction {
-  id: string;
-  type: TransactionType;
-  /** Gross sale price paid by the reader. Never show this as author revenue. */
-  amount: number;
-  /** Platform commission withheld from `amount`. */
-  commission: number;
-  /** What the author is actually paid: amount − commission. */
-  netAmount: number;
-  status: 'PENDING' | 'COMPLETED' | 'FAILED';
-  bookId?: string;
-  book?: Book;
-  createdAt: string;
-}
+/**
+ * The money-bearing types come from @papers/shared, the single description of
+ * the API contract.
+ *
+ * They used to be redeclared here, and the local copy of Transaction listed
+ * only `amount`. `amount` was therefore the only field a developer could reach,
+ * which is how the dashboard came to show authors their gross earnings — 43%
+ * above what they are actually paid — right next to the correct net balance.
+ */
+export type {
+  Transaction,
+  MonthlyRevenue,
+  AuthorStats,
+} from '@papers/shared';
 
-export interface MonthlyRevenue {
-  /** ISO year-month, e.g. "2026-09". */
-  month: string;
-  /** Net revenue for that month. */
-  revenue: number;
-}
-
-export interface AuthorStats {
-  totalBooks: number;
-  totalSales: number;
-  /** Net, all time. */
-  totalRevenue: number;
-  /** Net, current month. */
-  monthlyRevenue: number;
-  /** Net per month, six entries, oldest first. */
-  monthlyRevenues: MonthlyRevenue[];
-  averageRating: number;
-  totalRatings: number;
-}
 
 export interface Withdrawal {
   id: string;
