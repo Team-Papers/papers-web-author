@@ -102,18 +102,36 @@ export interface Book {
 export interface Transaction {
   id: string;
   type: TransactionType;
+  /** Gross sale price paid by the reader. Never show this as author revenue. */
   amount: number;
+  /** Platform commission withheld from `amount`. */
+  commission: number;
+  /** What the author is actually paid: amount − commission. */
+  netAmount: number;
+  status: 'PENDING' | 'COMPLETED' | 'FAILED';
   bookId?: string;
   book?: Book;
   createdAt: string;
 }
 
+export interface MonthlyRevenue {
+  /** ISO year-month, e.g. "2026-09". */
+  month: string;
+  /** Net revenue for that month. */
+  revenue: number;
+}
+
 export interface AuthorStats {
   totalBooks: number;
   totalSales: number;
+  /** Net, all time. */
   totalRevenue: number;
+  /** Net, current month. */
   monthlyRevenue: number;
+  /** Net per month, six entries, oldest first. */
+  monthlyRevenues: MonthlyRevenue[];
   averageRating: number;
+  totalRatings: number;
 }
 
 export interface Withdrawal {

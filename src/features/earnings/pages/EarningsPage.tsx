@@ -57,7 +57,8 @@ export function EarningsPage() {
     salesOnly.forEach(t => {
       const date = new Date(t.createdAt);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      monthlyData[key] = (monthlyData[key] || 0) + t.amount;
+      // Net, not gross: this chart is what the author will actually be paid.
+      monthlyData[key] = (monthlyData[key] || 0) + Number(t.netAmount);
     });
 
     return Object.entries(monthlyData)
@@ -193,9 +194,16 @@ export function EarningsPage() {
                         <p className="text-xs text-on-surface-variant">{formatDate(t.createdAt)}</p>
                       </div>
                     </div>
-                    <span className={`text-sm font-bold ${t.type === 'SALE' ? 'text-success' : 'text-error'}`}>
-                      {t.type === 'SALE' ? '+' : '-'}{formatCurrency(t.amount)}
-                    </span>
+                    <div className="text-right">
+                      <span className={`block text-sm font-bold ${t.type === 'SALE' ? 'text-success' : 'text-error'}`}>
+                        {t.type === 'SALE' ? '+' : '-'}{formatCurrency(Number(t.netAmount))}
+                      </span>
+                      {t.type === 'SALE' && Number(t.commission) > 0 && (
+                        <span className="block text-xs text-on-surface-variant">
+                          {formatCurrency(Number(t.amount))} − {formatCurrency(Number(t.commission))} de commission
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

@@ -40,15 +40,18 @@ export function DashboardPage() {
 
   if (loading) return <div className="flex items-center justify-center h-96"><Spinner size="lg" /></div>;
 
-  // Mock chart data
-  const chartData = [
-    { month: 'Jul', revenue: 0 },
-    { month: 'Août', revenue: 0 },
-    { month: 'Sep', revenue: 0 },
-    { month: 'Oct', revenue: 0 },
-    { month: 'Nov', revenue: stats?.monthlyRevenue ?? 0 },
-    { month: 'Déc', revenue: stats?.totalRevenue ?? 0 },
+  // Real six-month net revenue series from the API. This used to be hardcoded
+  // placeholder data with fixed month labels, which put September's revenue
+  // under "Nov" and the all-time total under "Déc".
+  const MONTH_LABELS = [
+    'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
+    'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc',
   ];
+
+  const chartData = (stats?.monthlyRevenues ?? []).map(({ month, revenue }) => {
+    const monthIndex = Number(month.split('-')[1]) - 1;
+    return { month: MONTH_LABELS[monthIndex] ?? month, revenue: Number(revenue) };
+  });
 
   return (
     <div className="space-y-6 p-6 lg:p-8">
@@ -203,9 +206,16 @@ export function DashboardPage() {
                       <p className="text-xs text-on-surface-variant">{formatDate(t.createdAt)}</p>
                     </div>
                   </div>
-                  <span className="text-sm font-bold text-success">
-                    +{formatCurrency(t.amount)}
-                  </span>
+                  <div className="text-right">
+                    <span className="block text-sm font-bold text-success">
+                      +{formatCurrency(Number(t.netAmount))}
+                    </span>
+                    {Number(t.commission) > 0 && (
+                      <span className="block text-xs text-on-surface-variant">
+                        sur {formatCurrency(Number(t.amount))}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
