@@ -14,10 +14,10 @@ import type { Category } from '@/types/models';
 
 const steps = [
   { label: 'Informations', icon: FileText },
-  { label: 'Details', icon: Info },
+  { label: 'Détails', icon: Info },
   { label: 'Couverture', icon: Image },
   { label: 'Fichier', icon: BookOpen },
-  { label: 'Resume', icon: Sparkles },
+  { label: 'Résumé', icon: Sparkles },
 ];
 
 export function NewBookPage() {
@@ -270,8 +270,17 @@ export function NewBookPage() {
                   <Sparkles className="h-5 w-5 text-success" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-display font-semibold text-on-surface">Pret a publier!</h3>
-                  <p className="text-sm text-on-surface-muted">Verifiez les informations avant de creer votre livre</p>
+                  {/* This step creates a draft, it does not publish. Saying
+                      "Prêt à publier" let an author believe the book was on its
+                      way to readers when it was sitting in their own drafts,
+                      waiting for a separate "Soumettre pour révision". */}
+                  <h3 className="text-lg font-display font-semibold text-on-surface">
+                    Prêt à enregistrer
+                  </h3>
+                  <p className="text-sm text-on-surface-muted">
+                    Vérifiez les informations. Votre livre sera enregistré comme brouillon : vous
+                    le soumettrez ensuite à la révision depuis sa fiche.
+                  </p>
                 </div>
               </div>
 
