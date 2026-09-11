@@ -41,8 +41,17 @@ export function EditBookPage() {
 
   useEffect(() => {
     if (!id) return;
+
+    // Cet ecran remplit une dizaine de champs depuis une seule reponse :
+    // useAsyncData, qui expose une valeur unique, ne lui convient pas. La garde
+    // est donc ecrite ici, mais pour la meme raison — naviguer d'un livre a
+    // l'autre laisse deux requetes en vol, et celle du livre quitte peut
+    // revenir en dernier et remplir le formulaire avec ses valeurs.
+    let obsolete = false;
+
     Promise.all([getBookById(id), getCategories()])
       .then(([bookData, cats]) => {
+        if (obsolete) return;
         setBook(bookData);
         setCategories(cats);
         // Populate form
@@ -60,8 +69,16 @@ export function EditBookPage() {
         );
         setSelectedCats(catIds);
       })
-      .catch(() => setBook(null))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!obsolete) setBook(null);
+      })
+      .finally(() => {
+        if (!obsolete) setLoading(false);
+      });
+
+    return () => {
+      obsolete = true;
+    };
   }, [id]);
 
   const handleCover = (file: File) => {

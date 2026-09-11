@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft, Send, Trash2, BookOpen, Pencil, EyeOff } from 'lucide-react';
+import { useAsyncData } from '@/hooks/useAsyncData';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -23,22 +24,22 @@ const statusBadge: Record<BookStatus, { variant: 'success' | 'warning' | 'error'
 export function BookDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [book, setBook] = useState<Book | null>(null);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: book,
+    loading,
+    setData: setBook,
+  } = useAsyncData<Book | null>(
+    () => {
+      if (!id) return Promise.resolve(null);
+      return getMyBooks({ limit: 100 }).then((res) => res.data.find((b) => b.id === id) ?? null);
+    },
+    [id],
+    null,
+  );
   const [actionLoading, setActionLoading] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [showUnpublish, setShowUnpublish] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (!id) return;
-    getMyBooks({ limit: 100 })
-      .then((res) => {
-        const found = res.data.find((b) => b.id === id);
-        setBook(found || null);
-      })
-      .finally(() => setLoading(false));
-  }, [id]);
 
   const handleSubmit = async () => {
     if (!book) return;

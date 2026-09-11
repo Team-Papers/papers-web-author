@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Plus, Search, BookOpen, ShoppingCart } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
@@ -9,6 +9,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Tabs } from '@/components/ui/Tabs';
 import { getMyBooks } from '@/lib/api/books';
+import { useAsyncData } from '@/hooks/useAsyncData';
 import { formatCurrency } from '@/lib/utils/formatters';
 import type { Book } from '@/types/models';
 import { BookStatus } from '@/types/models';
@@ -30,21 +31,20 @@ const tabs = [
 ];
 
 export function MyBooksPage() {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('');
   const [search, setSearch] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setLoading(true);
-    const params: Record<string, unknown> = {};
-    if (activeTab) params.status = activeTab;
-    if (search) params.search = search;
-    getMyBooks(params)
-      .then((res) => setBooks(res.data))
-      .finally(() => setLoading(false));
-  }, [activeTab, search]);
+  const { data: books, loading } = useAsyncData<Book[]>(
+    () => {
+      const params: Record<string, unknown> = {};
+      if (activeTab) params.status = activeTab;
+      if (search) params.search = search;
+      return getMyBooks(params).then((res) => res.data);
+    },
+    [activeTab, search],
+    [],
+  );
 
   return (
     <div>
