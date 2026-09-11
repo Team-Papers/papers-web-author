@@ -11,7 +11,7 @@ import { FileDropzone } from '@/components/ui/FileDropzone';
 import { getBookById, updateBook, getCategories, uploadCover, uploadBookFile } from '@/lib/api/books';
 import { cn } from '@/lib/utils/cn';
 import { formatCurrency } from '@/lib/utils/formatters';
-import type { Book, Category } from '@/types/models';
+import type { BookCategoryLink, Book, Category } from '@/types/models';
 import { BookStatus } from '@/types/models';
 
 const steps = ['Informations', 'Détails', 'Couverture', 'Fichier', 'Résumé'];
@@ -55,7 +55,7 @@ export function EditBookPage() {
         setExistingCoverUrl(bookData.coverUrl || '');
         setExistingFileUrl(bookData.fileUrl || '');
         // Extract category IDs
-        const catIds = (bookData.categories || []).map((c: any) =>
+        const catIds = (bookData.categories || []).map((c: BookCategoryLink) =>
           'category' in c ? c.category.id : c.id
         );
         setSelectedCats(catIds);

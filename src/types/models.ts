@@ -150,3 +150,12 @@ export interface Notification {
   read: boolean;
   createdAt: string;
 }
+
+/**
+ * A category as it reaches a book.
+ *
+ * The API sends the join row (`{ category: {...} }`) on some endpoints and the
+ * category itself on others, so both shapes turn up. Naming it beats `any`:
+ * the ambiguity is the API's, and it should be visible rather than erased.
+ */
+export type BookCategoryLink = Category | { category: Category };

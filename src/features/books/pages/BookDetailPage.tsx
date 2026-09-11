@@ -9,7 +9,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { Modal } from '@/components/ui/Modal';
 import { getMyBooks, submitBook, deleteBook, unpublishBook } from '@/lib/api/books';
 import { formatCurrency, formatDate } from '@/lib/utils/formatters';
-import type { Book } from '@/types/models';
+import type { BookCategoryLink, Book } from '@/types/models';
 import { BookStatus } from '@/types/models';
 
 const statusBadge: Record<BookStatus, { variant: 'success' | 'warning' | 'error' | 'info' | 'neutral'; label: string }> = {
@@ -180,8 +180,8 @@ export function BookDetailPage() {
               <div>
                 <p className="text-xs text-on-surface-variant mb-2">Catégories</p>
                 <div className="flex flex-wrap gap-2">
-                  {book.categories.map((c: any) => {
-                    const cat = c.category || c;
+                  {book.categories.map((c: BookCategoryLink) => {
+                    const cat = 'category' in c ? c.category : c;
                     return (
                       <span key={cat.id} className="px-3 py-1 bg-surface-container rounded-full text-xs font-medium text-on-surface-variant">{cat.name}</span>
                     );
