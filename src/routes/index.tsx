@@ -12,6 +12,8 @@ import { MyBooksPage } from '@/features/books/pages/MyBooksPage';
 import { NewBookPage } from '@/features/books/pages/NewBookPage';
 import { EditBookPage } from '@/features/books/pages/EditBookPage';
 import { BookDetailPage } from '@/features/books/pages/BookDetailPage';
+import { MySeriesPage } from '@/features/series/pages/MySeriesPage';
+import { SeriesDetailPage } from '@/features/series/pages/SeriesDetailPage';
 import { EarningsPage } from '@/features/earnings/pages/EarningsPage';
 import { StatisticsPage } from '@/features/dashboard/pages/StatisticsPage';
 import { SettingsPage } from '@/features/settings/pages/SettingsPage';
@@ -43,6 +45,8 @@ export function AppRoutes() {
           <Route path="/books/new" element={<NewBookPage />} />
           <Route path="/books/:id" element={<BookDetailPage />} />
           <Route path="/books/:id/edit" element={<EditBookPage />} />
+          <Route path="/series" element={<MySeriesPage />} />
+          <Route path="/series/:id" element={<SeriesDetailPage />} />
           <Route path="/earnings" element={<EarningsPage />} />
           <Route path="/statistics" element={<StatisticsPage />} />
           <Route path="/settings" element={<SettingsPage />} />

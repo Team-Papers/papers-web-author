@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router';
-import { LayoutDashboard, BookOpen, PlusCircle, Wallet, BarChart3, Settings, LogOut, Menu, X, Presentation, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Layers, PlusCircle, Wallet, BarChart3, Settings, LogOut, Menu, X, Presentation, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { Avatar } from '@/components/ui/Avatar';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
   { to: '/books', icon: BookOpen, label: 'Mes livres' },
+  { to: '/series', icon: Layers, label: 'Mes séries' },
   { to: '/books/new', icon: PlusCircle, label: 'Nouveau livre' },
   { to: '/earnings', icon: Wallet, label: 'Revenus' },
   { to: '/statistics', icon: BarChart3, label: 'Statistiques' },
