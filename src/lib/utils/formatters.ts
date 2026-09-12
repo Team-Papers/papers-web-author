@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { formatMoney, toNumber, type Money } from '@papers/shared';
+import { formatMoney, toNumber, type Money } from '@team-papers/shared';
 
 /**
  * Accepts Money, not number: Prisma serialises Decimal columns as JSON

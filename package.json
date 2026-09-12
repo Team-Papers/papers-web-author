@@ -13,7 +13,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@papers/shared": "file:../papers-shared",
+    "@team-papers/shared": "^0.1.0",
     "axios": "^1.13.4",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -54,5 +54,6 @@
     "*.{ts,tsx}": [
       "eslint --fix"
     ]
-  }
+  },
+  "packageManager": "npm@11.6.2"
 }

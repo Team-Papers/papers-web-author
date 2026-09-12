@@ -100,7 +100,7 @@ export interface Book {
 }
 
 /**
- * The money-bearing types come from @papers/shared, the single description of
+ * The money-bearing types come from @team-papers/shared, the single description of
  * the API contract.
  *
  * They used to be redeclared here, and the local copy of Transaction listed
@@ -112,7 +112,7 @@ export type {
   Transaction,
   MonthlyRevenue,
   AuthorStats,
-} from '@papers/shared';
+} from '@team-papers/shared';
 
 
 export interface Withdrawal {
