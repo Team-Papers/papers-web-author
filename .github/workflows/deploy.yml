@@ -1,9 +1,31 @@
+# Déploiement de l'espace auteur.
+#
+# Ce workflow a annoncé un succès à chaque push sans jamais rien déployer. Le
+# serveur ne peut pas lire GitHub — le dépôt est privé et le checkout n'a pas
+# d'identifiants — donc `git pull` échouait, et comme rien n'arrêtait le
+# script, il reconstruisait le même vieux code et concluait par
+# « Successfully executed commands ». La production est restée figée pendant
+# des mois pendant que le travail était déclaré livré, et chaque exécution
+# écrasait les déploiements faits à la main.
+#
+# Trois garde-fous :
+#   1. `set -euo pipefail` — une étape qui échoue arrête le déploiement ;
+#   2. le commit déployé est comparé à celui qui a déclenché le workflow ;
+#   3. le site doit répondre avant qu'on parle de succès.
+#
+# Le jeton éphémère du workflow sert d'identifiant, transmis par variable
+# d'environnement et lu par un assistant de credentials — jamais dans une URL,
+# où il resterait visible dans la liste des processus du serveur.
 name: Deploy Papers Web Author
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
@@ -15,10 +37,33 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
+          script_stop: true
+          envs: GH_TOKEN,ATTENDU
           script: |
+            set -euo pipefail
             source ~/.nvm/nvm.sh
             cd /home/softengine/papers-web-author
-            git pull origin main
+
+            git -c credential.helper='!f() { echo username=x-access-token; echo password=$GH_TOKEN; }; f' \
+                fetch origin main
+            git reset --hard FETCH_HEAD
+
+            OBTENU="$(git rev-parse HEAD)"
+            if [ "$OBTENU" != "$ATTENDU" ]; then
+              echo "Le serveur est sur $OBTENU alors que ce workflow déploie $ATTENDU."
+              exit 1
+            fi
+
             echo 'VITE_API_URL=https://api-papers.seed-innov.com/api/v1' > .env
             npm ci
             npm run build
+
+            # Une construction réussie ne prouve pas que Nginx sert la page.
+            if ! curl -fsS -o /dev/null https://auteur-papers.seed-innov.com/; then
+              echo "https://auteur-papers.seed-innov.com/ ne répond pas après le déploiement."
+              exit 1
+            fi
+            echo "Le site répond."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ATTENDU: ${{ github.sha }}
