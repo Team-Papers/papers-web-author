@@ -54,6 +54,19 @@ jobs:
               exit 1
             fi
 
+
+            # @papers/shared est reference par `file:../papers-shared` : un
+            # depot separe, prive, que le jeton de CE workflow ne peut pas
+            # lire. Sans lui les types se resolvent en `any` et la compilation
+            # echoue sur des erreurs qui n'ont rien a voir. Le repertoire est
+            # depose sur le serveur a la main pour l'instant — le dire ici
+            # plutot que de laisser le compilateur se plaindre a sa place.
+            # Voir Team-Papers/papers-landing#11.
+            if [ ! -s ../papers-shared/dist/index.js ]; then
+              echo "@papers/shared absent ou non construit dans /home/softengine/papers-shared."
+              exit 1
+            fi
+            echo "@papers/shared $(node -p "require('../papers-shared/package.json').version")"
             echo 'VITE_API_URL=https://api-papers.seed-innov.com/api/v1' > .env
             npm ci
             npm run build
