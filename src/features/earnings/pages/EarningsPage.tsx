@@ -8,12 +8,16 @@ import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { Spinner } from '@/components/ui/Spinner';
 import { getMyEarnings, requestWithdrawal } from '@/lib/api/authors';
+import type { WithdrawalRequest } from '@/lib/api/authors';
 import { formatCurrency, formatDate } from '@/lib/utils/formatters';
 import type { Transaction } from '@/types/models';
 
 export function EarningsPage() {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
+  const [threshold, setThreshold] = useState(0);
+  const [wSuccess, setWSuccess] = useState('');
   const [loading, setLoading] = useState(true);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [wAmount, setWAmount] = useState('');
@@ -25,7 +29,12 @@ export function EarningsPage() {
   const load = () => {
     setLoading(true);
     getMyEarnings()
-      .then((r) => { setBalance(r.balance); setTransactions(r.transactions || []); })
+      .then((r) => {
+        setBalance(r.balance);
+        setTransactions(r.transactions || []);
+        setWithdrawals(r.withdrawals);
+        setThreshold(r.withdrawalThreshold);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   };
@@ -35,15 +44,29 @@ export function EarningsPage() {
   const handleWithdraw = async () => {
     setWError('');
     if (!wAmount || Number(wAmount) <= 0) { setWError('Montant invalide'); return; }
+    if (threshold > 0 && Number(wAmount) < threshold) {
+      setWError(`Le montant minimal d'un retrait est de ${formatCurrency(threshold)}`);
+      return;
+    }
     if (Number(wAmount) > balance) { setWError('Solde insuffisant'); return; }
     if (!wPhone) { setWError('Numéro requis'); return; }
     setWLoading(true);
     try {
-      await requestWithdrawal({ amount: Number(wAmount), method: wMethod, phoneNumber: wPhone });
+      const demande = await requestWithdrawal({ amount: Number(wAmount), method: wMethod, phoneNumber: wPhone });
       setShowWithdraw(false);
       setWAmount(''); setWPhone('');
+      // Le formulaire se fermait sans rien dire : l'auteur ne savait pas si sa
+      // demande etait partie, et voyait seulement son solde baisser.
+      setWSuccess(
+        `Demande de ${formatCurrency(Number(demande.amount))} enregistrée. Elle sera traitée sous peu.`,
+      );
       load();
-    } catch { setWError('Erreur lors du retrait'); }
+    } catch (err: unknown) {
+      // Le message du serveur porte la raison exacte — seuil, solde — que
+      // « Erreur lors du retrait » effaçait.
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setWError(msg || 'Erreur lors du retrait');
+    }
     finally { setWLoading(false); }
   };
 
@@ -77,6 +100,23 @@ export function EarningsPage() {
     <div>
       <Header title="Revenus" subtitle="Gerez vos gains" />
       <div className="p-6 lg:p-8 space-y-6 max-w-5xl mx-auto">
+        {wSuccess && (
+          <div
+            role="status"
+            className="flex items-start justify-between gap-4 rounded-xl bg-success-container px-4 py-3 text-sm text-success"
+          >
+            <span>{wSuccess}</span>
+            <button
+              type="button"
+              onClick={() => setWSuccess('')}
+              className="shrink-0 underline"
+              aria-label="Masquer la confirmation"
+            >
+              Fermer
+            </button>
+          </div>
+        )}
+
         {/* Balance Card */}
         <div className="welcome-card relative overflow-hidden p-8 rounded-2xl animate-fade-up">
           <div className="absolute inset-0 pattern-african" />
@@ -90,6 +130,11 @@ export function EarningsPage() {
               <div>
                 <p className="text-xs text-primary-300 uppercase tracking-widest">Solde disponible</p>
                 <p className="text-3xl lg:text-4xl font-display font-bold text-white mt-1">{formatCurrency(balance)}</p>
+                {threshold > 0 && (
+                  <p className="text-xs text-primary-300 mt-1">
+                    Retrait a partir de {formatCurrency(threshold)}
+                  </p>
+                )}
               </div>
             </div>
             <Button
@@ -210,6 +255,41 @@ export function EarningsPage() {
             )}
           </Card>
         </div>
+
+        {withdrawals.length > 0 && (
+          <Card>
+            <div className="p-5">
+              <h2 className="font-display font-semibold text-on-surface">
+                Demandes en cours ({withdrawals.length})
+              </h2>
+              {/* Leur montant est deja retire du solde : sans cette liste,
+                  l'auteur voit son solde baisser sans savoir pourquoi. */}
+              <p className="text-sm text-on-surface-variant mt-1">
+                Ces montants sont reserves et ne figurent plus dans le solde disponible.
+              </p>
+              <ul className="mt-4 space-y-3">
+                {withdrawals.map((w) => (
+                  <li
+                    key={w.id}
+                    className="flex items-center justify-between gap-4 rounded-xl border border-outline px-4 py-3"
+                  >
+                    <div>
+                      <p className="font-medium text-on-surface">{formatCurrency(Number(w.amount))}</p>
+                      <p className="text-sm text-on-surface-variant">
+                        {w.paymentMethod === 'MTN' ? 'MTN Mobile Money' : 'Orange Money'} ·{' '}
+                        {w.phoneNumber} · {formatDate(w.createdAt)}
+                      </p>
+                    </div>
+                    <span className="flex items-center gap-1.5 text-sm text-warning">
+                      <Clock className="h-4 w-4" />
+                      En attente
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Card>
+        )}
       </div>
 
       <Modal isOpen={showWithdraw} onClose={() => setShowWithdraw(false)} title="Demander un retrait"
