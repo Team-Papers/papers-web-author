@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Check, ChevronLeft, ChevronRight, Upload, FileText, Image, Info, BookOpen, Sparkles } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
+import { ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
@@ -12,12 +11,20 @@ import { cn } from '@/lib/utils/cn';
 import { formatCurrency } from '@/lib/utils/formatters';
 import type { Category } from '@/types/models';
 
+/**
+ * Les cinq etapes, dites par ce qu'elles demandent.
+ *
+ * « Informations », « Details », « Resume » nommaient des rubriques de
+ * formulaire. Un auteur ne sait pas ce qu'on attend de lui sous « Details » ;
+ * il sait repondre a « Ce qu'il faut savoir ». Chaque etape porte donc une
+ * question, et une phrase qui dit si elle est obligatoire.
+ */
 const steps = [
-  { label: 'Informations', icon: FileText },
-  { label: 'Détails', icon: Info },
-  { label: 'Couverture', icon: Image },
-  { label: 'Fichier', icon: BookOpen },
-  { label: 'Résumé', icon: Sparkles },
+  { label: 'Le livre', demande: 'De quoi parle-t-il, et combien coûte-t-il ?', requis: true },
+  { label: 'Les détails', demande: 'Langue, nombre de pages, ISBN.', requis: false },
+  { label: 'La couverture', demande: "C'est elle qu'on voit d'abord.", requis: false },
+  { label: 'Le fichier', demande: 'Le manuscrit, en PDF ou ePub.', requis: false },
+  { label: 'Relecture', demande: 'Vérifiez avant d’enregistrer.', requis: true },
 ];
 
 export function NewBookPage() {
@@ -105,70 +112,54 @@ export function NewBookPage() {
     return true;
   };
 
-  const progress = ((step + 1) / steps.length) * 100;
-
   return (
     <div>
-      <Header title="Nouveau livre" subtitle="Publiez votre œuvre" />
-      <div className="p-6 lg:p-8 max-w-3xl mx-auto">
-        {/* Progress bar */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-on-surface">Étape {step + 1} sur {steps.length}</span>
-            <span className="text-sm text-on-surface-muted">{Math.round(progress)}%</span>
-          </div>
-          <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
+      {/*
+        Trois dispositifs disaient la meme chose : une barre de progression, un
+        pourcentage, et cinq pastilles de 48 px reliees par des traits. Sur un
+        telephone, les pastilles mangeaient un quart de l'ecran pour repeter ce
+        que « Etape 2 sur 5 » dit en trois mots. Il en reste un.
+      */}
+      <div className="mx-auto w-full max-w-2xl px-4 pb-32 lg:max-w-3xl lg:px-8 lg:pb-8">
+        <header className="pt-8 pb-6">
+          <p className="text-sm text-on-surface-muted">
+            Étape {step + 1} sur {steps.length}
+          </p>
+          <h1 className="mt-1.5 font-display text-[28px] leading-tight font-semibold text-on-surface lg:text-4xl">
+            {steps[step].label}
+          </h1>
+          <p className="mt-2 text-on-surface-variant">{steps[step].demande}</p>
+          {!steps[step].requis && (
+            <p className="mt-1 text-sm text-on-surface-muted">
+              Vous pouvez passer et y revenir plus tard.
+            </p>
+          )}
+
+          <div
+            className="mt-5 h-1 overflow-hidden rounded-full bg-surface-container-high"
+            role="progressbar"
+            aria-valuenow={step + 1}
+            aria-valuemin={1}
+            aria-valuemax={steps.length}
+            aria-label={`Étape ${step + 1} sur ${steps.length}`}
+          >
             <div
-              className="h-full bg-gradient-to-r from-primary to-primary-400 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
+              className="h-full rounded-full bg-primary transition-[width] duration-300"
+              style={{ width: `${((step + 1) / steps.length) * 100}%` }}
             />
           </div>
-        </div>
+        </header>
 
-        {/* Stepper */}
-        <div className="flex items-center justify-between mb-8 overflow-x-auto pb-2">
-          {steps.map((s, i) => {
-            const Icon = s.icon;
-            return (
-              <div key={s.label} className="flex items-center flex-1 last:flex-initial min-w-0">
-                <div className="flex flex-col items-center">
-                  <div className={cn(
-                    'w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300',
-                    i < step ? 'bg-primary text-white shadow-md' :
-                    i === step ? 'bg-primary text-white shadow-lg scale-110 ring-4 ring-primary-container' :
-                    'bg-surface-container text-on-surface-variant'
-                  )}>
-                    {i < step ? <Check className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
-                  </div>
-                  <span className={cn(
-                    'text-xs mt-2 hidden sm:block font-medium transition-colors',
-                    i <= step ? 'text-primary' : 'text-on-surface-variant'
-                  )}>
-                    {s.label}
-                  </span>
-                </div>
-                {i < steps.length - 1 && (
-                  <div className="flex-1 mx-3 h-1 rounded-full overflow-hidden bg-surface-container-high">
-                    <div
-                      className={cn(
-                        'h-full bg-primary transition-all duration-500',
-                        i < step ? 'w-full' : 'w-0'
-                      )}
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
+        {/* Le message du serveur porte la raison exacte — titre deja pris,
+            fichier refuse. Un ecran qui calcule une erreur sans l'afficher
+            laisse l'auteur cliquer dans le vide. */}
         {error && (
-          <div className="bg-error-container text-error rounded-xl px-4 py-3 text-sm mb-4 flex items-center gap-2 animate-fade-up">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-error/10">
-              <Info className="h-4 w-4" />
-            </div>
+          <p
+            role="alert"
+            className="mb-5 rounded-lg border border-error/30 bg-error-container px-4 py-3 text-sm text-error"
+          >
             {error}
-          </div>
+          </p>
         )}
 
         <Card variant="elevated" className="p-6 animate-fade-up">
@@ -265,10 +256,9 @@ export function NewBookPage() {
           {/* Step 5: Review */}
           {step === 4 && (
             <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success-container">
-                  <Sparkles className="h-5 w-5 text-success" />
-                </div>
+              {/* La pastille et son icone repetaient le titre de l'etape,
+                  desormais en haut de l'ecran. Une redite de plus. */}
+              <div>
                 <div>
                   {/* This step creates a draft, it does not publish. Saying
                       "Prêt à publier" let an author believe the book was on its
@@ -327,18 +317,41 @@ export function NewBookPage() {
           )}
         </Card>
 
-        {/* Navigation */}
-        <div className="flex justify-between mt-6">
-          <Button variant="outlined" onClick={() => step > 0 ? setStep(step - 1) : navigate('/books')} leftIcon={<ChevronLeft className="h-4 w-4" />}>
+      </div>
+
+      {/*
+        Les boutons descendent au bas de l'ecran et y restent. Ils etaient a la
+        suite du formulaire : sur l'etape des categories, il fallait faire
+        defiler une trentaine de pastilles pour retrouver « Suivant », et
+        recommencer a chaque etape.
+
+        L'action qui avance est a droite, sous le pouce d'un droitier ; celle
+        qui recule, loin de lui. Se tromper de sens coute un aller-retour, pas
+        un manuscrit.
+      */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-outline bg-surface/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-lg lg:static lg:border-0 lg:bg-transparent lg:px-8 lg:pb-8 lg:backdrop-blur-none">
+        <div className="mx-auto flex max-w-2xl items-center gap-3 lg:max-w-3xl lg:px-0">
+          <Button
+            variant="outlined"
+            onClick={() => (step > 0 ? setStep(step - 1) : navigate('/books'))}
+            leftIcon={<ChevronLeft className="h-4 w-4" />}
+          >
             {step === 0 ? 'Annuler' : 'Précédent'}
           </Button>
+
+          <div className="flex-1" />
+
           {step < 4 ? (
-            <Button onClick={() => setStep(step + 1)} disabled={!canNext()} rightIcon={<ChevronRight className="h-4 w-4" />}>
+            <Button
+              onClick={() => setStep(step + 1)}
+              disabled={!canNext()}
+              rightIcon={<ChevronRight className="h-4 w-4" />}
+            >
               Suivant
             </Button>
           ) : (
             <Button onClick={handleSubmit} isLoading={loading}>
-              Créer le livre
+              Enregistrer le livre
             </Button>
           )}
         </div>

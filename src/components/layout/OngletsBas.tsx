@@ -29,8 +29,16 @@ const DESTINATIONS = [
 export function OngletsBas() {
   const { pathname } = useLocation();
 
-  // « Publier » disparait pendant qu'on publie : l'assistant occupe l'ecran,
-  // et proposer d'en ouvrir un second n'aurait pas de sens.
+  /**
+   * Publier est une tache, pas un lieu : elle prend l'ecran entier.
+   *
+   * Les onglets s'effacent avec le bouton. Ils recouvraient les actions de
+   * l'assistant — « Suivant » etait litteralement sous la barre — et, meme
+   * degages, proposer quatre sorties au meme poids visuel que « Suivant »
+   * invite a abandonner un formulaire a moitie rempli.
+   *
+   * L'assistant garde sa propre sortie : « Annuler », a gauche, loin du pouce.
+   */
   const enTrainDePublier = pathname.startsWith('/books/new');
 
   return (
@@ -51,6 +59,7 @@ export function OngletsBas() {
         </NavLink>
       )}
 
+      {enTrainDePublier ? null : (
       <nav
         aria-label="Navigation principale"
         className={cn(
@@ -86,6 +95,7 @@ export function OngletsBas() {
           ))}
         </ul>
       </nav>
+      )}
     </>
   );
 }
