@@ -57,10 +57,17 @@ export function MyBooksPage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 pb-8 lg:max-w-4xl lg:px-8">
-      <header className="flex items-baseline justify-between pt-8 pb-6">
+      <header className="flex items-baseline gap-4 pt-8 pb-6 [&>h1]:mr-auto">
         <h1 className="font-display text-[28px] font-semibold text-on-surface lg:text-4xl">
           Mes livres
         </h1>
+        {/* Les séries n'ont pas d'onglet : au téléphone, c'est d'ici qu'on y va. */}
+        <Link
+          to="/series"
+          className="inline-flex min-h-11 items-center text-sm font-medium text-primary-lisible hover:underline"
+        >
+          Séries
+        </Link>
         <Link
           to="/books/new"
           className="hidden min-h-11 items-center gap-2 rounded-lg bg-primary px-4 font-medium text-on-primary lg:inline-flex"

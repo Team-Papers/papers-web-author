@@ -1,12 +1,9 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router';
-import { CalendarClock, CheckCircle2, Plus, Trash2, ArrowLeft } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
+import { ChevronLeft, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { Modal } from '@/components/ui/Modal';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import { getMyBooks } from '@/lib/api/books';
@@ -18,8 +15,10 @@ import {
 } from '@/lib/api/series';
 import { messageDe } from '@/lib/utils/erreurs';
 import type { Book } from '@/types/models';
+import { etatDeSerie } from '../etat';
 
 type Detail = Awaited<ReturnType<typeof getSeriesDetail>>;
+type Episode = Detail['episodes'][number];
 
 /**
  * Une série et ses épisodes.
@@ -27,6 +26,10 @@ type Detail = Awaited<ReturnType<typeof getSeriesDetail>>;
  * Ranger, numéroter et dater vont ensemble : c'est le geste « ce chapitre est
  * le troisième, et il sort mardi ». Les séparer ferait trois allers-retours
  * pour une seule décision.
+ *
+ * Chaque épisode porte, comme un manuscrit, une tranche : paru, programmé,
+ * ou sans date — ce dernier est le seul qui attende quelque chose de
+ * l'auteur, et le seul dit en rouge.
  */
 export function SeriesDetailPage() {
   const { id = '' } = useParams();
@@ -73,8 +76,8 @@ export function SeriesDetailPage() {
 
   if (loading || !serie) {
     return (
-      <div className="flex justify-center py-24">
-        <Spinner />
+      <div className="flex h-96 items-center justify-center">
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -85,83 +88,102 @@ export function SeriesDetailPage() {
   const disponibles = livres.filter((l) => !dejaRanges.has(l.id));
   const prochainRang =
     Math.max(0, ...serie.episodes.map((e) => e.episodeNumber ?? 0)) + 1;
+  const etat = etatDeSerie(serie);
+  const n = serie.episodes.length;
 
   return (
-    <div>
-      <Header title={serie.title} subtitle={`${serie.episodes.length} épisode(s)`} />
+    <div className="mx-auto w-full max-w-2xl px-4 pb-8 lg:max-w-4xl lg:px-8">
+      <header className="pt-6 pb-6">
+        <Link
+          to="/series"
+          className="-ml-1 inline-flex min-h-11 items-center gap-0.5 text-sm text-on-surface-variant hover:text-on-surface"
+        >
+          <ChevronLeft className="h-4 w-4" aria-hidden />
+          Séries
+        </Link>
+        <h1 className="mt-1 font-display text-[28px] leading-tight font-semibold text-on-surface lg:text-4xl">
+          {serie.title}
+        </h1>
+        <p className="mt-2 flex items-center gap-2 text-sm">
+          <span style={{ color: etat.teinte }}>{etat.mot}</span>
+          <span className="text-outline" aria-hidden>
+            ·
+          </span>
+          <span className="text-on-surface-muted">
+            {n === 0 ? 'Aucun épisode' : n === 1 ? '1 épisode' : `${n} épisodes`}
+          </span>
+        </p>
+      </header>
 
-      <div className="space-y-6 p-6 lg:p-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link
-            to="/series"
-            className="inline-flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-on-surface"
-          >
-            <ArrowLeft className="h-4 w-4" /> Toutes mes séries
-          </Link>
+      {erreur && (
+        <p role="alert" className="mb-6 rounded-lg bg-error-container px-4 py-3 text-sm text-error">
+          {erreur}
+        </p>
+      )}
 
-          <div className="flex gap-2">
-            <Button variant="text" onClick={basculerTerminee}>
-              <CheckCircle2 className="h-4 w-4" />
-              {serie.completed ? 'Rouvrir la série' : 'Marquer terminée'}
-            </Button>
-            <Button onClick={() => setOuvert(true)} disabled={disponibles.length === 0}>
-              <Plus className="h-4 w-4" /> Ajouter un épisode
-            </Button>
-          </div>
-        </div>
-
-        {erreur && (
-          <p role="alert" className="rounded-lg bg-error-light px-3 py-2 text-sm text-error">
-            {erreur}
+      {n === 0 ? (
+        <div className="rounded-xl border border-dashed border-outline bg-surface px-5 py-10 text-center">
+          <h2 className="font-display text-xl font-semibold text-on-surface">Le premier épisode</h2>
+          <p className="mx-auto mt-2 max-w-xs text-sm text-on-surface-variant">
+            {disponibles.length > 0
+              ? 'Rangez vos chapitres dans l’ordre et donnez-leur une date. Chacun paraîtra tout seul le jour dit.'
+              : 'Publiez d’abord un livre : c’est lui qui deviendra un épisode.'}
           </p>
-        )}
-
-        {serie.episodes.length === 0 ? (
-          <EmptyState
-            icon={<CalendarClock className="h-10 w-10" />}
-            title="Aucun épisode"
-            description="Rangez vos chapitres dans l'ordre et donnez-leur une date. Chacun se publiera tout seul le jour dit."
-            action={
-              disponibles.length > 0
-                ? { label: 'Ajouter le premier', onClick: () => setOuvert(true) }
-                : undefined
-            }
-          />
-        ) : (
-          <ol className="space-y-2">
+          {disponibles.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setOuvert(true)}
+              className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 font-medium text-on-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              <Plus className="h-4 w-4" aria-hidden />
+              Ajouter un épisode
+            </button>
+          ) : (
+            <Link
+              to="/books/new"
+              className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 font-medium text-on-primary"
+            >
+              <Plus className="h-4 w-4" aria-hidden />
+              Publier un livre
+            </Link>
+          )}
+        </div>
+      ) : (
+        <>
+          <ol className="flex flex-col gap-2">
             {serie.episodes.map((episode) => (
-              <li
-                key={episode.id}
-                className="flex items-center gap-4 rounded-xl border border-outline bg-surface p-4"
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary tabular-nums">
-                  {episode.episodeNumber ?? '—'}
-                </span>
-
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-on-surface">{episode.title}</p>
-                  <p className="text-sm text-on-surface-muted">{dateDeSortie(episode)}</p>
-                </div>
-
-                {episode.paru ? (
-                  <Badge variant="success">Paru</Badge>
-                ) : (
-                  <Badge variant="info">À venir</Badge>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => retirer(episode.id)}
-                  aria-label={`Retirer ${episode.title} de la série`}
-                  className="rounded-lg p-2 text-on-surface-muted transition-colors hover:bg-error-light hover:text-error"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </li>
+              <LigneDEpisode key={episode.id} episode={episode} onRetirer={() => retirer(episode.id)} />
             ))}
           </ol>
-        )}
-      </div>
+
+          {/* Les actions viennent apres la liste, pas avant : on lit la
+              serie, puis on decide. « Ajouter » est l'action principale ;
+              terminer une serie est rare et se fait a la fin. */}
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={() => setOuvert(true)}
+              disabled={disponibles.length === 0}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-medium text-on-primary disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              <Plus className="h-4 w-4" aria-hidden />
+              Ajouter un épisode
+            </button>
+            <button
+              type="button"
+              onClick={basculerTerminee}
+              className="inline-flex min-h-12 items-center justify-center rounded-lg px-5 text-sm font-medium text-primary-lisible hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              {serie.completed ? 'Rouvrir la série' : 'Marquer la série terminée'}
+            </button>
+          </div>
+          {disponibles.length === 0 && (
+            <p className="mt-2 text-sm text-on-surface-muted">
+              Tous vos livres sont déjà rangés. Publiez-en un pour l’ajouter.
+            </p>
+          )}
+        </>
+      )}
 
       <AjouterUnEpisode
         ouvert={ouvert}
@@ -175,16 +197,63 @@ export function SeriesDetailPage() {
   );
 }
 
-/** Ce que le lecteur lira sous le titre : paru le, ou prévu pour. */
-function dateDeSortie(episode: Detail['episodes'][number]): string {
-  if (episode.paru) return 'Disponible';
-  if (!episode.publishAt) return 'Sans date — publiez-le vous-même';
-
-  return `Prévu pour le ${new Date(episode.publishAt).toLocaleDateString('fr-FR', {
+/** L'état d'un épisode : ce que le lecteur verra, et la teinte de sa tranche. */
+function etatDEpisode(episode: Episode) {
+  if (episode.paru) {
+    return { mot: 'Paru', teinte: 'var(--color-etat-paru)', suite: null };
+  }
+  if (!episode.publishAt) {
+    return {
+      mot: 'Sans date',
+      teinte: 'var(--color-etat-refuse)',
+      suite: 'Publiez-le vous-même, ou donnez-lui une date',
+    };
+  }
+  const date = new Date(episode.publishAt).toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-  })}`;
+  });
+  return { mot: 'Programmé', teinte: 'var(--color-etat-programme)', suite: `Paraît le ${date}` };
+}
+
+function LigneDEpisode({ episode, onRetirer }: { episode: Episode; onRetirer: () => void }) {
+  const etat = etatDEpisode(episode);
+
+  return (
+    <li className="flex min-h-[72px] items-stretch gap-3 rounded-lg border border-outline bg-surface py-3 pr-1 pl-3">
+      <span
+        aria-hidden
+        className="block w-[3px] shrink-0 self-stretch rounded-full"
+        style={{ backgroundColor: etat.teinte }}
+      />
+      <span className="flex w-7 shrink-0 items-center justify-center font-display text-lg font-semibold tabular-nums text-on-surface-variant">
+        {episode.episodeNumber ?? '—'}
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col justify-center">
+        <span className="truncate font-medium text-on-surface">{episode.title}</span>
+        <span className="mt-0.5 flex items-center gap-2 text-sm">
+          <span className="shrink-0 whitespace-nowrap" style={{ color: etat.teinte }}>{etat.mot}</span>
+          {etat.suite && (
+            <>
+              <span className="text-outline" aria-hidden>
+                ·
+              </span>
+              <span className="truncate text-on-surface-muted">{etat.suite}</span>
+            </>
+          )}
+        </span>
+      </span>
+      <button
+        type="button"
+        onClick={onRetirer}
+        aria-label={`Retirer ${episode.title} de la série`}
+        className="flex h-11 w-11 shrink-0 items-center justify-center self-center rounded-lg text-on-surface-muted transition-colors hover:bg-error-container hover:text-error focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      >
+        <Trash2 className="h-4 w-4" aria-hidden />
+      </button>
+    </li>
+  );
 }
 
 function AjouterUnEpisode({
@@ -225,6 +294,7 @@ function AjouterUnEpisode({
       onClose();
       setBookId('');
       setDate('');
+      setRang(String(rangPropose + 1));
     } catch (e) {
       setErreur(messageDe(e));
     } finally {
@@ -236,7 +306,7 @@ function AjouterUnEpisode({
     <Modal isOpen={ouvert} onClose={onClose} title="Ajouter un épisode">
       <form onSubmit={soumettre} className="space-y-4">
         {erreur && (
-          <p role="alert" className="rounded-lg bg-error-light px-3 py-2 text-sm text-error">
+          <p role="alert" className="rounded-lg bg-error-container px-4 py-3 text-sm text-error">
             {erreur}
           </p>
         )}
@@ -247,7 +317,7 @@ function AjouterUnEpisode({
             value={bookId}
             onChange={(e) => setBookId(e.target.value)}
             required
-            className="w-full rounded-lg border border-outline bg-surface px-3 py-2 text-on-surface"
+            className="min-h-11 w-full rounded-lg border border-outline bg-surface px-3 text-on-surface focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
           >
             <option value="">Choisir un livre…</option>
             {livres.map((l) => (
@@ -261,6 +331,7 @@ function AjouterUnEpisode({
         <Input
           label="Numéro d'épisode"
           type="number"
+          inputMode="numeric"
           min={1}
           value={rang}
           onChange={(e) => setRang(e.target.value)}
