@@ -35,7 +35,7 @@ export function RegisterPage() {
   return (
     <div>
       <h2 className="text-2xl font-display font-bold text-on-surface mb-1">Inscription</h2>
-      <p className="text-sm text-on-surface-muted mb-6">Creez votre compte Papers</p>
+      <p className="text-sm text-on-surface-muted mb-6">Créez votre compte Papers</p>
 
       {error && <div className="bg-error-container text-error rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
 
@@ -86,11 +86,11 @@ export function RegisterPage() {
         <Input label="Email" type="email" value={form.email} onChange={update('email')} leftIcon={<Mail className="h-4 w-4" />} required />
         <Input label="Mot de passe" type="password" value={form.password} onChange={update('password')} leftIcon={<Lock className="h-4 w-4" />} required />
         <Input label="Confirmer" type="password" value={form.confirm} onChange={update('confirm')} leftIcon={<Lock className="h-4 w-4" />} required />
-        <Button type="submit" fullWidth isLoading={loading} rightIcon={<ArrowRight className="h-4 w-4" />}>Creer mon compte</Button>
+        <Button type="submit" fullWidth isLoading={loading} rightIcon={<ArrowRight className="h-4 w-4" />}>Créer mon compte</Button>
       </form>
 
       <p className="text-sm text-center text-on-surface-muted mt-6">
-        Deja un compte ?{' '}
+        Déjà un compte ?{' '}
         <Link to="/login" className="text-primary font-semibold hover:underline">Se connecter</Link>
       </p>
     </div>

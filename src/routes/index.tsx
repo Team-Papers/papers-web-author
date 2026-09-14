@@ -32,7 +32,7 @@ export function AppRoutes() {
 
         {/* `/pending` n'etait derriere aucun garde : rien n'en faisait jamais
             sortir. Un auteur approuve rechargeait la page — c'est tout ce que
-            fait « Verifier le statut » — et retombait sur l'ecran d'attente,
+            fait « Vérifier le statut » — et retombait sur l'ecran d'attente,
             indefiniment. Le seul moyen d'entrer etait de taper une autre URL. */}
         <Route path="/pending" element={<PendingRoute />} />
 

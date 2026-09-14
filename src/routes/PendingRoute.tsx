@@ -10,7 +10,7 @@ import { AuthorStatus } from '@/types/models';
  * `/pending` n'etait derriere aucun garde. Le garde des pages protegees y
  * envoie un candidat en attente, mais rien ne l'en faisait jamais sortir : une
  * fois approuve, l'auteur rechargeait la page — c'est tout ce que fait le
- * bouton « Verifier le statut » — et retombait sur le meme ecran. Le seul
+ * bouton « Vérifier le statut » — et retombait sur le meme ecran. Le seul
  * moyen d'entrer dans son espace etait de taper une autre adresse a la main.
  *
  * Le rechargement fonctionne pourtant : `checkAuth` relit le profil depuis le

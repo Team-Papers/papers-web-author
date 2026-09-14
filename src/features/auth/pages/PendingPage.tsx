@@ -17,15 +17,15 @@ export function PendingPage() {
         </div>
         <h1 className="text-2xl font-display font-bold text-white mb-3">Candidature en cours d&apos;examen</h1>
         <p className="text-white/60 mb-8 leading-relaxed">
-          Votre profil d&apos;auteur est en cours de verification par notre equipe.
-          Vous recevrez une notification des que votre candidature sera approuvee.
+          Votre profil d&apos;auteur est en cours de vérification par notre équipe.
+          Vous recevrez une notification dès que votre candidature sera approuvée.
         </p>
         <div className="flex flex-col gap-3">
           <Button variant="filled" fullWidth onClick={() => window.location.reload()} leftIcon={<RefreshCw className="h-4 w-4" />} className="bg-white text-primary hover:bg-white/90">
-            Verifier le statut
+            Vérifier le statut
           </Button>
           <Button variant="text" fullWidth onClick={logout} leftIcon={<LogOut className="h-4 w-4" />} className="text-white/50 hover:text-white hover:bg-white/10">
-            Se deconnecter
+            Se déconnecter
           </Button>
         </div>
       </div>

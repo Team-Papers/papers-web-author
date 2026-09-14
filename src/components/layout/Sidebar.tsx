@@ -153,7 +153,7 @@ export function Sidebar() {
         footer={
           <div className="flex gap-3 justify-end">
             <Button variant="outlined" onClick={() => setShowLogout(false)}>Annuler</Button>
-            <Button variant="danger" onClick={handleLogout}>Se deconnecter</Button>
+            <Button variant="danger" onClick={handleLogout}>Se déconnecter</Button>
           </div>
         }
       >

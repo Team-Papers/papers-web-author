@@ -109,12 +109,12 @@ export function NewBookPage() {
 
   return (
     <div>
-      <Header title="Nouveau livre" subtitle="Publiez votre oeuvre" />
+      <Header title="Nouveau livre" subtitle="Publiez votre œuvre" />
       <div className="p-6 lg:p-8 max-w-3xl mx-auto">
         {/* Progress bar */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-on-surface">Etape {step + 1} sur {steps.length}</span>
+            <span className="text-sm font-medium text-on-surface">Étape {step + 1} sur {steps.length}</span>
             <span className="text-sm text-on-surface-muted">{Math.round(progress)}%</span>
           </div>
           <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
