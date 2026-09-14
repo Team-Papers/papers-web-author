@@ -51,6 +51,8 @@ export interface User {
 
 export interface AuthorProfile {
   id: string;
+  /** L'adresse publique lisible, `/auteurs/jean-auteur`. Absent sur les profils anciens. */
+  slug?: string | null;
   userId: string;
   user?: User;
   penName: string;

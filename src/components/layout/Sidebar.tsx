@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 import { LayoutDashboard, BookOpen, Layers, PlusCircle, Wallet, BarChart3, Settings, LogOut, Presentation, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { pagePublique } from '@/lib/site';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { Avatar } from '@/components/ui/Avatar';
 import { Modal } from '@/components/ui/Modal';
@@ -83,13 +84,13 @@ export function Sidebar() {
         {/* Showcase link */}
         {authorProfile?.id && (
           <a
-            href={`https://showcase-papers.seed-innov.com/${authorProfile.id}`}
+            href={pagePublique(authorProfile)}
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium bg-accent/10 text-accent-400 hover:bg-accent/20 transition-all duration-200 w-full border border-accent/10"
           >
             <Presentation className="h-[18px] w-[18px] transition-transform group-hover:scale-110" />
-            <span>Ma vitrine</span>
+            <span>Ma page publique</span>
           </a>
         )}
 
