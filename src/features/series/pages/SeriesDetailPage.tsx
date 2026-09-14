@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router';
-import { ChevronLeft, Plus, Trash2 } from 'lucide-react';
+import { CalendarClock, ChevronLeft, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
@@ -11,10 +11,14 @@ import {
   attachEpisode,
   detachEpisode,
   getSeriesDetail,
+  scheduleSeries,
   updateSeries,
+  type EpisodeIgnore,
+  type EpisodeProgramme,
 } from '@/lib/api/series';
 import { messageDe } from '@/lib/utils/erreurs';
-import type { Book } from '@/types/models';
+import { BookStatus, type Book } from '@/types/models';
+import { calendrierDeSortie, demainHuitHeures, jourEtHeure } from '../calendrier';
 import { etatDeSerie } from '../etat';
 
 type Detail = Awaited<ReturnType<typeof getSeriesDetail>>;
@@ -47,7 +51,9 @@ export function SeriesDetailPage() {
   );
 
   const [ouvert, setOuvert] = useState(false);
+  const [programmation, setProgrammation] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [confirmation, setConfirmation] = useState<string | null>(null);
 
   async function recharger() {
     setData(await getSeriesDetail(id));
@@ -90,6 +96,36 @@ export function SeriesDetailPage() {
     Math.max(0, ...serie.episodes.map((e) => e.episodeNumber ?? 0)) + 1;
   const etat = etatDeSerie(serie);
   const n = serie.episodes.length;
+  // Le statut d'un épisode ne figure pas sur la fiche de la série — le lecteur
+  // n'a pas à le connaître — mais sur la liste des livres de l'auteur, si.
+  const statuts = new Map(livres.map((l) => [l.id, l.status]));
+  const aVenir = serie.episodes.filter((e) => !e.paru);
+
+  /**
+   * Ce que le serveur a fait, en une phrase : combien d'épisodes, de quand à
+   * quand, et ce qu'il a laissé de côté. L'auteur n'a pas à relire la liste
+   * pour savoir si tout y est.
+   */
+  function annoncer(resultat: { episodes: EpisodeProgramme[]; ignores: EpisodeIgnore[] }) {
+    const { episodes, ignores } = resultat;
+    const phrases: string[] = [];
+    if (episodes.length === 0) {
+      phrases.push('Aucun épisode à programmer.');
+    } else if (episodes.length === 1) {
+      phrases.push(`1 épisode programmé, le ${jourEtHeure(new Date(episodes[0].publishAt))}.`);
+    } else {
+      const premier = jourEtHeure(new Date(episodes[0].publishAt));
+      const dernier = jourEtHeure(new Date(episodes[episodes.length - 1].publishAt));
+      phrases.push(`${episodes.length} épisodes programmés, du ${premier} au ${dernier}.`);
+    }
+    if (ignores.length > 0) {
+      const motifs = { REJECTED: 'refusé', SUSPENDED: 'suspendu', PENDING: 'en examen' } as const;
+      phrases.push(
+        `Laissé de côté : ${ignores.map((i) => `${i.title} (${motifs[i.status]})`).join(', ')}.`,
+      );
+    }
+    setConfirmation(phrases.join(' '));
+  }
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 pb-8 lg:max-w-4xl lg:px-8">
@@ -114,6 +150,15 @@ export function SeriesDetailPage() {
           </span>
         </p>
       </header>
+
+      {confirmation && (
+        <p
+          role="status"
+          className="mb-6 rounded-lg border border-success/30 bg-success-container px-4 py-3 text-sm text-success"
+        >
+          {confirmation}
+        </p>
+      )}
 
       {erreur && (
         <p role="alert" className="mb-6 rounded-lg bg-error-container px-4 py-3 text-sm text-error">
@@ -152,14 +197,28 @@ export function SeriesDetailPage() {
         <>
           <ol className="flex flex-col gap-2">
             {serie.episodes.map((episode) => (
-              <LigneDEpisode key={episode.id} episode={episode} onRetirer={() => retirer(episode.id)} />
+              <LigneDEpisode
+                key={episode.id}
+                episode={episode}
+                refuse={statuts.get(episode.id) === BookStatus.REJECTED}
+                onRetirer={() => retirer(episode.id)}
+              />
             ))}
           </ol>
 
+          {/* Un épisode ajouté sans date attend l'auteur ; la programmation
+              groupée est le chemin conseillé, et une ligne le dit ici, où
+              l'auteur regarde après avoir rangé ses chapitres. */}
+          <p className="mt-3 text-sm text-on-surface-muted">
+            Le plus simple : programmez la sortie, et chaque épisode à venir reçoit sa date d’un
+            coup. Un épisode ajouté sans date reste à publier vous-même.
+          </p>
+
           {/* Les actions viennent apres la liste, pas avant : on lit la
               serie, puis on decide. « Ajouter » est l'action principale ;
-              terminer une serie est rare et se fait a la fin. */}
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
+              programmer vient une fois les chapitres ranges ; terminer une
+              serie est rare et se fait a la fin. */}
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <button
               type="button"
               onClick={() => setOuvert(true)}
@@ -168,6 +227,18 @@ export function SeriesDetailPage() {
             >
               <Plus className="h-4 w-4" aria-hidden />
               Ajouter un épisode
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setConfirmation(null);
+                setProgrammation(true);
+              }}
+              disabled={aVenir.length === 0}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-outline px-5 font-medium text-primary-lisible hover:bg-surface-container disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              <CalendarClock className="h-4 w-4" aria-hidden />
+              Programmer la sortie
             </button>
             <button
               type="button"
@@ -193,14 +264,175 @@ export function SeriesDetailPage() {
         livres={disponibles}
         onAjoute={recharger}
       />
+
+      {/* Le formulaire est monte a l'ouverture seulement : ses valeurs par
+          defaut (demain 8 h) se recalculent a chaque fois qu'on l'ouvre. */}
+      {programmation && (
+        <ProgrammerLaSortie
+          onClose={() => setProgrammation(false)}
+          seriesId={id}
+          episodes={serie.episodes}
+          statuts={statuts}
+          onProgramme={async (resultat) => {
+            await recharger();
+            annoncer(resultat);
+          }}
+        />
+      )}
     </div>
   );
 }
 
+/**
+ * Dater toute la série d'un coup : un départ, un pas, et l'aperçu des dates
+ * qui en résultent — l'auteur confirme ce qu'il voit, pas une formule.
+ */
+function ProgrammerLaSortie({
+  onClose,
+  seriesId,
+  episodes,
+  statuts,
+  onProgramme,
+}: {
+  onClose: () => void;
+  seriesId: string;
+  episodes: Episode[];
+  statuts: Map<string, Book['status']>;
+  onProgramme: (resultat: { episodes: EpisodeProgramme[]; ignores: EpisodeIgnore[] }) => Promise<void>;
+}) {
+  const [depart, setDepart] = useState(() => demainHuitHeures());
+  const [tousLes, setTousLes] = useState('3');
+  const [envoi, setEnvoi] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  // L'instant d'ouverture sert de « maintenant » : le rendu reste pur, et le
+  // serveur tranche de toute façon si la date est passée entre-temps.
+  const [ouvertA] = useState(() => Date.now());
+
+  const dateDeDepart = depart ? new Date(depart) : null;
+  const pas = Number(tousLes);
+  const departValide = dateDeDepart !== null && !Number.isNaN(dateDeDepart.getTime());
+  const departAVenir = departValide && dateDeDepart.getTime() > ouvertA;
+  const pasValide = Number.isInteger(pas) && pas >= 1 && pas <= 30;
+
+  const calendrier =
+    departValide && pasValide ? calendrierDeSortie(episodes, statuts, dateDeDepart, pas) : [];
+  const programmes = calendrier.filter((l) => l.sort === 'programme');
+
+  async function soumettre(e: React.FormEvent) {
+    e.preventDefault();
+    if (!departAVenir || !pasValide || !dateDeDepart) return;
+    setErreur(null);
+    setEnvoi(true);
+
+    try {
+      // Une heure locale devient un instant : le serveur publie à l'heure de
+      // l'auteur, où qu'il soit.
+      const resultat = await scheduleSeries(seriesId, {
+        startAt: dateDeDepart.toISOString(),
+        everyDays: pas,
+      });
+      await onProgramme(resultat);
+      onClose();
+    } catch (e) {
+      setErreur(messageDe(e));
+    } finally {
+      setEnvoi(false);
+    }
+  }
+
+  return (
+    <Modal isOpen onClose={onClose} title="Programmer la sortie">
+      <form onSubmit={soumettre} className="space-y-4">
+        {erreur && (
+          <p role="alert" className="rounded-lg bg-error-container px-4 py-3 text-sm text-error">
+            {erreur}
+          </p>
+        )}
+
+        <Input
+          label="Premier épisode"
+          type="datetime-local"
+          value={depart}
+          onChange={(e) => setDepart(e.target.value)}
+          required
+          error={depart && !departAVenir ? 'Choisissez une date à venir.' : undefined}
+        />
+
+        <Input
+          label="Un épisode tous les"
+          type="number"
+          inputMode="numeric"
+          min={1}
+          max={30}
+          step={1}
+          value={tousLes}
+          onChange={(e) => setTousLes(e.target.value)}
+          required
+          rightIcon={<span className="text-sm">jours</span>}
+          error={tousLes && !pasValide ? 'Entre 1 et 30 jours.' : undefined}
+        />
+
+        {/* L'aperçu reprend la forme de la liste des épisodes : le numéro,
+            le titre, et ce qui l'attend. Un refusé n'a pas de date ; on le
+            dit plutôt que de le faire disparaître. */}
+        <div>
+          <h3 className="mb-1.5 text-sm font-medium text-on-surface">Ce qui en résulte</h3>
+          <ol aria-label="Dates de sortie" className="flex flex-col gap-1.5">
+            {calendrier.map((ligne) => (
+              <li
+                key={ligne.episode.id}
+                className="flex items-baseline gap-2 rounded-lg bg-surface-container px-3 py-2 text-sm"
+              >
+                <span className="w-6 shrink-0 font-display font-semibold tabular-nums text-on-surface-variant">
+                  {ligne.episode.episodeNumber ?? '—'}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-on-surface">{ligne.episode.title}</span>
+                {ligne.sort === 'programme' ? (
+                  <span className="shrink-0 text-on-surface-variant">{jourEtHeure(ligne.publishAt)}</span>
+                ) : ligne.sort === 'refuse' ? (
+                  <span className="shrink-0" style={{ color: 'var(--color-etat-refuse)' }}>
+                    Refusé, laissé de côté
+                  </span>
+                ) : (
+                  <span className="shrink-0" style={{ color: 'var(--color-etat-examen)' }}>
+                    En examen, laissé de côté
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+          {calendrier.length > 0 && programmes.length === 0 && (
+            <p className="mt-2 text-sm text-on-surface-muted">Aucun épisode ne peut recevoir de date.</p>
+          )}
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="text" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button type="submit" disabled={envoi || !departAVenir || !pasValide || programmes.length === 0}>
+            {envoi ? 'Programmation…' : 'Programmer'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
 /** L'état d'un épisode : ce que le lecteur verra, et la teinte de sa tranche. */
-function etatDEpisode(episode: Episode) {
+function etatDEpisode(episode: Episode, refuse: boolean) {
   if (episode.paru) {
     return { mot: 'Paru', teinte: 'var(--color-etat-paru)', suite: null };
+  }
+  // Un chapitre refusé ne recevra pas de date, quoi qu'on lui donne : lui
+  // proposer d'en choisir une enverrait l'auteur dans un mur. Il attend une
+  // correction, comme sur la liste des livres.
+  if (refuse) {
+    return {
+      mot: 'Refusé',
+      teinte: 'var(--color-etat-refuse)',
+      suite: 'Corrigez-le avant de lui donner une date',
+    };
   }
   if (!episode.publishAt) {
     return {
@@ -217,8 +449,16 @@ function etatDEpisode(episode: Episode) {
   return { mot: 'Programmé', teinte: 'var(--color-etat-programme)', suite: `Paraît le ${date}` };
 }
 
-function LigneDEpisode({ episode, onRetirer }: { episode: Episode; onRetirer: () => void }) {
-  const etat = etatDEpisode(episode);
+function LigneDEpisode({
+  episode,
+  refuse,
+  onRetirer,
+}: {
+  episode: Episode;
+  refuse: boolean;
+  onRetirer: () => void;
+}) {
+  const etat = etatDEpisode(episode, refuse);
 
   return (
     <li className="flex min-h-[72px] items-stretch gap-3 rounded-lg border border-outline bg-surface py-3 pr-1 pl-3">
