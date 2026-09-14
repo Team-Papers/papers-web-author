@@ -144,6 +144,18 @@
     --color-on-primary-container: #E2DFF9;
     --color-secondary-container: #2E283F;
     --color-on-secondary-container: #E9E6E0;
+
+    /* Les conteneurs semantiques : sans version sombre, ils restaient pastel
+       sur l'encre, et leur texte blanc devenait illisible. Les teintes de
+       texte montent d'un cran pour tenir 4,5:1 sur ces fonds. */
+    --color-success: #6FCF97;
+    --color-success-container: #163B27;
+    --color-warning: #E0A85A;
+    --color-warning-container: #3D2A10;
+    --color-error: #F0776C;
+    --color-error-container: #4A1B17;
+    --color-info: #A79EEB;
+    --color-info-container: #282168;
     --glass-bg: rgba(23, 19, 37, 0.86);
     --glass-border: rgba(255, 255, 255, 0.1);
   }
@@ -168,6 +180,18 @@
   --color-on-primary-container: #E2DFF9;
   --color-secondary-container: #2E283F;
   --color-on-secondary-container: #E9E6E0;
+
+  /* Les conteneurs semantiques : sans version sombre, ils restaient pastel
+     sur l'encre, et leur texte blanc devenait illisible. Les teintes de
+     texte montent d'un cran pour tenir 4,5:1 sur ces fonds. */
+  --color-success: #6FCF97;
+  --color-success-container: #163B27;
+  --color-warning: #E0A85A;
+  --color-warning-container: #3D2A10;
+  --color-error: #F0776C;
+  --color-error-container: #4A1B17;
+  --color-info: #A79EEB;
+  --color-info-container: #282168;
   --glass-bg: rgba(23, 19, 37, 0.86);
   --glass-border: rgba(255, 255, 255, 0.1);
 }
