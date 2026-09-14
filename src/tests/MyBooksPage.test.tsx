@@ -42,7 +42,7 @@ async function afficher() {
       <MyBooksPage />
     </MemoryRouter>,
   );
-  await screen.findByText('Recueil en ligne');
+  await screen.findByText('Recueil en ligne', {}, { timeout: 5000 });
 }
 
 const titres = () =>

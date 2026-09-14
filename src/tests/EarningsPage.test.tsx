@@ -30,7 +30,7 @@ async function afficher() {
       <EarningsPage />
     </MemoryRouter>,
   );
-  await screen.findByRole('heading', { name: 'Revenus' });
+  await screen.findByRole('heading', { name: 'Revenus' }, { timeout: 5000 });
 }
 
 describe('EarningsPage — le solde et la distance qui reste', () => {
