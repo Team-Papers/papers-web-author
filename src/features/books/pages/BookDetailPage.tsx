@@ -207,7 +207,15 @@ export function BookDetailPage() {
           brouillon, « 0 vente, 0 F » n'apprend rien et pese. */}
       {(enVente || aVendu) && (
         <Rubrique titre="Ce que ce livre a rapporté">
-          <dl className="grid grid-cols-2 gap-4 rounded-xl border border-outline bg-surface p-5 sm:grid-cols-3">
+          <dl className="grid grid-cols-2 gap-4 rounded-xl border border-outline bg-surface p-5 sm:grid-cols-4">
+            {typeof book.views === 'number' && (
+              <div>
+                <dt className="text-sm text-on-surface-muted">Vues</dt>
+                <dd className="mt-0.5 font-display text-2xl font-semibold tabular-nums text-on-surface">
+                  {book.views}
+                </dd>
+              </div>
+            )}
             <div>
               <dt className="text-sm text-on-surface-muted">Ventes</dt>
               <dd className="mt-0.5 font-display text-2xl font-semibold tabular-nums text-on-surface">

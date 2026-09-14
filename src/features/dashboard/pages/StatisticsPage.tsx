@@ -108,6 +108,9 @@ export function StatisticsPage() {
                           <span className="block h-full rounded-full bg-accent" style={{ width: `${part}%` }} />
                         </span>
                         <span className="shrink-0 text-xs tabular-nums text-on-surface-muted">
+                          {/* Vues puis ventes : le rapport entre les deux est la seule
+                              chose qui dise si une fiche convainc. */}
+                          {typeof livre.views === 'number' && `${livre.views} ${livre.views === 1 ? 'vue' : 'vues'} · `}
                           {livre.totalSales === 1 ? '1 vente' : `${livre.totalSales} ventes`}
                         </span>
                       </span>

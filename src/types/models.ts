@@ -95,6 +95,8 @@ export interface Book {
   categories?: Category[];
   totalSales: number;
   totalRevenue: number;
+  /** Fiches servies au public. Absent tant que l'API n'est pas a jour. */
+  views?: number;
   averageRating: number;
   reviewCount: number;
   createdAt: string;
