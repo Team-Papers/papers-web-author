@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
-import { Card } from '@/components/ui/Card';
 import { FileDropzone } from '@/components/ui/FileDropzone';
 import { createBook, getCategories, uploadCover, uploadBookFile } from '@/lib/api/books';
 import { cn } from '@/lib/utils/cn';
@@ -162,7 +161,7 @@ export function NewBookPage() {
           </p>
         )}
 
-        <Card variant="elevated" className="p-6 animate-fade-up">
+        <section className="rounded-xl border border-outline bg-surface p-5">
           {/* Step 1: Info */}
           {step === 0 && (
             <div className="space-y-4">
@@ -315,7 +314,7 @@ export function NewBookPage() {
               </div>
             </div>
           )}
-        </Card>
+        </section>
 
       </div>
 

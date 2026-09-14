@@ -1,111 +1,124 @@
 import { useEffect, useState } from 'react';
-import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
-import { Header } from '@/components/layout/Header';
-import { Card } from '@/components/ui/Card';
+import { Link } from 'react-router';
 import { Spinner } from '@/components/ui/Spinner';
+import { Tranche } from '@/components/atelier/Tranche';
 import { getMyStats } from '@/lib/api/authors';
 import { getMyBooks } from '@/lib/api/books';
-import { formatCurrency } from '@/lib/utils/formatters';
+import { formatCurrency, toNumber } from '@/lib/utils/formatters';
 import type { AuthorStats, Book } from '@/types/models';
-import { BookStatus } from '@/types/models';
 
+/**
+ * Ce qui se vend.
+ *
+ * L'ecran s'appelait « Statistiques » et ouvrait sur un histogramme des
+ * livres par statut — une information que la liste des livres donne deja,
+ * rangee par etat — peint aux couleurs de Google. Il repond desormais a la
+ * seule question qu'un auteur se pose ici : lequel de mes livres marche, et
+ * combien m'a-t-il rapporte. Le net, livre par livre, tel que l'API le
+ * compte ; jamais un prix multiplie par un taux.
+ */
 export function StatisticsPage() {
   const [stats, setStats] = useState<AuthorStats | null>(null);
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [livres, setLivres] = useState<Book[]>([]);
+  const [chargement, setChargement] = useState(true);
 
   useEffect(() => {
     Promise.all([
       getMyStats().catch(() => null),
-      getMyBooks({ limit: 100 }).catch(() => ({ data: [] })),
-    ]).then(([s, b]) => {
-      if (s) setStats(s);
-      setBooks(b.data);
-    }).finally(() => setLoading(false));
+      getMyBooks({ limit: 100 }).catch(() => ({ data: [] as Book[] })),
+    ])
+      .then(([s, b]) => {
+        if (s) setStats(s);
+        setLivres(b.data);
+      })
+      .finally(() => setChargement(false));
   }, []);
 
-  if (loading) return <div className="flex items-center justify-center h-96"><Spinner size="lg" /></div>;
+  if (chargement) return <div className="flex h-96 items-center justify-center"><Spinner size="lg" /></div>;
 
-  const statusCounts = [
-    { name: 'Brouillon', count: books.filter((b) => b.status === BookStatus.DRAFT).length, fill: '#dadce0' },
-    { name: 'En attente', count: books.filter((b) => b.status === BookStatus.PENDING).length, fill: '#fbbc04' },
-    { name: 'Publié', count: books.filter((b) => b.status === BookStatus.PUBLISHED).length, fill: '#34a853' },
-    { name: 'Rejeté', count: books.filter((b) => b.status === BookStatus.REJECTED).length, fill: '#ea4335' },
-  ];
-
-  const topBooks = [...books].sort((a, b) => b.totalSales - a.totalSales).slice(0, 5);
+  const vendus = livres
+    .filter((l) => (l.totalSales ?? 0) > 0)
+    .sort((a, b) => toNumber(b.totalRevenue) - toNumber(a.totalRevenue));
+  const meilleur = vendus[0] ? toNumber(vendus[0].totalRevenue) : 0;
 
   return (
-    <div>
-      <Header title="Statistiques" subtitle="Analysez vos performances" />
-      <div className="p-6 lg:p-8 space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Books by status */}
-          <Card className="p-6">
-            <h3 className="text-sm font-display font-semibold text-on-surface mb-4">Livres par statut</h3>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={statusCounts}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-outline)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--color-on-surface-variant)' }} />
-                  <YAxis tick={{ fontSize: 12, fill: 'var(--color-on-surface-variant)' }} allowDecimals={false} />
-                  <Tooltip />
-                  <Bar dataKey="count" radius={[8, 8, 0, 0]}>
-                    {statusCounts.map((entry, i) => (
-                      <Cell key={i} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
+    <div className="mx-auto w-full max-w-2xl px-4 pb-8 lg:max-w-4xl lg:px-8">
+      <header className="pt-8 pb-6">
+        <h1 className="font-display text-[28px] leading-tight font-semibold text-on-surface lg:text-4xl">
+          Ce qui se vend
+        </h1>
+      </header>
 
-          {/* Top books */}
-          <Card className="p-6">
-            <h3 className="text-sm font-display font-semibold text-on-surface mb-4">Top livres par ventes</h3>
-            {topBooks.length === 0 ? (
-              <p className="text-sm text-on-surface-muted text-center py-8">Aucun livre avec des ventes</p>
-            ) : (
-              <div className="space-y-3">
-                {topBooks.map((book, i) => (
-                  <div key={book.id} className="flex items-center gap-3 py-2">
-                    <span className="text-lg font-bold text-on-surface-muted w-6">{i + 1}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-on-surface truncate">{book.title}</p>
-                      <p className="text-xs text-on-surface-muted">{book.totalSales} ventes · {formatCurrency(book.totalRevenue)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-        </div>
-
-        {/* Summary */}
-        {stats && (
-          <Card className="p-6">
-            <h3 className="text-sm font-display font-semibold text-on-surface mb-4">Résumé</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-surface-container rounded-2xl">
-                <p className="text-2xl font-display font-bold text-primary">{stats.totalBooks}</p>
-                <p className="text-xs text-on-surface-muted mt-1">Livres</p>
-              </div>
-              <div className="text-center p-4 bg-surface-container rounded-2xl">
-                <p className="text-2xl font-display font-bold text-success">{stats.totalSales}</p>
-                <p className="text-xs text-on-surface-muted mt-1">Ventes</p>
-              </div>
-              <div className="text-center p-4 bg-surface-container rounded-2xl">
-                <p className="text-2xl font-display font-bold text-warning">{formatCurrency(stats.totalRevenue)}</p>
-                <p className="text-xs text-on-surface-muted mt-1">Revenus total</p>
-              </div>
-              <div className="text-center p-4 bg-surface-container rounded-2xl">
-                <p className="text-2xl font-display font-bold text-on-surface">{stats.averageRating?.toFixed(1) || '—'}</p>
-                <p className="text-xs text-on-surface-muted mt-1">Note moyenne</p>
-              </div>
+      {stats && (
+        <dl className="grid grid-cols-2 gap-4 rounded-xl border border-outline bg-surface p-5 sm:grid-cols-3">
+          <div>
+            <dt className="text-sm text-on-surface-muted">Ventes</dt>
+            <dd className="mt-0.5 font-display text-2xl font-semibold tabular-nums text-on-surface">{stats.totalSales}</dd>
+          </div>
+          <div>
+            <dt className="text-sm text-on-surface-muted">Net pour vous</dt>
+            <dd className="mt-0.5 font-display text-2xl font-semibold tabular-nums text-accent-lisible">
+              {formatCurrency(toNumber(stats.totalRevenue))}
+            </dd>
+          </div>
+          {stats.totalRatings > 0 && (
+            <div>
+              <dt className="text-sm text-on-surface-muted">Note moyenne</dt>
+              <dd className="mt-0.5 font-display text-2xl font-semibold tabular-nums text-on-surface">
+                {stats.averageRating.toFixed(1)}
+                <span className="ml-1.5 font-sans text-sm font-normal text-on-surface-muted">
+                  sur {stats.totalRatings} avis
+                </span>
+              </dd>
             </div>
-          </Card>
+          )}
+        </dl>
+      )}
+
+      <section className="mt-8">
+        <h2 className="mb-3 text-sm font-semibold text-on-surface-variant">Livre par livre</h2>
+        {vendus.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-outline bg-surface px-5 py-8 text-center text-sm text-on-surface-variant">
+            Dès qu'un livre se vend, il apparaît ici avec ce qu'il vous a rapporté.
+          </p>
+        ) : (
+          <ol className="flex flex-col gap-2">
+            {vendus.map((livre) => {
+              const net = toNumber(livre.totalRevenue);
+              const part = meilleur > 0 ? Math.max(4, (net / meilleur) * 100) : 0;
+              return (
+                <li key={livre.id}>
+                  <Link
+                    to={`/books/${livre.id}`}
+                    className="flex min-h-[72px] items-stretch gap-3 rounded-lg border border-outline bg-surface px-3 py-3 transition-colors hover:bg-surface-dim focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  >
+                    <Tranche statut={livre.status} />
+                    <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
+                      <span className="flex items-baseline justify-between gap-3">
+                        <span className="truncate font-medium text-on-surface">{livre.title}</span>
+                        <span className="shrink-0 text-sm font-semibold tabular-nums text-accent-lisible">
+                          {formatCurrency(net)}
+                        </span>
+                      </span>
+                      {/* La barre compare les livres entre eux, pas a un objectif :
+                          la plus longue est le meilleur vendeur, les autres se lisent
+                          par rapport a lui. */}
+                      <span className="flex items-center gap-3">
+                        <span className="h-1 flex-1 overflow-hidden rounded-full bg-surface-container-high" aria-hidden>
+                          <span className="block h-full rounded-full bg-accent" style={{ width: `${part}%` }} />
+                        </span>
+                        <span className="shrink-0 text-xs tabular-nums text-on-surface-muted">
+                          {livre.totalSales === 1 ? '1 vente' : `${livre.totalSales} ventes`}
+                        </span>
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
         )}
-      </div>
+      </section>
     </div>
   );
 }
