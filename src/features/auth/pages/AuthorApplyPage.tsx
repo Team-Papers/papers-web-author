@@ -4,6 +4,7 @@ import { PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
+import { messageDe } from '@/lib/utils/erreurs';
 import { useAuthStore } from '@/features/auth/store/authStore';
 
 export function AuthorApplyPage() {
@@ -21,8 +22,10 @@ export function AuthorApplyPage() {
     try {
       await applyAsAuthor({ penName, bio });
       navigate('/pending');
-    } catch {
-      setError('Erreur lors de la soumission. Réessayez.');
+    } catch (err) {
+      // Le serveur dit pourquoi — biographie trop courte, demande déjà en cours.
+      // « Réessayez » sans raison fait recommencer la même erreur.
+      setError(messageDe(err));
     } finally {
       setLoading(false);
     }
