@@ -6,7 +6,7 @@ import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage';
 import { AuthorApplyPage } from '@/features/auth/pages/AuthorApplyPage';
-import { PendingPage } from '@/features/auth/pages/PendingPage';
+import { PendingRoute } from '@/routes/PendingRoute';
 import { DashboardPage } from '@/features/dashboard/pages/DashboardPage';
 import { MyBooksPage } from '@/features/books/pages/MyBooksPage';
 import { NewBookPage } from '@/features/books/pages/NewBookPage';
@@ -30,7 +30,11 @@ export function AppRoutes() {
           <Route path="/apply" element={<AuthorApplyPage />} />
         </Route>
 
-        <Route path="/pending" element={<PendingPage />} />
+        {/* `/pending` n'etait derriere aucun garde : rien n'en faisait jamais
+            sortir. Un auteur approuve rechargeait la page — c'est tout ce que
+            fait « Verifier le statut » — et retombait sur l'ecran d'attente,
+            indefiniment. Le seul moyen d'entrer etait de taper une autre URL. */}
+        <Route path="/pending" element={<PendingRoute />} />
 
         {/* Protected */}
         <Route
