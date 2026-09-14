@@ -58,7 +58,9 @@ export function EarningsPage() {
       // Le formulaire se fermait sans rien dire : l'auteur ne savait pas si sa
       // demande etait partie, et voyait seulement son solde baisser.
       setWSuccess(
-        `Demande de ${formatCurrency(Number(demande.amount))} enregistrée. Elle sera traitée sous peu.`,
+        // « Sous peu » ne veut rien dire : un auteur qui attend son argent
+        // compte les jours. Le versement est fait a la main, sous 72 heures.
+        `Demande de ${formatCurrency(Number(demande.amount))} enregistrée. Vous recevrez le versement sous 72 heures.`,
       );
       load();
     } catch (err: unknown) {
@@ -132,7 +134,7 @@ export function EarningsPage() {
                 <p className="text-3xl lg:text-4xl font-display font-bold text-white mt-1">{formatCurrency(balance)}</p>
                 {threshold > 0 && (
                   <p className="text-xs text-primary-300 mt-1">
-                    Retrait a partir de {formatCurrency(threshold)}
+                    Retrait à partir de {formatCurrency(threshold)} · versé sous 72 h
                   </p>
                 )}
               </div>
@@ -304,7 +306,7 @@ export function EarningsPage() {
           {wError && <div className="bg-error-container text-error rounded-xl px-4 py-3 text-sm">{wError}</div>}
           <Input label="Montant (FCFA)" type="number" value={wAmount} onChange={(e) => setWAmount(e.target.value)} />
           <div>
-            <label className="block text-sm font-medium text-on-surface mb-2">Methode</label>
+            <label className="block text-sm font-medium text-on-surface mb-2">Méthode</label>
             <div className="flex gap-3">
               {['MTN', 'OM'].map((m) => (
                 <button key={m} type="button" onClick={() => setWMethod(m)}
@@ -315,6 +317,13 @@ export function EarningsPage() {
             </div>
           </div>
           <Input label="Numéro de téléphone" value={wPhone} onChange={(e) => setWPhone(e.target.value)} leftIcon={<Phone className="h-4 w-4" />} />
+
+          {/* Le versement est fait a la main par l'equipe. Le dire ici, avant
+              l'envoi, evite a l'auteur d'attendre sans savoir combien de temps
+              — et evite a l'equipe les messages « ou est mon argent ». */}
+          <p className="text-sm text-on-surface-muted">
+            Le versement est effectué manuellement sur ce numéro, sous 72 heures.
+          </p>
         </div>
       </Modal>
     </div>
