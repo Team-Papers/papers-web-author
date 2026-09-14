@@ -248,7 +248,7 @@ function Cloche() {
     >
       <Bell className="h-5 w-5" aria-hidden />
       {unreadCount > 0 && (
-        <span className="absolute top-1.5 right-1.5 min-w-[18px] rounded-full bg-error px-1 text-center text-[11px] leading-[18px] font-semibold text-on-error">
+        <span className="absolute top-0 right-0 min-w-[18px] rounded-full bg-error px-1 text-center text-[11px] leading-[18px] font-semibold text-on-error">
           {unreadCount > 9 ? '9+' : unreadCount}
         </span>
       )}
