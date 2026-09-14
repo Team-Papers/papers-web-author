@@ -17,6 +17,7 @@ import { SeriesDetailPage } from '@/features/series/pages/SeriesDetailPage';
 import { EarningsPage } from '@/features/earnings/pages/EarningsPage';
 import { StatisticsPage } from '@/features/dashboard/pages/StatisticsPage';
 import { SettingsPage } from '@/features/settings/pages/SettingsPage';
+import { ActivityPage } from '@/features/activity/pages/ActivityPage';
 
 export function AppRoutes() {
   return (
@@ -54,6 +55,7 @@ export function AppRoutes() {
           <Route path="/earnings" element={<EarningsPage />} />
           <Route path="/statistics" element={<StatisticsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/notifications" element={<ActivityPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

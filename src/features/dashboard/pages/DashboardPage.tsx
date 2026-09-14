@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import { ArrowRight, Plus } from 'lucide-react';
+import { ArrowRight, Bell, Plus } from 'lucide-react';
 import { Spinner } from '@/components/ui/Spinner';
+import { useNotifications } from '@/lib/hooks/useNotifications';
 import { Tranche } from '@/components/atelier/Tranche';
 import { ceQuiVousAttend, etatDe } from '@/components/atelier/etat';
 import { useAuthStore } from '@/features/auth/store/authStore';
@@ -121,7 +122,10 @@ function Entete({
 
   return (
     <header className="pt-8 pb-7">
-      <p className="text-sm text-on-surface-muted">Bonjour{prenom ? ` ${prenom}` : ''}</p>
+      <div className="flex items-start justify-between gap-4">
+        <p className="text-sm text-on-surface-muted">Bonjour{prenom ? ` ${prenom}` : ''}</p>
+        <Cloche />
+      </div>
       <h1 className="mt-1.5 font-display text-[28px] leading-tight font-semibold text-on-surface lg:text-4xl">
         {phrase}
       </h1>
@@ -225,5 +229,29 @@ function Argent({ solde, ventes }: { solde: number; ventes: number }) {
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * La cloche du telephone. Le bandeau qui la portait a disparu avec la
+ * refonte ; sans elle, un auteur n'apprenait plus une relecture terminee ou
+ * une vente qu'en allant voir. Le compte des non-lues vient du meme
+ * sondage que la page Activite.
+ */
+function Cloche() {
+  const { unreadCount } = useNotifications();
+  return (
+    <Link
+      to="/notifications"
+      aria-label={unreadCount > 0 ? `Activité, ${unreadCount} non lue${unreadCount > 1 ? 's' : ''}` : 'Activité'}
+      className="relative -mt-2 -mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container lg:hidden"
+    >
+      <Bell className="h-5 w-5" aria-hidden />
+      {unreadCount > 0 && (
+        <span className="absolute top-1.5 right-1.5 min-w-[18px] rounded-full bg-error px-1 text-center text-[11px] leading-[18px] font-semibold text-on-error">
+          {unreadCount > 9 ? '9+' : unreadCount}
+        </span>
+      )}
+    </Link>
   );
 }
