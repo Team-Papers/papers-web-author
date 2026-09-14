@@ -1,83 +1,91 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { BookStatus } from '@/types/models';
 import type { Book } from '@/types/models';
 
 /**
- * L'écran relance sa requête à chaque frappe dans le champ de recherche.
- * Sans annulation, rien ne garantit l'ordre des réponses : la requête lancée
- * en premier peut revenir en dernier et écraser un résultat plus récent.
- * L'auteur voit alors une liste qui ne correspond pas à ce qu'il a tapé.
- *
- * Le test agit sur UNE SEULE instance du composant : remonter le composant
- * donnerait un état neuf et React ignorerait silencieusement l'écriture
- * tardive, ce qui masquerait le défaut au lieu de le démontrer.
+ * L'écran relançait une requête à chaque frappe, et rien ne garantissait
+ * l'ordre des réponses. Il charge désormais la liste une seule fois et filtre
+ * sur place : le défaut n'a plus de terrain. Ce test tient cette promesse —
+ * une requête, pas une de plus — et vérifie que le rangement par état répond
+ * bien aux trois questions qu'un auteur se pose.
  */
 const getMyBooks = vi.fn();
 vi.mock('@/lib/api/books', () => ({
   getMyBooks: (...args: unknown[]) => getMyBooks(...args),
 }));
 
-function livre(titre: string): Book {
+function livre(titre: string, status: BookStatus): Book {
   return {
     id: titre,
     title: titre,
-    status: BookStatus.PUBLISHED,
+    status,
     price: 1000,
     coverUrl: null,
     createdAt: new Date().toISOString(),
   } as unknown as Book;
 }
 
-function page(livres: Book[]) {
-  return { data: livres, total: livres.length, page: 1, limit: 20, totalPages: 1 };
+const BIBLIOTHEQUE = [
+  livre('Brouillon du fleuve', BookStatus.DRAFT),
+  livre('Manuscrit refusé', BookStatus.REJECTED),
+  livre('Roman en relecture', BookStatus.PENDING),
+  livre('Recueil en ligne', BookStatus.PUBLISHED),
+];
+
+async function afficher() {
+  getMyBooks.mockResolvedValue({ data: BIBLIOTHEQUE, total: 4, page: 1, limit: 100, totalPages: 1 });
+  const { MyBooksPage } = await import('@/features/books/pages/MyBooksPage');
+  render(
+    <MemoryRouter>
+      <MyBooksPage />
+    </MemoryRouter>,
+  );
+  await screen.findByText('Recueil en ligne');
 }
 
-/** Une promesse que le test résout quand il veut, pour ordonner les réponses. */
-function differee<T>() {
-  let resoudre!: (valeur: T) => void;
-  const promesse = new Promise<T>((r) => {
-    resoudre = r;
+const titres = () =>
+  screen
+    .queryAllByRole('listitem')
+    .map((li) => li.textContent ?? '')
+    .filter((t) => t.length > 0);
+
+describe('MyBooksPage — une requête, puis le rangement par état', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('charge la liste une seule fois, quoi que tape l’auteur', async () => {
+    await afficher();
+    fireEvent.change(screen.getByPlaceholderText('Rechercher un titre'), { target: { value: 'fleuve' } });
+    fireEvent.change(screen.getByPlaceholderText('Rechercher un titre'), { target: { value: 'fleuv' } });
+
+    expect(getMyBooks).toHaveBeenCalledTimes(1);
+    expect(titres()).toHaveLength(1);
+    expect(screen.getByText('Brouillon du fleuve')).toBeDefined();
   });
-  return { promesse, resoudre };
-}
 
-describe('MyBooksPage — réponses dans le désordre', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+  it('« À faire » ne montre que ce qui attend l’auteur : brouillons et refus', async () => {
+    await afficher();
+    fireEvent.click(screen.getByRole('button', { name: 'À faire' }));
+
+    expect(titres()).toHaveLength(2);
+    expect(screen.getByText('Brouillon du fleuve')).toBeDefined();
+    expect(screen.getByText('Manuscrit refusé')).toBeDefined();
   });
 
-  it('ignore une réponse obsolète arrivée après une plus récente', async () => {
-    const premiere = differee<ReturnType<typeof page>>();
-    const seconde = differee<ReturnType<typeof page>>();
+  it('« En cours » ne montre que ce qui avance sans lui', async () => {
+    await afficher();
+    fireEvent.click(screen.getByRole('button', { name: 'En cours' }));
 
-    getMyBooks.mockReturnValueOnce(premiere.promesse).mockReturnValueOnce(seconde.promesse);
+    expect(titres()).toHaveLength(1);
+    expect(screen.getByText('Roman en relecture')).toBeDefined();
+  });
 
-    const { MyBooksPage } = await import('@/features/books/pages/MyBooksPage');
-    render(
-      <MemoryRouter>
-        <MyBooksPage />
-      </MemoryRouter>,
-    );
+  it('une recherche sans résultat le dit avec le terme cherché', async () => {
+    await afficher();
+    fireEvent.change(screen.getByPlaceholderText('Rechercher un titre'), { target: { value: 'zzz' } });
 
-    await waitFor(() => expect(getMyBooks).toHaveBeenCalledTimes(1));
-
-    // Une frappe dans la recherche relance l'effet sur la même instance.
-    fireEvent.change(screen.getByPlaceholderText('Rechercher un livre...'), {
-      target: { value: 'z' },
-    });
-    await waitFor(() => expect(getMyBooks).toHaveBeenCalledTimes(2));
-
-    // La seconde requête répond d'abord, la première ensuite : exactement ce
-    // qu'un réseau lent produit.
-    seconde.resoudre(page([livre('Resultat recent')]));
-    await waitFor(() => expect(screen.getByText('Resultat recent')).toBeDefined());
-
-    premiere.resoudre(page([livre('Resultat obsolete')]));
-    await new Promise((r) => setTimeout(r, 50));
-
-    expect(screen.queryByText('Resultat obsolete')).toBeNull();
-    expect(screen.getByText('Resultat recent')).toBeDefined();
+    expect(titres()).toHaveLength(0);
+    expect(screen.getByText(/Aucun titre ne contient/)).toBeDefined();
   });
 });
