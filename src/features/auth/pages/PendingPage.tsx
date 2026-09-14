@@ -1,34 +1,46 @@
-import { Clock, RefreshCw, LogOut } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { RefreshCw } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/store/authStore';
 
+/**
+ * L'attente, apres la candidature.
+ *
+ * L'ecran etait un fond sombre a halos flous, le decor de l'ancienne
+ * application de lecture. Il prend la forme de l'atelier : du papier, une
+ * phrase qui dit combien de temps, et ce qui se passera ensuite. Un auteur
+ * qui attend veut savoir quand, pas etre impressionne.
+ */
 export function PendingPage() {
   const logout = useAuthStore((s) => s.logout);
 
   return (
-    <div className="min-h-screen bg-gradient-hero relative overflow-hidden flex items-center justify-center p-4">
-      <div className="absolute inset-0 pattern-african" />
-      <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-primary/10 blur-[100px]" />
-      <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-accent/10 blur-[100px]" />
-
-      <div className="relative z-10 max-w-md text-center">
-        <div className="w-20 h-20 rounded-2xl bg-warning/20 border border-warning/30 flex items-center justify-center mx-auto mb-6 animate-float">
-          <Clock className="h-10 w-10 text-warning" />
-        </div>
-        <h1 className="text-2xl font-display font-bold text-white mb-3">Candidature en cours d&apos;examen</h1>
-        <p className="text-white/60 mb-8 leading-relaxed">
-          Votre profil d&apos;auteur est en cours de vérification par notre équipe.
-          Vous recevrez une notification dès que votre candidature sera approuvée.
+    <div className="flex min-h-screen items-center justify-center bg-surface-dim px-4 py-12">
+      <main className="w-full max-w-md rounded-xl border border-outline bg-surface p-6 sm:p-8">
+        <p className="text-sm text-on-surface-muted">Candidature reçue</p>
+        <h1 className="mt-1.5 font-display text-[28px] leading-tight font-semibold text-on-surface">
+          Notre équipe la relit.
+        </h1>
+        <p className="mt-3 text-on-surface-variant">
+          Vous recevrez un e-mail sous 48 heures. Dès qu'elle est acceptée, vous pourrez publier votre
+          premier livre : titre, prix, couverture, manuscrit.
         </p>
-        <div className="flex flex-col gap-3">
-          <Button variant="filled" fullWidth onClick={() => window.location.reload()} leftIcon={<RefreshCw className="h-4 w-4" />} className="bg-white text-primary hover:bg-white/90">
-            Vérifier le statut
-          </Button>
-          <Button variant="text" fullWidth onClick={logout} leftIcon={<LogOut className="h-4 w-4" />} className="text-white/50 hover:text-white hover:bg-white/10">
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-medium text-on-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            <RefreshCw className="h-4 w-4" aria-hidden />
+            Vérifier maintenant
+          </button>
+          <button
+            type="button"
+            onClick={() => logout()}
+            className="inline-flex min-h-12 items-center justify-center rounded-lg px-5 text-sm font-medium text-on-surface-variant hover:bg-surface-container"
+          >
             Se déconnecter
-          </Button>
+          </button>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
