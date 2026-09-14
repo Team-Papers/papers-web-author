@@ -39,7 +39,7 @@ export function OngletsBas() {
    *
    * L'assistant garde sa propre sortie : « Annuler », a gauche, loin du pouce.
    */
-  const enTrainDePublier = pathname.startsWith('/books/new');
+  const enTrainDePublier = pathname.startsWith('/books/new') || pathname.endsWith('/edit');
 
   return (
     <>

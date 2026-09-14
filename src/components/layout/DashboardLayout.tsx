@@ -17,7 +17,7 @@ export function DashboardLayout() {
   // L'assistant de publication cache les onglets et pose ses propres actions
   // en bas : la page ne doit alors pas reserver une place qui n'est plus prise.
   const { pathname } = useLocation();
-  const sansOnglets = pathname.startsWith('/books/new');
+  const sansOnglets = pathname.startsWith('/books/new') || pathname.endsWith('/edit');
 
   return (
     <div className="flex h-screen bg-surface-dim">

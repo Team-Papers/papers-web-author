@@ -1,20 +1,25 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { Check, ChevronLeft, ChevronRight, Upload, ArrowLeft } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
+import { ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
-import { Card } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';
 import { FileDropzone } from '@/components/ui/FileDropzone';
 import { getBookById, updateBook, getCategories, uploadCover, uploadBookFile } from '@/lib/api/books';
 import { cn } from '@/lib/utils/cn';
+import { messageDe } from '@/lib/utils/erreurs';
 import { formatCurrency } from '@/lib/utils/formatters';
 import type { BookCategoryLink, Book, Category } from '@/types/models';
 import { BookStatus } from '@/types/models';
 
-const steps = ['Informations', 'Détails', 'Couverture', 'Fichier', 'Résumé'];
+const steps = [
+  { label: 'Le livre', demande: 'De quoi parle-t-il, et combien coûte-t-il ?', requis: true },
+  { label: 'Les détails', demande: 'Langue, nombre de pages, ISBN.', requis: false },
+  { label: 'La couverture', demande: "C'est elle qu'on voit d'abord.", requis: false },
+  { label: 'Le fichier', demande: 'Le manuscrit, en PDF ou ePub.', requis: false },
+  { label: 'Relecture', demande: 'Vérifiez avant d’enregistrer.', requis: true },
+];
 
 export function EditBookPage() {
   const { id } = useParams<{ id: string }>();
@@ -130,8 +135,8 @@ export function EditBookPage() {
         pageCount: pageCount ? Number(pageCount) : undefined,
       });
       navigate(`/books/${id}`);
-    } catch {
-      setError('Erreur lors de la modification du livre');
+    } catch (e) {
+      setError(messageDe(e));
     } finally {
       setSaving(false);
     }
@@ -152,8 +157,8 @@ export function EditBookPage() {
 
   if (!book) {
     return (
-      <div className="p-8 text-center text-on-surface-variant">
-        Livre introuvable
+      <div className="mx-auto w-full max-w-2xl px-4 py-16 text-center">
+        <p className="text-on-surface-variant">Ce livre n’existe pas, ou n’est pas à vous.</p>
       </div>
     );
   }
@@ -161,8 +166,8 @@ export function EditBookPage() {
   // Only DRAFT and REJECTED books can be edited
   if (book.status !== BookStatus.DRAFT && book.status !== BookStatus.REJECTED) {
     return (
-      <div className="p-8 text-center">
-        <p className="text-on-surface-variant mb-4">Ce livre ne peut pas être modifié car il est en cours de révision ou déjà publié.</p>
+      <div className="mx-auto w-full max-w-2xl px-4 py-16 text-center">
+        <p className="mb-4 text-on-surface-variant">Ce livre est en relecture ou en vente : il ne se modifie plus. Retirez-le de la vente pour le reprendre.</p>
         <Button onClick={() => navigate(`/books/${id}`)}>Retour au livre</Button>
       </div>
     );
@@ -170,57 +175,63 @@ export function EditBookPage() {
 
   return (
     <div>
-      <Header title="Modifier le livre" subtitle={book.title} />
-      <div className="p-6 lg:p-8 max-w-3xl mx-auto">
-        <Button variant="text" onClick={() => navigate(`/books/${id}`)} leftIcon={<ArrowLeft className="h-4 w-4" />} className="mb-4">
-          Retour aux détails
-        </Button>
+      {/* Meme coquille que l'assistant de publication : une etape, une
+          question, une barre. Modifier un livre est le meme geste que le
+          publier, avec les champs deja remplis. */}
+      <div className="mx-auto w-full max-w-2xl px-4 pb-32 lg:max-w-3xl lg:px-8 lg:pb-8">
+        <header className="pt-8 pb-6">
+          <p className="text-sm text-on-surface-muted">
+            Étape {step + 1} sur {steps.length} · {book.title}
+          </p>
+          <h1 className="mt-1.5 font-display text-[28px] leading-tight font-semibold text-on-surface lg:text-4xl">
+            {steps[step].label}
+          </h1>
+          <p className="mt-2 text-on-surface-variant">{steps[step].demande}</p>
+          {!steps[step].requis && (
+            <p className="mt-1 text-sm text-on-surface-muted">Vous pouvez passer et y revenir plus tard.</p>
+          )}
+          <div
+            className="mt-5 h-1 overflow-hidden rounded-full bg-surface-container-high"
+            role="progressbar"
+            aria-valuenow={step + 1}
+            aria-valuemin={1}
+            aria-valuemax={steps.length}
+            aria-label={`Étape ${step + 1} sur ${steps.length}`}
+          >
+            <div
+              className="h-full rounded-full bg-primary transition-[width] duration-300"
+              style={{ width: `${((step + 1) / steps.length) * 100}%` }}
+            />
+          </div>
+        </header>
 
-        {/* Stepper */}
-        <div className="flex items-center justify-between mb-8">
-          {steps.map((s, i) => (
-            <div key={s} className="flex items-center flex-1 last:flex-initial">
-              <div className="flex flex-col items-center">
-                <div className={cn(
-                  'w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all',
-                  i < step ? 'bg-primary text-on-primary' :
-                  i === step ? 'bg-primary text-on-primary ring-4 ring-primary-container' :
-                  'bg-surface-container-high text-on-surface-variant'
-                )}>
-                  {i < step ? <Check className="h-5 w-5" /> : i + 1}
-                </div>
-                <span className={cn('text-xs mt-2 hidden sm:block', i <= step ? 'text-primary font-medium' : 'text-on-surface-variant')}>{s}</span>
-              </div>
-              {i < steps.length - 1 && (
-                <div className={cn('flex-1 h-0.5 mx-3', i < step ? 'bg-primary' : 'bg-surface-container-high')} />
-              )}
-            </div>
-          ))}
-        </div>
+        {error && (
+          <p role="alert" className="mb-5 rounded-lg border border-error/30 bg-error-container px-4 py-3 text-sm text-error">
+            {error}
+          </p>
+        )}
 
-        {error && <div className="bg-error-container text-error rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
-
-        <Card className="p-6">
-          {/* Step 1: Basic Info */}
+        <section className="rounded-xl border border-outline bg-surface p-5">
           {step === 0 && (
             <div className="space-y-4">
               <Input label="Titre du livre" value={title} onChange={(e) => setTitle(e.target.value)} required />
               <Textarea label="Description" value={description} onChange={(e) => setDescription(e.target.value)} rows={4} required />
-              <Input label="Prix (FCFA)" type="number" value={price} onChange={(e) => setPrice(e.target.value)} required />
+              <Input label="Prix (FCFA)" type="number" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} required />
               {categories.length > 0 && (
                 <div>
-                  <label className="block text-sm font-medium text-on-surface mb-2">Catégories</label>
-                  <div className="flex flex-wrap gap-2">
+                  <p className="mb-2 block text-sm font-medium text-on-surface" id="categories-livre">Catégories</p>
+                  <div className="flex flex-wrap gap-2" role="group" aria-labelledby="categories-livre">
                     {categories.map((cat) => (
                       <button
                         key={cat.id}
                         type="button"
                         onClick={() => toggleCat(cat.id)}
+                        aria-pressed={selectedCats.includes(cat.id)}
                         className={cn(
-                          'px-4 py-2 rounded-full text-sm font-medium transition-all border',
+                          'min-h-10 rounded-full border px-4 text-sm font-medium transition-colors',
                           selectedCats.includes(cat.id)
-                            ? 'bg-primary text-on-primary border-primary'
-                            : 'bg-surface border-outline text-on-surface-variant hover:bg-surface-container'
+                            ? 'border-primary bg-primary text-on-primary'
+                            : 'border-outline bg-surface text-on-surface-variant hover:bg-surface-dim',
                         )}
                       >
                         {cat.name}
@@ -232,19 +243,16 @@ export function EditBookPage() {
             </div>
           )}
 
-          {/* Step 2: Details */}
           {step === 1 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-display font-semibold text-on-surface">Détails supplémentaires</h3>
-              <p className="text-sm text-on-surface-muted">Ces informations sont optionnelles mais aident les lecteurs.</p>
-              <Input label="ISBN (optionnel)" value={isbn} onChange={(e) => setIsbn(e.target.value)} placeholder="978-..." />
+              <Input label="ISBN" value={isbn} onChange={(e) => setIsbn(e.target.value)} placeholder="978-…" helper="Si le livre en a un." />
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-on-surface mb-2">Langue</label>
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-medium text-on-surface">Langue</span>
                   <select
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-outline bg-surface text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="min-h-11 w-full rounded-lg border border-outline bg-surface px-3 text-on-surface focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
                   >
                     <option value="fr">Français</option>
                     <option value="en">Anglais</option>
@@ -252,102 +260,102 @@ export function EditBookPage() {
                     <option value="de">Allemand</option>
                     <option value="pt">Portugais</option>
                   </select>
-                </div>
-                <Input label="Nombre de pages (optionnel)" type="number" value={pageCount} onChange={(e) => setPageCount(e.target.value)} placeholder="250" />
+                </label>
+                <Input label="Pages" type="number" inputMode="numeric" value={pageCount} onChange={(e) => setPageCount(e.target.value)} placeholder="250" />
               </div>
             </div>
           )}
 
-          {/* Step 3: Cover */}
           {step === 2 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-display font-semibold text-on-surface">Image de couverture</h3>
-              <p className="text-sm text-on-surface-muted">Formats acceptés: JPG, PNG. Taille recommandée: 600x900px</p>
+              <p className="text-sm text-on-surface-muted">JPG ou PNG, 600 × 900 px de préférence, 5 Mo au plus.</p>
               {coverPreview || existingCoverUrl ? (
-                <div className="flex flex-col items-center gap-4">
-                  <img src={coverPreview || existingCoverUrl} alt="Preview" className="h-64 rounded-xl shadow-md object-cover" />
-                  <Button variant="outlined" onClick={() => { setCoverFile(null); setCoverPreview(''); setExistingCoverUrl(''); }}>Changer l'image</Button>
+                <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end">
+                  <img src={coverPreview || existingCoverUrl} alt="" className="h-56 rounded-lg object-cover" />
+                  <Button variant="outlined" onClick={() => { setCoverFile(null); setCoverPreview(''); setExistingCoverUrl(''); }}>
+                    Changer la couverture
+                  </Button>
                 </div>
               ) : (
-                <FileDropzone onFile={handleCover} accept={{ 'image/*': ['.jpg', '.jpeg', '.png'] }} maxSize={5 * 1024 * 1024} label="Glissez votre image de couverture ici" />
+                <FileDropzone onFile={handleCover} accept={{ 'image/*': ['.jpg', '.jpeg', '.png'] }} maxSize={5 * 1024 * 1024} label="Déposez la couverture ici" />
               )}
             </div>
           )}
 
-          {/* Step 4: File */}
           {step === 3 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-display font-semibold text-on-surface">Fichier du livre</h3>
-              <p className="text-sm text-on-surface-muted">Formats acceptés: PDF, EPUB. Taille max: 50MB</p>
+              <p className="text-sm text-on-surface-muted">PDF ou ePub, 50 Mo au plus.</p>
               {bookFile ? (
-                <div className="flex items-center gap-3 p-4 bg-surface-container rounded-xl">
-                  <Upload className="h-5 w-5 text-primary" />
-                  <span className="text-sm text-on-surface font-medium">{bookFile.name}</span>
-                  <Button variant="text" size="sm" onClick={() => setBookFile(null)} className="ml-auto">Supprimer</Button>
+                <div className="flex items-center gap-3 rounded-lg bg-surface-container p-4">
+                  <Upload className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-on-surface">{bookFile.name}</span>
+                  <Button variant="text" size="sm" onClick={() => setBookFile(null)}>Retirer</Button>
                 </div>
               ) : existingFileUrl ? (
-                <div className="flex items-center gap-3 p-4 bg-surface-container rounded-xl">
-                  <Upload className="h-5 w-5 text-primary" />
-                  <span className="text-sm text-on-surface font-medium">Fichier actuel: {existingFileUrl}</span>
-                  <Button variant="text" size="sm" onClick={() => setExistingFileUrl('')} className="ml-auto">Remplacer</Button>
+                // Le nom du fichier stocke est prive : on dit qu'il existe, pas ou il est.
+                <div className="flex items-center gap-3 rounded-lg bg-surface-container p-4">
+                  <Upload className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+                  <span className="min-w-0 flex-1 text-sm font-medium text-on-surface">
+                    Un manuscrit est déjà en place{book.fileFormat ? ` (${book.fileFormat.toUpperCase()})` : ''}.
+                  </span>
+                  <Button variant="text" size="sm" onClick={() => setExistingFileUrl('')}>Remplacer</Button>
                 </div>
               ) : (
-                <FileDropzone onFile={handleBookFile} accept={{ 'application/pdf': ['.pdf'], 'application/epub+zip': ['.epub'] }} maxSize={50 * 1024 * 1024} label="Glissez votre fichier ici" icon="file" />
+                <FileDropzone onFile={handleBookFile} accept={{ 'application/pdf': ['.pdf'], 'application/epub+zip': ['.epub'] }} maxSize={50 * 1024 * 1024} label="Déposez le manuscrit ici" icon="file" />
               )}
             </div>
           )}
 
-          {/* Step 5: Review */}
           {step === 4 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-display font-semibold text-on-surface">Résumé des modifications</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-on-surface-variant">Titre</p>
-                  <p className="text-sm font-medium text-on-surface">{title}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-on-surface-variant">Prix</p>
-                  <p className="text-sm font-medium text-on-surface">{formatCurrency(Number(price))}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-on-surface-variant">Langue</p>
-                  <p className="text-sm font-medium text-on-surface uppercase">{language}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-on-surface-variant">Pages</p>
-                  <p className="text-sm font-medium text-on-surface">{pageCount || 'Non spécifié'}</p>
-                </div>
-                <div className="sm:col-span-2">
-                  <p className="text-xs text-on-surface-variant">Description</p>
-                  <p className="text-sm text-on-surface line-clamp-3">{description}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-on-surface-variant">Couverture</p>
-                  <p className="text-sm text-on-surface">{coverFile ? coverFile.name : existingCoverUrl ? 'Existante' : 'Aucune'}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-on-surface-variant">Fichier</p>
-                  <p className="text-sm text-on-surface">{bookFile ? bookFile.name : existingFileUrl ? 'Existant' : 'Aucun'}</p>
-                </div>
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
+              <div className="col-span-2">
+                <dt className="text-on-surface-muted">Titre</dt>
+                <dd className="mt-0.5 font-medium text-on-surface">{title}</dd>
               </div>
-              {(coverPreview || existingCoverUrl) && <img src={coverPreview || existingCoverUrl} alt="Cover" className="h-40 rounded-xl object-cover" />}
-            </div>
+              <div>
+                <dt className="text-on-surface-muted">Prix</dt>
+                <dd className="mt-0.5 font-display text-lg font-semibold tabular-nums text-on-surface">
+                  {Number(price) > 0 ? formatCurrency(Number(price)) : 'Gratuit'}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-on-surface-muted">Langue · pages</dt>
+                <dd className="mt-0.5 text-on-surface">{language.toUpperCase()} · {pageCount || '—'}</dd>
+              </div>
+              <div>
+                <dt className="text-on-surface-muted">Couverture</dt>
+                <dd className="mt-0.5 text-on-surface">{coverFile ? 'Nouvelle' : existingCoverUrl ? 'Inchangée' : 'Aucune'}</dd>
+              </div>
+              <div>
+                <dt className="text-on-surface-muted">Manuscrit</dt>
+                <dd className="mt-0.5 text-on-surface">{bookFile ? bookFile.name : existingFileUrl ? 'Inchangé' : 'Aucun'}</dd>
+              </div>
+              <div className="col-span-2">
+                <dt className="text-on-surface-muted">Description</dt>
+                <dd className="mt-0.5 line-clamp-4 text-on-surface">{description}</dd>
+              </div>
+            </dl>
           )}
-        </Card>
+        </section>
+      </div>
 
-        {/* Navigation */}
-        <div className="flex justify-between mt-6">
-          <Button variant="outlined" onClick={() => step > 0 ? setStep(step - 1) : navigate(`/books/${id}`)} leftIcon={<ChevronLeft className="h-4 w-4" />}>
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-outline bg-surface/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-lg lg:static lg:border-0 lg:bg-transparent lg:px-8 lg:pb-8 lg:backdrop-blur-none">
+        <div className="mx-auto flex max-w-2xl items-center gap-3 lg:max-w-3xl lg:px-0">
+          <Button
+            variant="outlined"
+            onClick={() => (step > 0 ? setStep(step - 1) : navigate(`/books/${id}`))}
+            leftIcon={<ChevronLeft className="h-4 w-4" />}
+          >
             {step === 0 ? 'Annuler' : 'Précédent'}
           </Button>
+          <div className="flex-1" />
           {step < 4 ? (
             <Button onClick={() => setStep(step + 1)} disabled={!canNext()} rightIcon={<ChevronRight className="h-4 w-4" />}>
               Suivant
             </Button>
           ) : (
             <Button onClick={handleSubmit} isLoading={saving}>
-              Enregistrer les modifications
+              Enregistrer
             </Button>
           )}
         </div>
