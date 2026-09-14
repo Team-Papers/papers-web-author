@@ -27,7 +27,9 @@ export function DashboardLayout() {
           className={
             sansOnglets
               ? 'flex-1 overflow-y-auto'
-              : 'flex-1 overflow-y-auto pb-[calc(var(--hauteur-onglets)+env(safe-area-inset-bottom))] lg:pb-0'
+              : // Les onglets, et par-dessus le bouton « Publier » : sans cette marge,
+                // il recouvre le montant de la derniere ligne de chaque liste.
+                'flex-1 overflow-y-auto pb-[calc(var(--hauteur-onglets)+env(safe-area-inset-bottom)+4.5rem)] lg:pb-0'
           }
         >
           <Outlet />
