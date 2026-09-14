@@ -1,227 +1,229 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import { BookOpen, ShoppingCart, Wallet, Star, AlertTriangle, TrendingUp, Clock } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { StatCard } from '@/components/ui/StatCard';
-import { Card } from '@/components/ui/Card';
+import { ArrowRight, Plus } from 'lucide-react';
 import { Spinner } from '@/components/ui/Spinner';
-import { WelcomeCard } from '@/components/ui/WelcomeCard';
+import { Tranche } from '@/components/atelier/Tranche';
+import { ceQuiVousAttend, etatDe } from '@/components/atelier/etat';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { getMyStats, getMyEarnings } from '@/lib/api/authors';
 import { getMyBooks } from '@/lib/api/books';
-import { formatCurrency, formatDate, toNumber } from '@/lib/utils/formatters';
-import type { AuthorStats, Transaction, Book } from '@/types/models';
-import { BookStatus } from '@/types/models';
+import { formatCurrency, toNumber } from '@/lib/utils/formatters';
+import type { AuthorStats, Book } from '@/types/models';
 
+/**
+ * L'atelier.
+ *
+ * L'ecran ouvrait sur quatre tuiles de chiffres — livres, ventes, revenus,
+ * note — puis un graphique. C'est le tableau de bord d'un observateur, pas
+ * d'un auteur : il repond a « comment ca va » alors que la question du matin
+ * est « qu'est-ce que j'ai a faire ».
+ *
+ * Il ouvre donc sur ce qui attend une action : un refus a corriger, un
+ * brouillon a envoyer. Vient ensuite ce qui est en cours — rien a faire, mais
+ * savoir que la relecture avance evite de se demander si on a oublie quelque
+ * chose. L'argent ferme la page : il compte, mais il ne demande rien.
+ */
 export function DashboardPage() {
-  const authorProfile = useAuthStore((s) => s.authorProfile);
+  const profil = useAuthStore((s) => s.authorProfile);
   const [stats, setStats] = useState<AuthorStats | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [rejectedBooks, setRejectedBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [solde, setSolde] = useState(0);
+  const [livres, setLivres] = useState<Book[]>([]);
+  const [chargement, setChargement] = useState(true);
 
   useEffect(() => {
-    async function load() {
+    async function charger() {
       try {
         const [s, e, b] = await Promise.all([
           getMyStats().catch(() => null),
           getMyEarnings().catch(() => ({ balance: 0, transactions: [] })),
-          getMyBooks({ status: BookStatus.REJECTED, limit: 5 }).catch(() => ({ data: [], total: 0, page: 1, limit: 5, totalPages: 0 })),
+          getMyBooks({ limit: 100 }).catch(() => ({
+            data: [],
+            total: 0,
+            page: 1,
+            limit: 100,
+            totalPages: 0,
+          })),
         ]);
         if (s) setStats(s);
-        setTransactions(e.transactions?.slice(0, 5) || []);
-        setRejectedBooks(b.data);
+        setSolde(toNumber(e.balance));
+        setLivres(b.data);
       } finally {
-        setLoading(false);
+        setChargement(false);
       }
     }
-    load();
+    charger();
   }, []);
 
-  if (loading) return <div className="flex items-center justify-center h-96"><Spinner size="lg" /></div>;
+  if (chargement) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
-  // Real six-month net revenue series from the API. This used to be hardcoded
-  // placeholder data with fixed month labels, which put September's revenue
-  // under "Nov" and the all-time total under "Déc".
-  const MONTH_LABELS = [
-    'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
-    'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc',
-  ];
-
-  const chartData = (stats?.monthlyRevenues ?? []).map(({ month, revenue }) => {
-    const monthIndex = Number(month.split('-')[1]) - 1;
-    return { month: MONTH_LABELS[monthIndex] ?? month, revenue: Number(revenue) };
+  const attendent = ceQuiVousAttend(livres);
+  const enCours = livres.filter((l) => {
+    const etat = etatDe(l.status);
+    return !etat.vousAttend && etat.suite !== null;
   });
+  const enLigne = livres.filter((l) => l.status === 'PUBLISHED').length;
+  const prenom = profil?.penName || profil?.user?.firstName || '';
 
   return (
-    <div className="space-y-6 p-6 lg:p-8">
-      {/* Welcome Card */}
-      <WelcomeCard
-        authorName={authorProfile?.penName || 'Auteur'}
-        booksCount={stats?.totalBooks ?? 0}
-        monthlyRevenue={toNumber(stats?.monthlyRevenue)}
-      />
+    <div className="mx-auto w-full max-w-2xl px-4 pb-8 lg:max-w-4xl lg:px-8">
+      <Entete prenom={prenom} attendent={attendent.length} enLigne={enLigne} />
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Livres publiés"
-          value={stats?.totalBooks ?? 0}
-          icon={<BookOpen className="h-5 w-5" />}
-          index={0}
-        />
-        <StatCard
-          title="Ventes totales"
-          value={stats?.totalSales ?? 0}
-          icon={<ShoppingCart className="h-5 w-5" />}
-          iconBg="bg-success-container text-success"
-          index={1}
-        />
-        <StatCard
-          title="Revenus"
-          value={formatCurrency(stats?.totalRevenue ?? 0)}
-          icon={<Wallet className="h-5 w-5" />}
-          iconBg="bg-accent-100 text-accent-600"
-          index={2}
-        />
-        <StatCard
-          title="Note moyenne"
-          value={stats?.averageRating?.toFixed(1) ?? '—'}
-          icon={<Star className="h-5 w-5" />}
-          iconBg="bg-accent-100 text-accent-600"
-          index={3}
-        />
-      </div>
-
-      {/* Alert for rejected books */}
-      {rejectedBooks.length > 0 && (
-        <Card className="border-error/30 bg-error-container/30">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-error/10">
-              <AlertTriangle className="h-5 w-5 text-error" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-error">
-                {rejectedBooks.length} livre(s) rejete(s)
-              </p>
-              <p className="text-xs text-on-surface-variant mt-1">
-                Consultez vos livres pour voir les motifs de rejet et soumettre a nouveau.
-              </p>
-              <Link
-                to="/books"
-                className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-              >
-                Voir mes livres
-                <TrendingUp className="h-3 w-3 rotate-45" />
-              </Link>
-            </div>
-          </div>
-        </Card>
+      {attendent.length > 0 && (
+        <Section titre="À vous de jouer">
+          {attendent.map((livre) => (
+            <LigneDeManuscrit key={livre.id} livre={livre} />
+          ))}
+        </Section>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chart */}
-        <Card className="lg:col-span-2" variant="elevated">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-base font-display font-semibold text-on-surface">Revenus mensuels</h3>
-            <span className="text-xs text-on-surface-variant bg-surface-container px-2.5 py-1 rounded-full">
-              6 derniers mois
-            </span>
-          </div>
-          <div className="h-64 min-h-[256px] w-full">
-            <ResponsiveContainer width="100%" height={256} minWidth={0}>
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#00B4D8" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#00B4D8" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-outline)" vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fontSize: 12, fill: 'var(--color-on-surface-variant)' }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: 'var(--color-on-surface-variant)' }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(v) => `${v / 1000}k`}
-                />
-                <Tooltip
-                  formatter={(v) => formatCurrency(v as number)}
-                  contentStyle={{
-                    backgroundColor: 'var(--color-surface)',
-                    borderColor: 'var(--color-outline)',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#00B4D8"
-                  fill="url(#chartGradient)"
-                  strokeWidth={3}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
+      {enCours.length > 0 && (
+        <Section titre="En cours">
+          {enCours.map((livre) => (
+            <LigneDeManuscrit key={livre.id} livre={livre} />
+          ))}
+        </Section>
+      )}
 
-        {/* Recent transactions */}
-        <Card variant="elevated">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-display font-semibold text-on-surface">Activité récente</h3>
-            <Clock className="h-4 w-4 text-on-surface-variant" />
-          </div>
-          {transactions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container mb-3">
-                <ShoppingCart className="h-6 w-6 text-on-surface-variant" />
-              </div>
-              <p className="text-sm text-on-surface-muted">Aucune activite recente</p>
-              <p className="text-xs text-on-surface-muted mt-1">
-                Les ventes apparaitront ici
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {transactions.map((t, index) => (
-                <div
-                  key={t.id}
-                  className="flex items-center justify-between py-3 border-b border-outline-variant last:border-0 animate-fade-up"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-success-container">
-                      <TrendingUp className="h-4 w-4 text-success" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-on-surface line-clamp-1">
-                        {t.book?.title || 'Transaction'}
-                      </p>
-                      <p className="text-xs text-on-surface-variant">{formatDate(t.createdAt)}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="block text-sm font-bold text-success">
-                      +{formatCurrency(Number(t.netAmount))}
-                    </span>
-                    {Number(t.commission) > 0 && (
-                      <span className="block text-xs text-on-surface-variant">
-                        sur {formatCurrency(Number(t.amount))}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-      </div>
+      {livres.length === 0 && <PremierLivre />}
+
+      <Argent solde={solde} ventes={stats?.totalSales ?? 0} />
     </div>
+  );
+}
+
+/**
+ * L'en-tete dit une chose, celle qui compte ce matin.
+ *
+ * « Bonjour » suivi de quatre chiffres ne dit rien. Une phrase qui compte ce
+ * qui attend se lit d'un coup d'oeil, et disparait quand rien n'attend.
+ */
+function Entete({
+  prenom,
+  attendent,
+  enLigne,
+}: {
+  prenom: string;
+  attendent: number;
+  enLigne: number;
+}) {
+  const phrase =
+    attendent > 0
+      ? `${attendent} ${attendent > 1 ? 'manuscrits demandent' : 'manuscrit demande'} votre attention`
+      : enLigne > 0
+        ? `${enLigne} ${enLigne > 1 ? 'livres en ligne' : 'livre en ligne'}. Rien ne vous attend.`
+        : 'Votre atelier est prêt.';
+
+  return (
+    <header className="pt-8 pb-7">
+      <p className="text-sm text-on-surface-muted">Bonjour{prenom ? ` ${prenom}` : ''}</p>
+      <h1 className="mt-1.5 font-display text-[28px] leading-tight font-semibold text-on-surface lg:text-4xl">
+        {phrase}
+      </h1>
+    </header>
+  );
+}
+
+function Section({ titre, children }: { titre: string; children: React.ReactNode }) {
+  return (
+    <section className="mb-8">
+      <h2 className="mb-3 text-sm font-semibold text-on-surface-variant">{titre}</h2>
+      <ul className="flex flex-col gap-2">{children}</ul>
+    </section>
+  );
+}
+
+/**
+ * Une ligne de manuscrit.
+ *
+ * La tranche coloree a gauche porte l'etat ; le reste est du texte. Pas de
+ * carte, pas d'ombre, pas de couverture en vignette : ce qu'un auteur cherche
+ * ici, c'est un titre et une suite a donner, et une couverture de 40 px n'aide
+ * ni a lire l'un ni a comprendre l'autre.
+ */
+function LigneDeManuscrit({ livre }: { livre: Book }) {
+  const etat = etatDe(livre.status);
+
+  return (
+    <li>
+      <Link
+        to={`/books/${livre.id}`}
+        className="flex min-h-[64px] items-stretch gap-3 rounded-lg border border-outline bg-surface px-3 py-3 transition-colors hover:border-outline-variant hover:bg-surface-dim focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      >
+        <Tranche statut={livre.status} />
+
+        <span className="flex min-w-0 flex-1 flex-col justify-center">
+          <span className="truncate font-medium text-on-surface">{livre.title}</span>
+          <span className="mt-0.5 truncate text-sm" style={{ color: etat.teinte }}>
+            {etat.suite ?? etat.mot}
+          </span>
+        </span>
+
+        <ArrowRight
+          className="h-4 w-4 shrink-0 self-center text-on-surface-muted"
+          aria-hidden
+        />
+      </Link>
+    </li>
+  );
+}
+
+/** Un ecran vide est une invitation, pas un constat. */
+function PremierLivre() {
+  return (
+    <section className="rounded-xl border border-dashed border-outline bg-surface px-5 py-10 text-center">
+      <h2 className="font-display text-xl font-semibold text-on-surface">
+        Rien n&apos;est encore sorti d&apos;ici
+      </h2>
+      <p className="mx-auto mt-2 max-w-xs text-sm text-on-surface-variant">
+        Déposez un manuscrit : titre, prix, fichier. Notre équipe le relit, puis il part en vente.
+      </p>
+      <Link
+        to="/books/new"
+        className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 font-medium text-on-primary transition-transform active:scale-[0.98]"
+      >
+        <Plus className="h-4 w-4" aria-hidden />
+        Publier un livre
+      </Link>
+    </section>
+  );
+}
+
+/**
+ * L'argent, en cuivre et en bas.
+ *
+ * Il ne demande rien — le mettre en haut ferait ouvrir l'application pour
+ * regarder un solde plutot que pour travailler. Mais c'est la raison d'etre
+ * du reste, alors il a sa couleur a lui, qui ne sert nulle part ailleurs.
+ */
+function Argent({ solde, ventes }: { solde: number; ventes: number }) {
+  return (
+    <section className="mb-4">
+      <h2 className="mb-3 text-sm font-semibold text-on-surface-variant">Ce que vous avez gagné</h2>
+
+      <div className="flex items-stretch gap-2">
+        <Link
+          to="/earnings"
+          className="flex flex-1 flex-col justify-center rounded-lg border border-outline bg-surface px-4 py-4 transition-colors hover:bg-surface-dim focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          <span className="text-xs text-on-surface-muted">Disponible</span>
+          <span className="mt-1 font-display text-2xl font-semibold tabular-nums text-accent-lisible">
+            {formatCurrency(solde)}
+          </span>
+        </Link>
+
+        <div className="flex flex-1 flex-col justify-center rounded-lg border border-outline bg-surface px-4 py-4">
+          <span className="text-xs text-on-surface-muted">Ventes</span>
+          <span className="mt-1 font-display text-2xl font-semibold tabular-nums text-on-surface">
+            {ventes}
+          </span>
+        </div>
+      </div>
+    </section>
   );
 }

@@ -1,105 +1,126 @@
 @import "tailwindcss";
 
 /**
- * Papers Author Dashboard - Design System 2.0
- * Aligned with Papers Landing Page identity
- * Primary: Papers Turquoise (#00B4D8)
- * Accent: Papers Gold (#F5A623)
- * Display Font: Poppins | Body Font: Inter
+ * Papers Atelier — l'espace de travail d'un auteur.
+ *
+ * Une identite propre, distincte de l'application de lecture. Celle-ci est un
+ * lieu de lecture : turquoise, or, douce. Celui-ci est un etabli — on y suit
+ * l'etat d'un manuscrit et ce qu'il rapporte.
+ *
+ * La palette vient du metier du livre relie : l'encre violacee des toiles de
+ * reliure, le fil indigo qui coud les cahiers, le cuivre du fer a dorer. Le
+ * rouge n'est pas decoratif : c'est le crayon de correction, et il ne sert
+ * qu'a ce qui attend l'auteur.
+ *
+ * Deux familles, employees nulle part ailleurs dans Papers : Fraunces pour
+ * les titres — une serif faite pour l'edition — et IBM Plex Sans pour
+ * l'interface, dessinee pour les outils et solide en francais accentue.
  */
 
 @theme {
-  /* ============================================
-     PRIMARY - Papers Turquoise
-     ============================================ */
-  --color-primary-50: #E6F7FB;
-  --color-primary-100: #CAF0F8;
-  --color-primary-200: #ADE8F4;
-  --color-primary-300: #7DD8ED;
-  --color-primary-400: #48CAE4;
-  --color-primary-500: #00B4D8;
-  --color-primary-600: #0096B4;
-  --color-primary-700: #008A9A;
-  --color-primary-800: #006B7A;
-  --color-primary-900: #004D5A;
-  --color-primary: #00B4D8;
-  --color-primary-light: #ADE8F4;
-  --color-primary-dark: #0096B4;
-  --color-primary-container: #E6F7FB;
-  --color-on-primary: #FFFFFF;
-  --color-on-primary-container: #006B7A;
+  /* ── L'ENCRE ── chrome, barres, en-tetes ─────────────────────────── */
+  --color-encre: #1F1B2E;
+  --color-encre-clair: #2E283F;
+  --color-encre-pale: #4A4259;
 
-  /* ============================================
-     ACCENT - Papers Gold
-     ============================================ */
-  --color-accent-100: #FFF3DB;
-  --color-accent-400: #FFD166;
-  --color-accent-500: #FFBE45;
-  --color-accent-600: #F5A623;
-  --color-accent-700: #E09000;
-  --color-accent: #F5A623;
-
-  --color-secondary: #475569;
-  --color-secondary-container: #E2E8F0;
-  --color-on-secondary: #FFFFFF;
-  --color-on-secondary-container: #1E293B;
-
-  /* ============================================
-     SURFACES
-     ============================================ */
+  /* ── LE PAPIER ── surfaces ───────────────────────────────────────── */
   --color-surface: #FFFFFF;
-  --color-surface-dim: #F8FAFC;
-  --color-surface-container: #F1F5F9;
-  --color-surface-container-high: #E2E8F0;
-  --color-surface-container-highest: #CBD5E1;
-  --color-surface-dark: #0A0F1C;
-  --color-surface-dark-alt: #0F172A;
-  --color-on-surface: #0F172A;
-  --color-on-surface-variant: #475569;
-  --color-on-surface-muted: #94A3B8;
-  --color-outline: #E2E8F0;
-  --color-outline-variant: #F1F5F9;
+  --color-surface-dim: #FBFAF8;
+  --color-surface-container: #F4F2EE;
+  --color-surface-container-high: #E9E6E0;
+  --color-surface-container-highest: #DAD6CE;
+  --color-on-surface: #1F1B2E;
+  --color-on-surface-variant: #56506A;
+  --color-on-surface-muted: #8B8498;
+  --color-outline: #E4E0DA;
+  --color-outline-variant: #F1EEE9;
 
-  /* ============================================
-     SEMANTIC
-     ============================================ */
-  --color-success: #10B981;
-  --color-success-container: #D1FAE5;
-  --color-warning: #F59E0B;
-  --color-warning-container: #FEF3C7;
-  --color-error: #EF4444;
-  --color-error-container: #FEE2E2;
+  /* ── LE FIL ── l'action principale ───────────────────────────────── */
+  --color-primary-50: #F1F0FC;
+  --color-primary-100: #E2DFF9;
+  --color-primary-200: #C6C0F3;
+  --color-primary-300: #A79EEB;
+  --color-primary-400: #7E72DA;
+  --color-primary-500: #4B3FBF;
+  --color-primary-600: #3E33A3;
+  --color-primary-700: #332A86;
+  --color-primary-800: #282168;
+  --color-primary-900: #1D1849;
+  --color-primary: #4B3FBF;
+  --color-primary-light: #C6C0F3;
+  --color-primary-dark: #3E33A3;
+  --color-primary-container: #E2DFF9;
+  --color-on-primary: #FFFFFF;
+  --color-on-primary-container: #282168;
+
+  /*
+   * Le fil employe comme encre sur fond clair descend de deux crans : la
+   * valeur de marque donne 6,1:1, celle-ci 9,3:1. Meme lecon que sur le site.
+   */
+  --color-primary-lisible: #332A86;
+
+  /* ── LE CUIVRE ── l'argent, et rien d'autre ──────────────────────── */
+  --color-accent-100: #FBF0DF;
+  --color-accent-400: #D99B43;
+  --color-accent-500: #C4832C;
+  --color-accent-600: #A8681F;
+  --color-accent-700: #8A5418;
+  --color-accent: #A8681F;
+  --color-accent-lisible: #7A4A15;
+
+  --color-secondary: #56506A;
+  --color-secondary-container: #E9E6E0;
+  --color-on-secondary: #FFFFFF;
+  --color-on-secondary-container: #2E283F;
+
+  /* ── L'ETAT D'UN MANUSCRIT ───────────────────────────────────────── */
+  /* Ces six couleurs ne servent qu'a la tranche d'etat et a ses pastilles.
+     Les employer ailleurs briserait la seule chose que l'auteur balaie. */
+  --color-etat-brouillon: #8B8498;
+  --color-etat-examen: #C4832C;
+  --color-etat-paru: #2F7D52;
+  --color-etat-refuse: #C3352B;
+  --color-etat-suspendu: #7A4A15;
+  --color-etat-programme: #4B3FBF;
+
+  /* ── SEMANTIQUE ──────────────────────────────────────────────────── */
+  --color-success: #2F7D52;
+  --color-success-container: #DCEFE4;
+  --color-warning: #C4832C;
+  --color-warning-container: #FBF0DF;
+  --color-error: #C3352B;
+  --color-error-container: #F9E3E1;
   --color-on-error: #FFFFFF;
-  --color-info: #3B82F6;
-  --color-info-container: #DBEAFE;
+  --color-info: #4B3FBF;
+  --color-info-container: #E2DFF9;
 
-  /* ============================================
-     TYPOGRAPHY
-     ============================================ */
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  /* ── TYPOGRAPHIE ─────────────────────────────────────────────────── */
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
 
-  /* ============================================
-     BORDER RADIUS
-     ============================================ */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
+  /* ── FORMES ──────────────────────────────────────────────────────── */
+  /* Un outil se dessine plus serre qu'une vitrine : les rayons descendent. */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
   --radius-full: 9999px;
 
-  /* ============================================
-     EFFECTS
-     ============================================ */
-  --shadow-glow: 0 0 20px rgba(0, 180, 216, 0.25), 0 0 40px rgba(0, 180, 216, 0.15);
-  --shadow-glow-accent: 0 0 20px rgba(245, 166, 35, 0.25);
-  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.08);
-  --shadow-card-hover: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 20px 40px -4px rgba(0, 0, 0, 0.1);
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-bg-dark: rgba(10, 15, 28, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-blur: 16px;
+  /* ── RELIEFS ─────────────────────────────────────────────────────── */
+  /* Pas de halo colore : un etabli n'a pas besoin de briller. */
+  --shadow-card: 0 1px 2px rgba(31, 27, 46, 0.04), 0 1px 3px rgba(31, 27, 46, 0.06);
+  --shadow-card-hover: 0 2px 4px rgba(31, 27, 46, 0.06), 0 8px 16px rgba(31, 27, 46, 0.08);
+  --shadow-flottant: 0 4px 12px rgba(31, 27, 46, 0.14), 0 12px 28px rgba(31, 27, 46, 0.12);
+  --shadow-glow: 0 1px 3px rgba(31, 27, 46, 0.08);
+  --shadow-glow-accent: 0 1px 3px rgba(168, 104, 31, 0.2);
+  --glass-bg: rgba(255, 255, 255, 0.86);
+  --glass-bg-dark: rgba(31, 27, 46, 0.86);
+  --glass-border: rgba(31, 27, 46, 0.08);
+  --glass-blur: 14px;
+
+  /* Hauteur de la barre d'onglets, que les pages reservent en bas. */
+  --hauteur-onglets: 4.25rem;
 }
 
 /* ============================================
@@ -107,42 +128,47 @@
    ============================================ */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-surface: #0F172A;
-    --color-surface-dim: #1E293B;
-    --color-surface-container: #334155;
-    --color-surface-container-high: #475569;
-    --color-surface-container-highest: #64748B;
-    --color-on-surface: #F8FAFC;
-    --color-on-surface-variant: #CBD5E1;
-    --color-on-surface-muted: #94A3B8;
-    --color-outline: #334155;
-    --color-outline-variant: #1E293B;
-    --color-primary-container: #004D5A;
-    --color-on-primary-container: #CAF0F8;
-    --color-secondary-container: #334155;
-    --color-on-secondary-container: #E2E8F0;
-    --glass-bg: rgba(15, 23, 42, 0.8);
+    --color-primary-lisible: #A79EEB;
+    --color-accent-lisible: #D99B43;
+    --color-surface: #171325;
+    --color-surface-dim: #100D1B;
+    --color-surface-container: #221D33;
+    --color-surface-container-high: #2E283F;
+    --color-surface-container-highest: #4A4259;
+    --color-on-surface: #F6F4F1;
+    --color-on-surface-variant: #C9C3D4;
+    --color-on-surface-muted: #938BA3;
+    --color-outline: #322B45;
+    --color-outline-variant: #241E36;
+    --color-primary-container: #282168;
+    --color-on-primary-container: #E2DFF9;
+    --color-secondary-container: #2E283F;
+    --color-on-secondary-container: #E9E6E0;
+    --glass-bg: rgba(23, 19, 37, 0.86);
     --glass-border: rgba(255, 255, 255, 0.1);
   }
 }
 
 [data-theme="dark"],
 .dark {
-  --color-surface: #0F172A;
-  --color-surface-dim: #1E293B;
-  --color-surface-container: #334155;
-  --color-surface-container-high: #475569;
-  --color-surface-container-highest: #64748B;
-  --color-on-surface: #F8FAFC;
-  --color-on-surface-variant: #CBD5E1;
-  --color-on-surface-muted: #94A3B8;
-  --color-outline: #334155;
-  --color-outline-variant: #1E293B;
-  --color-primary-container: #004D5A;
-  --color-on-primary-container: #CAF0F8;
-  --color-secondary-container: #334155;
-  --color-on-secondary-container: #E2E8F0;
-  --glass-bg: rgba(15, 23, 42, 0.8);
+  /* Sur fond sombre, l'encre lisible remonte l'echelle au lieu de la descendre. */
+  --color-primary-lisible: #A79EEB;
+  --color-accent-lisible: #D99B43;
+  --color-surface: #171325;
+  --color-surface-dim: #100D1B;
+  --color-surface-container: #221D33;
+  --color-surface-container-high: #2E283F;
+  --color-surface-container-highest: #4A4259;
+  --color-on-surface: #F6F4F1;
+  --color-on-surface-variant: #C9C3D4;
+  --color-on-surface-muted: #938BA3;
+  --color-outline: #322B45;
+  --color-outline-variant: #241E36;
+  --color-primary-container: #282168;
+  --color-on-primary-container: #E2DFF9;
+  --color-secondary-container: #2E283F;
+  --color-on-secondary-container: #E9E6E0;
+  --glass-bg: rgba(23, 19, 37, 0.86);
   --glass-border: rgba(255, 255, 255, 0.1);
 }
 
@@ -168,8 +194,23 @@ body {
   color: var(--color-primary-900);
 }
 
-h1, h2, h3, h4, h5, h6 {
+/*
+ * La serif est reservee a ce qui merite une voix : le titre d'un ecran, un
+ * montant, le nom d'un livre. Appliquee a tous les niveaux de titre, elle
+ * mettait le meme accent sur « Ce que vous avez gagne » que sur la phrase
+ * d'ouverture, et l'emphase partout ne hierarchise rien.
+ *
+ * Les titres de rang deux et au-dela reprennent donc la sans : ce sont des
+ * etiquettes de section, pas des declarations. Une page qui veut la serif
+ * plus bas la demande avec `font-display`.
+ */
+h1 {
   font-family: var(--font-display);
+}
+
+h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: 600;
 }
 
 /* ============================================

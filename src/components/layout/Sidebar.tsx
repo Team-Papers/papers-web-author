@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router';
-import { LayoutDashboard, BookOpen, Layers, PlusCircle, Wallet, BarChart3, Settings, LogOut, Menu, X, Presentation, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Layers, PlusCircle, Wallet, BarChart3, Settings, LogOut, Presentation, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { Avatar } from '@/components/ui/Avatar';
@@ -18,7 +18,6 @@ const navItems = [
 ];
 
 export function Sidebar() {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
@@ -52,7 +51,6 @@ export function Sidebar() {
           <NavLink
             key={item.to}
             to={item.to}
-            onClick={() => setMobileOpen(false)}
             className={({ isActive }) =>
               cn(
                 'group relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 animate-slide-in',
@@ -123,30 +121,15 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile toggle */}
-      <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 rounded-xl bg-surface shadow-lg border border-outline"
-        onClick={() => setMobileOpen(!mobileOpen)}
-      >
-        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </button>
-
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={() => setMobileOpen(false)} />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={cn(
-          'fixed lg:static inset-y-0 left-0 z-40 w-[260px] bg-gradient-sidebar flex flex-col transition-transform duration-300 lg:translate-x-0',
-          mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        )}
-      >
-        <div className="absolute inset-0 pattern-african pointer-events-none" />
-        <div className="relative z-10 flex flex-col h-full">
-          {navContent}
-        </div>
+      {/*
+        Le tiroir lateral et son hamburger ont disparu du telephone : les
+        onglets du bas les remplacent, et deux navigations pour les memes
+        destinations en font une de trop. Il reste ce qu'il a toujours ete —
+        une colonne, la ou il y a de la place pour une colonne.
+      */}
+      <aside className="hidden w-[260px] shrink-0 flex-col bg-gradient-sidebar lg:flex">
+        <div className="pointer-events-none absolute inset-0 pattern-african" />
+        <div className="relative z-10 flex h-full flex-col">{navContent}</div>
       </aside>
 
       <Modal isOpen={showLogout} onClose={() => setShowLogout(false)} title="Se déconnecter ?"
