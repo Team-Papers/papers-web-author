@@ -70,6 +70,8 @@ export async function detachEpisode(seriesId: string, bookId: string): Promise<v
 /** La série telle qu'un lecteur la voit : ses épisodes, dans l'ordre. */
 export async function getSeriesDetail(id: string): Promise<{
   id: string;
+  /** L'adresse publique lisible : c'est elle qu'un auteur met dans une publicité. */
+  slug: string;
   title: string;
   description: string | null;
   coverUrl?: string | null;

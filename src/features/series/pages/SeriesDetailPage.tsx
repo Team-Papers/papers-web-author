@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router';
-import { CalendarClock, ChevronLeft, ImagePlus, Plus, Trash2 } from 'lucide-react';
+import { CalendarClock, Check, ChevronLeft, Copy, ExternalLink, ImagePlus, Plus, Share2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
@@ -16,10 +16,12 @@ import {
   type EpisodeIgnore,
   type EpisodeProgramme,
 } from '@/lib/api/series';
+import { cn } from '@/lib/utils/cn';
 import { messageDe } from '@/lib/utils/erreurs';
 import { BookStatus, type Book } from '@/types/models';
 import { calendrierDeSortie, demainHuitHeures, jourEtHeure } from '../calendrier';
 import { etatDeSerie } from '../etat';
+import { pageDeLaSerie } from '@/lib/site';
 
 type Detail = Awaited<ReturnType<typeof getSeriesDetail>>;
 type Episode = Detail['episodes'][number];
@@ -200,6 +202,8 @@ export function SeriesDetailPage() {
           </label>
         </div>
       </section>
+
+      <AdressePublique serie={serie} />
 
       {confirmation && (
         <p
@@ -646,5 +650,102 @@ function AjouterUnEpisode({
         </div>
       </form>
     </Modal>
+  );
+}
+
+/**
+ * L'adresse publique de la serie, et le jour ou elle s'ouvrira.
+ *
+ * C'est l'adresse qu'un auteur donne a une publicite. Le piege, sans cette
+ * section : la page d'une serie n'existe pour le public qu'a partir du
+ * premier episode paru. Lancer la campagne la veille, c'est payer pour
+ * envoyer des lecteurs sur une page introuvable.
+ */
+function AdressePublique({
+  serie,
+}: {
+  serie: {
+    id: string;
+    slug: string;
+    title: string;
+    episodes: Array<{ paru: boolean; publishAt: string | null }>;
+  };
+}) {
+  const [copie, setCopie] = useState(false);
+  const url = pageDeLaSerie(serie);
+  const enLigne = serie.episodes.some((e) => e.paru);
+  const prochaine = serie.episodes
+    .filter((e) => !e.paru && e.publishAt)
+    .map((e) => new Date(e.publishAt as string))
+    .sort((a, b) => a.getTime() - b.getTime())[0];
+  const peutPartager = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
+  async function copier() {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopie(true);
+      setTimeout(() => setCopie(false), 2000);
+    } catch {
+      // Sans presse-papiers, l'adresse reste selectionnable.
+    }
+  }
+
+  return (
+    <section className="mb-6 rounded-xl border border-outline bg-surface p-5">
+      <h2 className="text-sm font-semibold text-on-surface-variant">Adresse de la série</h2>
+      <p className="mt-2 truncate rounded-lg bg-surface-container px-3 py-2 font-mono text-sm text-on-surface select-all">
+        {url.replace(/^https?:\/\//, '')}
+      </p>
+
+      {enLigne ? (
+        <>
+          <p className="mt-2.5 text-sm text-on-surface-variant">
+            En ligne. Donnez cette adresse à vos lecteurs, ou à votre publicité.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {peutPartager && (
+              <button
+                type="button"
+                onClick={() => {
+                  void navigator.share({ title: serie.title, url }).catch(() => {});
+                }}
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-on-primary"
+              >
+                <Share2 className="h-4 w-4" aria-hidden />
+                Partager
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={copier}
+              className={cn(
+                'inline-flex min-h-11 items-center gap-2 rounded-lg border px-4 text-sm font-medium',
+                peutPartager
+                  ? 'border-outline bg-surface text-on-surface'
+                  : 'border-primary bg-primary text-on-primary',
+              )}
+            >
+              {copie ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
+              {copie ? 'Copié' : 'Copier le lien'}
+            </button>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium text-primary-lisible hover:underline"
+            >
+              Voir la page
+              <ExternalLink className="h-4 w-4" aria-hidden />
+            </a>
+          </div>
+        </>
+      ) : (
+        <p className="mt-2.5 text-sm text-on-surface-variant">
+          {prochaine
+            ? `Cette page s'ouvrira au public à la parution du premier épisode, le ${prochaine.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} à ${prochaine.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}. N'annoncez pas la série avant.`
+            : "Cette page s'ouvrira au public dès qu'un épisode paraîtra. Programmez la sortie, ou publiez le premier vous-même."}
+        </p>
+      )}
+    </section>
   );
 }

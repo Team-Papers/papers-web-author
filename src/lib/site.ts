@@ -10,3 +10,8 @@ export const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined)?.r
 export function pagePublique(profil: { id: string; slug?: string | null }): string {
   return `${SITE_URL}/auteurs/${profil.slug || profil.id}`;
 }
+
+/** La page publique d'une série, celle qu'un auteur met dans une publicité. */
+export function pageDeLaSerie(serie: { id: string; slug?: string | null }): string {
+  return `${SITE_URL}/series/${serie.slug || serie.id}`;
+}
