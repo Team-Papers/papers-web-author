@@ -1,6 +1,7 @@
 import type { ApiResponse, ApiPaginatedRaw, PaginatedResponse } from '@/types/api';
 import { toPaginated } from '@/types/api';
 import type { Book, Category } from '@/types/models';
+import type { Revision } from '@/features/books/historique';
 import apiClient from './client';
 
 export async function getMyBooks(params: Record<string, unknown> = {}): Promise<PaginatedResponse<Book>> {
@@ -89,4 +90,16 @@ export async function uploadBookFile(file: File): Promise<{ url: string; size: n
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return res.data.data;
+}
+
+/**
+ * Ce qui a changé dans un livre, et quand. Réservé à son auteur et à
+ * l'administration : l'historique dit ce qu'un prix valait avant.
+ */
+export async function getBookRevisions(
+  id: string,
+  params: { page?: number; limit?: number } = {},
+): Promise<PaginatedResponse<Revision>> {
+  const res = await apiClient.get<ApiPaginatedRaw<Revision>>(`/books/${id}/revisions`, { params });
+  return toPaginated(res.data);
 }

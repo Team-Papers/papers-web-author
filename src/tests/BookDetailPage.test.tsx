@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { BookStatus } from '@/types/models';
 import type { Book } from '@/types/models';
@@ -14,8 +14,10 @@ const formatCurrency = (n: number) => fc(n).replace(/\s/g, ' ');
  * c'est lui, et lui seul, que l'auteur doit lire.
  */
 const getMyBooks = vi.fn();
+const getBookRevisions = vi.fn();
 vi.mock('@/lib/api/books', () => ({
   getMyBooks: () => getMyBooks(),
+  getBookRevisions: (...a: unknown[]) => getBookRevisions(...a),
   submitBook: vi.fn(),
   deleteBook: vi.fn(),
   unpublishBook: vi.fn(),
@@ -97,5 +99,64 @@ describe('BookDetailPage — quand le livre a bougé', () => {
     await afficher(livre({}));
 
     expect(screen.queryByText('Modifié le')).toBeNull();
+  });
+});
+
+/**
+ * « Ce qui a changé » répond à une question qu'on se pose parfois : « ai-je
+ * bien enregistré ma correction ? ». Elle est donc repliée — un auteur ouvre
+ * cette fiche pour savoir où en est son livre — et ne coûte rien tant qu'on
+ * ne l'ouvre pas.
+ */
+describe('BookDetailPage — ce qui a changé', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const REVISIONS = [
+    {
+      id: 'r2',
+      changedAt: '2026-09-15T10:00:00Z',
+      changedBy: null,
+      changes: { description: { avant: 'a', apres: 'b' } },
+    },
+    {
+      id: 'r1',
+      changedAt: '2026-09-14T10:00:00Z',
+      changedBy: null,
+      changes: { price: { avant: 0, apres: 500 } },
+    },
+  ];
+
+  it('reste repliée, et ne demande rien tant qu’on ne l’ouvre pas', async () => {
+    await afficher(livre({ updatedAt: '2026-09-15T10:00:00Z' }));
+
+    expect(screen.getByText('Ce qui a changé')).toBeDefined();
+    expect(getBookRevisions).not.toHaveBeenCalled();
+  });
+
+  it('liste les cinq dernières modifications en français lisible', async () => {
+    getBookRevisions.mockResolvedValue({
+      data: REVISIONS,
+      total: 2,
+      page: 1,
+      limit: 5,
+      totalPages: 1,
+    });
+    await afficher(livre({ updatedAt: '2026-09-15T10:00:00Z' }));
+
+    fireEvent.click(screen.getByText('Ce qui a changé'));
+
+    await waitFor(() => expect(getBookRevisions).toHaveBeenCalledWith('l1', { limit: 5 }));
+    const lignes = await screen.findAllByRole('listitem');
+    const textes = lignes.map((l) => l.textContent);
+    expect(textes.some((t) => t?.includes('15 sept. 2026') && t?.includes('description'))).toBe(
+      true,
+    );
+    expect(textes.some((t) => t?.includes('14 sept. 2026') && t?.includes('prix'))).toBe(true);
+  });
+
+  it('ne propose pas de journal sur un livre qui n’a jamais bougé', async () => {
+    await afficher(livre({}));
+
+    expect(screen.queryByText('Ce qui a changé')).toBeNull();
   });
 });
