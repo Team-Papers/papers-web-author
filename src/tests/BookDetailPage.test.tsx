@@ -77,3 +77,25 @@ describe('BookDetailPage — ce que le livre a vraiment rapporté', () => {
     expect(screen.getByRole('link', { name: /Corriger/ })).toBeDefined();
   });
 });
+
+/**
+ * « Modifié le » n'est pas une décoration : c'est ce qui permet à un auteur
+ * de savoir si la correction qu'il croit avoir enregistrée l'a bien été.
+ */
+describe('BookDetailPage — quand le livre a bougé', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('dit la date de la dernière modification à côté de la création', async () => {
+    await afficher(livre({ updatedAt: '2026-09-15T10:00:00Z' }));
+
+    expect(screen.getByText('Créé le')).toBeDefined();
+    expect(screen.getByText('Modifié le')).toBeDefined();
+    expect(screen.getByText('15 sept. 2026')).toBeDefined();
+  });
+
+  it('ne répète pas la date quand rien n’a bougé depuis la création', async () => {
+    await afficher(livre({}));
+
+    expect(screen.queryByText('Modifié le')).toBeNull();
+  });
+});

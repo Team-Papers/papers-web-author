@@ -22,6 +22,22 @@ export function formatDateTime(date: string | Date): string {
   return format(new Date(date), 'dd MMM yyyy HH:mm', { locale: fr });
 }
 
+/**
+ * Vrai quand un document a été touché après sa création.
+ *
+ * Une minute de tolérance : l'enregistrement initial écrit les deux dates à
+ * quelques millisecondes d'écart, et « Créé le 15 septembre · Modifié le
+ * 15 septembre » sur un brouillon qui vient de naître n'apprend rien à
+ * personne — c'est du bruit posé à côté d'un fait.
+ */
+export function aEteModifie(
+  createdAt: string | Date,
+  updatedAt: string | Date | null | undefined,
+): boolean {
+  if (!updatedAt) return false;
+  return new Date(updatedAt).getTime() - new Date(createdAt).getTime() > 60_000;
+}
+
 export function formatNumber(n: number): string {
   return new Intl.NumberFormat('fr-FR').format(n);
 }

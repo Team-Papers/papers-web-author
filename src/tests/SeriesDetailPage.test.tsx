@@ -44,6 +44,8 @@ function episode(n: number, titre: string, paru = false) {
 const SERIE = {
   id: 's1',
   title: 'Les nuits de Douala',
+  createdAt: '2026-09-01T10:00:00.000Z',
+  updatedAt: '2026-09-14T10:00:00.000Z',
   description: null,
   completed: false,
   episodes: [

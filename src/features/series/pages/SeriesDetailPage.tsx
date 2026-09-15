@@ -30,6 +30,7 @@ import {
 } from '@/lib/api/series';
 import { cn } from '@/lib/utils/cn';
 import { messageDe } from '@/lib/utils/erreurs';
+import { aEteModifie, formatDate } from '@/lib/utils/formatters';
 import { BookStatus, type Book } from '@/types/models';
 import { calendrierDeSortie, demainHuitHeures, jourEtHeure } from '../calendrier';
 import { etatDeSerie } from '../etat';
@@ -205,6 +206,15 @@ export function SeriesDetailPage() {
           <span className="text-on-surface-muted">
             {n === 0 ? 'Aucun épisode' : n === 1 ? '1 épisode' : `${n} épisodes`}
           </span>
+        </p>
+        {/* Discrètement, sous l'état : ce sont des repères, pas une nouvelle.
+            « Modifié le » n'apparaît que si la série a bougé depuis sa
+            création — sinon c'est la même date écrite deux fois. */}
+        <p className="mt-1 text-sm text-on-surface-muted">
+          Créé le {formatDate(serie.createdAt)}
+          {aEteModifie(serie.createdAt, serie.updatedAt) && (
+            <> · Modifié le {formatDate(serie.updatedAt)}</>
+          )}
         </p>
         {/* Le résumé ne s'affichait nulle part : on ne modifie pas à l'aveugle
             un texte qu'on ne relit jamais. */}

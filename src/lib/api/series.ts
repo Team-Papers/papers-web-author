@@ -17,6 +17,7 @@ export interface Series {
   status: Book['status'];
   completed: boolean;
   createdAt: string;
+  updatedAt: string;
   _count?: { books: number };
 }
 
@@ -76,6 +77,9 @@ export async function getSeriesDetail(id: string): Promise<{
   description: string | null;
   coverUrl?: string | null;
   completed: boolean;
+  createdAt: string;
+  /** Quand l'auteur y a touché pour la dernière fois. */
+  updatedAt: string;
   episodes: Array<{
     id: string;
     title: string;

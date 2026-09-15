@@ -8,7 +8,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Tranche } from '@/components/atelier/Tranche';
 import { etatDe } from '@/components/atelier/etat';
 import { getMyBooks, submitBook, deleteBook, unpublishBook } from '@/lib/api/books';
-import { formatCurrency, formatDate } from '@/lib/utils/formatters';
+import { aEteModifie, formatCurrency, formatDate } from '@/lib/utils/formatters';
 import type { BookCategoryLink, Book } from '@/types/models';
 import { BookStatus } from '@/types/models';
 
@@ -185,6 +185,15 @@ export function BookDetailPage() {
             <dt className="text-on-surface-muted">Créé le</dt>
             <dd className="mt-0.5 text-on-surface">{formatDate(book.createdAt)}</dd>
           </div>
+          {/* Seulement si le livre a bougé depuis : sur un brouillon qui vient
+              de naître, les deux dates sont la même, et la répéter n'apprend
+              rien. */}
+          {aEteModifie(book.createdAt, book.updatedAt) && (
+            <div>
+              <dt className="text-on-surface-muted">Modifié le</dt>
+              <dd className="mt-0.5 text-on-surface">{formatDate(book.updatedAt)}</dd>
+            </div>
+          )}
           {categories.length > 0 && (
             <div>
               <dt className="text-on-surface-muted">Catégories</dt>

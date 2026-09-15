@@ -30,6 +30,8 @@ const SERIE = {
   id: 's1',
   slug: 'triple-ambiance',
   title: 'Triple Ambiance',
+  createdAt: '2026-09-01T10:00:00.000Z',
+  updatedAt: '2026-09-14T10:00:00.000Z',
   description: 'Trois amis, une ville, une nuit.',
   completed: false,
   episodes: [],
@@ -54,6 +56,29 @@ describe('SeriesDetailPage — modifier le titre et le résumé', () => {
   it('montre le résumé, qu’on ne corrige pas à l’aveugle', async () => {
     await afficher();
     expect(screen.getByText('Trois amis, une ville, une nuit.')).toBeDefined();
+  });
+
+  it('dit quand la série a été créée, et quand elle a bougé', async () => {
+    await afficher();
+    expect(screen.getByText(/Créé le 01 sept\. 2026/)).toBeDefined();
+    expect(screen.getByText(/Modifié le 14 sept\. 2026/)).toBeDefined();
+  });
+
+  it('ne répète pas la date quand rien n’a bougé depuis la création', async () => {
+    getSeriesDetail.mockResolvedValue({ ...SERIE, updatedAt: SERIE.createdAt });
+    const { SeriesDetailPage } = await import('@/features/series/pages/SeriesDetailPage');
+    render(
+      <MemoryRouter initialEntries={['/series/s1']}>
+        <Routes>
+          <Route path="/series/:id" element={<SeriesDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    await screen.findByRole('heading', { name: 'Triple Ambiance', level: 1 }, { timeout: 5000 });
+
+    // « Créé le 15 septembre · Modifié le 15 septembre » est du bruit posé à
+    // côté d'un fait.
+    expect(screen.queryByText(/Modifié le/)).toBeNull();
   });
 
   it('enregistre le nouveau titre et le nouveau résumé', async () => {
