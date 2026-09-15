@@ -1,8 +1,20 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router';
-import { CalendarClock, Check, ChevronLeft, Copy, ExternalLink, ImagePlus, Plus, Share2, Trash2 } from 'lucide-react';
+import {
+  CalendarClock,
+  Check,
+  ChevronLeft,
+  Copy,
+  ExternalLink,
+  ImagePlus,
+  Pencil,
+  Plus,
+  Share2,
+  Trash2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
 import { Spinner } from '@/components/ui/Spinner';
 import { Modal } from '@/components/ui/Modal';
 import { useAsyncData } from '@/hooks/useAsyncData';
@@ -53,6 +65,7 @@ export function SeriesDetailPage() {
   );
 
   const [ouvert, setOuvert] = useState(false);
+  const [edition, setEdition] = useState(false);
   const [envoiCouverture, setEnvoiCouverture] = useState(false);
   const [programmation, setProgrammation] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -171,9 +184,19 @@ export function SeriesDetailPage() {
           <ChevronLeft className="h-4 w-4" aria-hidden />
           Séries
         </Link>
-        <h1 className="mt-1 font-display text-[28px] leading-tight font-semibold text-on-surface lg:text-4xl">
-          {serie.title}
-        </h1>
+        <div className="mt-1 flex items-start justify-between gap-3">
+          <h1 className="min-w-0 font-display text-[28px] leading-tight font-semibold text-on-surface lg:text-4xl">
+            {serie.title}
+          </h1>
+          <button
+            type="button"
+            onClick={() => setEdition(true)}
+            className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-outline bg-surface px-4 text-sm font-medium text-on-surface hover:bg-surface-dim focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            <Pencil className="h-4 w-4" aria-hidden />
+            Modifier
+          </button>
+        </div>
         <p className="mt-2 flex items-center gap-2 text-sm">
           <span style={{ color: etat.teinte }}>{etat.mot}</span>
           <span className="text-outline" aria-hidden>
@@ -183,6 +206,13 @@ export function SeriesDetailPage() {
             {n === 0 ? 'Aucun épisode' : n === 1 ? '1 épisode' : `${n} épisodes`}
           </span>
         </p>
+        {/* Le résumé ne s'affichait nulle part : on ne modifie pas à l'aveugle
+            un texte qu'on ne relit jamais. */}
+        {serie.description && (
+          <p className="mt-3 text-sm leading-relaxed whitespace-pre-line text-on-surface-variant">
+            {serie.description}
+          </p>
+        )}
       </header>
 
       <section className="mb-6 flex items-center gap-4">
@@ -323,6 +353,17 @@ export function SeriesDetailPage() {
         </>
       )}
 
+      {/* Monté à l'ouverture seulement : ses champs partent des valeurs de la
+          série telle qu'elle est maintenant, pas telle qu'elle était au
+          premier rendu. */}
+      {edition && (
+        <ModifierLaSerie
+          serie={serie}
+          onClose={() => setEdition(false)}
+          onModifie={recharger}
+        />
+      )}
+
       <AjouterUnEpisode
         ouvert={ouvert}
         onClose={() => setOuvert(false)}
@@ -347,6 +388,92 @@ export function SeriesDetailPage() {
         />
       )}
     </div>
+  );
+}
+
+/**
+ * Changer le titre et le résumé d'une série.
+ *
+ * Un titre se corrige — une faute, un sous-titre qu'on abandonne — et le
+ * résumé est ce qu'un lecteur lit avant de commencer. Les laisser figés à la
+ * création obligeait à recréer la série, donc à re-ranger ses chapitres.
+ *
+ * L'adresse, elle, ne bouge pas : c'est celle qu'un auteur a donnée à une
+ * publicité, dictée au téléphone, imprimée sur une affiche. La faire suivre
+ * le titre casserait une campagne en cours. On le dit sous le champ plutôt
+ * que de laisser l'auteur le déduire.
+ */
+function ModifierLaSerie({
+  serie,
+  onClose,
+  onModifie,
+}: {
+  serie: { id: string; title: string; description: string | null };
+  onClose: () => void;
+  onModifie: () => Promise<void>;
+}) {
+  const [titre, setTitre] = useState(serie.title);
+  const [description, setDescription] = useState(serie.description ?? '');
+  const [envoi, setEnvoi] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+
+  async function soumettre(e: React.FormEvent) {
+    e.preventDefault();
+    setErreur(null);
+    setEnvoi(true);
+
+    try {
+      await updateSeries(serie.id, {
+        title: titre.trim(),
+        // Un résumé effacé est un résumé absent, pas une chaîne vide : c'est
+        // ce que le serveur range en base et ce que le site sait ne pas
+        // afficher.
+        description: description.trim() || null,
+      });
+      await onModifie();
+      onClose();
+    } catch (e) {
+      setErreur(messageDe(e));
+    } finally {
+      setEnvoi(false);
+    }
+  }
+
+  return (
+    <Modal isOpen onClose={onClose} title="Modifier la série">
+      <form onSubmit={soumettre} className="space-y-4">
+        {erreur && (
+          <p role="alert" className="rounded-lg bg-error-container px-4 py-3 text-sm text-error">
+            {erreur}
+          </p>
+        )}
+
+        <Input
+          label="Titre"
+          value={titre}
+          onChange={(e) => setTitre(e.target.value)}
+          required
+          helper="L’adresse de la série ne change pas : un lien déjà partagé continue de marcher."
+        />
+
+        <Textarea
+          label="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="De quoi parle cette série ?"
+          rows={3}
+        />
+
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="text" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button type="submit" disabled={envoi || titre.trim().length === 0}>
+            {envoi ? 'Enregistrement…' : 'Enregistrer'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 }
 
