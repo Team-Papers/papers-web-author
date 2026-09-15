@@ -270,23 +270,26 @@ export function SeriesDetailPage() {
               ? 'Rangez vos chapitres dans l’ordre et donnez-leur une date. Chacun paraîtra tout seul le jour dit.'
               : 'Publiez d’abord un livre : c’est lui qui deviendra un épisode.'}
           </p>
-          {disponibles.length > 0 ? (
-            <button
-              type="button"
-              onClick={() => setOuvert(true)}
-              className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 font-medium text-on-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            >
-              <Plus className="h-4 w-4" aria-hidden />
-              Ajouter un épisode
-            </button>
-          ) : (
-            <Link
-              to="/books/new"
-              className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 font-medium text-on-primary"
-            >
-              <Plus className="h-4 w-4" aria-hidden />
-              Publier un livre
-            </Link>
+          {/* Écrire le premier chapitre est le geste attendu ici : le
+              proposer évite de sortir, publier, revenir. Ranger un livre
+              existant reste offert, en second. */}
+          <Link
+            to={`/books/new?serie=${serie.id}`}
+            className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 font-medium text-on-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            <Plus className="h-4 w-4" aria-hidden />
+            Publier un chapitre
+          </Link>
+          {disponibles.length > 0 && (
+            <div>
+              <button
+                type="button"
+                onClick={() => setOuvert(true)}
+                className="mt-2 inline-flex min-h-11 items-center justify-center rounded-lg px-5 text-sm font-medium text-primary-lisible hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              >
+                Ranger un livre que j’ai déjà
+              </button>
+            </div>
           )}
         </div>
       ) : (
@@ -316,14 +319,24 @@ export function SeriesDetailPage() {
               programmer vient une fois les chapitres ranges ; terminer une
               serie est rare et se fait a la fin. */}
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            {/* Écrire la suite est le geste de l'auteur d'une série ; ranger
+                un livre déjà publié est l'exception. « Ajouter un épisode »
+                était grisé dès que tous les livres étaient rangés, et l'auteur
+                n'avait alors plus aucun chemin depuis cette page. */}
+            <Link
+              to={`/books/new?serie=${serie.id}`}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-medium text-on-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              <Plus className="h-4 w-4" aria-hidden />
+              Publier un chapitre
+            </Link>
             <button
               type="button"
               onClick={() => setOuvert(true)}
               disabled={disponibles.length === 0}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-medium text-on-primary disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-outline px-5 font-medium text-primary-lisible hover:bg-surface-container disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
-              <Plus className="h-4 w-4" aria-hidden />
-              Ajouter un épisode
+              Ranger un livre existant
             </button>
             <button
               type="button"
@@ -347,7 +360,7 @@ export function SeriesDetailPage() {
           </div>
           {disponibles.length === 0 && (
             <p className="mt-2 text-sm text-on-surface-muted">
-              Tous vos livres sont déjà rangés. Publiez-en un pour l’ajouter.
+              Tous vos livres sont déjà rangés : il n’y a rien à ranger de plus.
             </p>
           )}
         </>

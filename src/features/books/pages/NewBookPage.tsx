@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -7,13 +7,26 @@ import { Textarea } from '@/components/ui/Textarea';
 import { FileDropzone } from '@/components/ui/FileDropzone';
 import { Etapes } from '@/components/atelier/Etapes';
 import { createBook, getCategories, uploadCover, uploadBookFile } from '@/lib/api/books';
+import { attachEpisode, getSeriesDetail } from '@/lib/api/series';
 import { cn } from '@/lib/utils/cn';
+import { messageDe } from '@/lib/utils/erreurs';
 import { formatCurrency } from '@/lib/utils/formatters';
 import type { Category } from '@/types/models';
 import { ETAPES_DU_LIVRE as steps } from '../etapes';
 
 export function NewBookPage() {
   const navigate = useNavigate();
+  /**
+   * La serie d'ou l'on vient, passee par l'adresse.
+   *
+   * Par l'adresse et non par un etat global : l'assistant se recharge, se
+   * met en favori, s'ouvre dans un autre onglet. Un etat en memoire aurait
+   * disparu au premier rechargement, et le chapitre serait reste orphelin
+   * sans que personne ne sache pourquoi.
+   */
+  const [parametres] = useSearchParams();
+  const serieId = parametres.get('serie');
+
   const [step, setStep] = useState(0);
   /**
    * L'étape la plus loin où l'auteur soit allé.
@@ -37,10 +50,33 @@ export function NewBookPage() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState('');
   const [bookFile, setBookFile] = useState<File | null>(null);
+  const [serie, setSerie] = useState<{ id: string; title: string } | null>(null);
+  const [serieIntrouvable, setSerieIntrouvable] = useState(false);
+  /** Le livre est enregistre, mais il n'a pas rejoint la serie, et voici pourquoi. */
+  const [rattachementRate, setRattachementRate] = useState<string | null>(null);
 
   useEffect(() => {
     getCategories().then(setCategories).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!serieId) return;
+    let obsolete = false;
+
+    getSeriesDetail(serieId)
+      .then((s) => {
+        if (!obsolete) setSerie({ id: s.id, title: s.title });
+      })
+      .catch(() => {
+        // Une adresse trafiquee, une serie supprimee : on le dit plutot que
+        // de laisser l'auteur croire que son chapitre sera range.
+        if (!obsolete) setSerieIntrouvable(true);
+      });
+
+    return () => {
+      obsolete = true;
+    };
+  }, [serieId]);
 
   const handleCover = (file: File) => {
     setCoverFile(file);
@@ -76,7 +112,7 @@ export function NewBookPage() {
         fileFormat = result.format;
       }
 
-      await createBook({
+      const livre = await createBook({
         title,
         description,
         price: Number(price),
@@ -89,7 +125,28 @@ export function NewBookPage() {
         language,
         pageCount: pageCount ? Number(pageCount) : undefined,
       });
-      navigate('/books');
+
+      if (!serie) {
+        navigate('/books');
+        return;
+      }
+
+      try {
+        // Le rang se calcule maintenant, pas a l'ouverture de l'assistant :
+        // un autre onglet a pu ranger un chapitre entre-temps, et le serveur
+        // refuse deux fois le meme rang.
+        const aJour = await getSeriesDetail(serie.id);
+        const rang = Math.max(0, ...aJour.episodes.map((e) => e.episodeNumber ?? 0)) + 1;
+        await attachEpisode(serie.id, { bookId: livre.id, episodeNumber: rang });
+      } catch (e) {
+        // Le livre existe : le dire, et dire ce qui a echoue. Renvoyer
+        // « Erreur lors de la creation » ferait recommencer un auteur qui a
+        // deja son manuscrit en base, et lui en donnerait deux.
+        setRattachementRate(messageDe(e));
+        return;
+      }
+
+      navigate(`/series/${serie.id}`);
     } catch {
       setError('Erreur lors de la création du livre');
     } finally {
@@ -149,6 +206,21 @@ export function NewBookPage() {
             atteignable={(i) => i <= atteint && (i === 0 || debutRempli)}
             onAller={allerA}
           />
+
+          {/* Venu d'une série : le dire dès la première étape. Un auteur qui
+              l'ignore écrit « Chapitre 3 » dans le titre, ou s'étonne de ne pas
+              retomber sur sa liste de livres à la fin. */}
+          {serie && (
+            <p className="mt-4 rounded-lg border border-outline bg-surface-container px-4 py-3 text-sm text-on-surface">
+              Ce chapitre rejoindra la série{' '}
+              <span className="font-semibold">{serie.title}</span>.
+            </p>
+          )}
+          {serieIntrouvable && (
+            <p className="mt-4 rounded-lg border border-outline bg-surface-container px-4 py-3 text-sm text-on-surface-variant">
+              Cette série est introuvable : le livre sera enregistré seul.
+            </p>
+          )}
         </header>
 
         {/* Le message du serveur porte la raison exacte — titre deja pris,
@@ -161,6 +233,27 @@ export function NewBookPage() {
           >
             {error}
           </p>
+        )}
+
+        {/* Le livre est en base, la série ne l'a pas pris : deux faits, et la
+            sortie. Le cacher enverrait l'auteur réenregistrer un manuscrit
+            qu'il possède déjà. */}
+        {rattachementRate && serie && (
+          <div
+            role="alert"
+            className="mb-5 rounded-lg border border-error/30 bg-error-container px-4 py-3 text-sm text-error"
+          >
+            <p>
+              Votre livre est enregistré, mais il n’a pas rejoint «&nbsp;{serie.title}&nbsp;» :{' '}
+              {rattachementRate}
+            </p>
+            <Link
+              to={`/series/${serie.id}`}
+              className="mt-2 inline-flex min-h-11 items-center font-medium underline"
+            >
+              Ouvrir la série pour l’y ranger
+            </Link>
+          </div>
         )}
 
         <section className="rounded-xl border border-outline bg-surface p-5">
@@ -351,8 +444,10 @@ export function NewBookPage() {
               Suivant
             </Button>
           ) : (
-            <Button onClick={handleSubmit} isLoading={loading}>
-              Enregistrer le livre
+            // Le livre est déjà enregistré : le bouton ne doit pas proposer de
+            // recommencer, ce qui en créerait un second.
+            <Button onClick={handleSubmit} isLoading={loading} disabled={rattachementRate !== null}>
+              {serie ? 'Enregistrer le chapitre' : 'Enregistrer le livre'}
             </Button>
           )}
         </div>
