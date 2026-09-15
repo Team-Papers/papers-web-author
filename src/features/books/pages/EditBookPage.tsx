@@ -6,20 +6,14 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Spinner } from '@/components/ui/Spinner';
 import { FileDropzone } from '@/components/ui/FileDropzone';
+import { Etapes } from '@/components/atelier/Etapes';
 import { getBookById, updateBook, getCategories, uploadCover, uploadBookFile } from '@/lib/api/books';
 import { cn } from '@/lib/utils/cn';
 import { messageDe } from '@/lib/utils/erreurs';
 import { formatCurrency } from '@/lib/utils/formatters';
 import type { BookCategoryLink, Book, Category } from '@/types/models';
 import { BookStatus } from '@/types/models';
-
-const steps = [
-  { label: 'Le livre', demande: 'De quoi parle-t-il, et combien coûte-t-il ?', requis: true },
-  { label: 'Les détails', demande: 'Langue, nombre de pages, ISBN.', requis: false },
-  { label: 'La couverture', demande: "C'est elle qu'on voit d'abord.", requis: false },
-  { label: 'Le fichier', demande: 'Le manuscrit, en PDF ou ePub.', requis: false },
-  { label: 'Relecture', demande: 'Vérifiez avant d’enregistrer.', requis: true },
-];
+import { ETAPES_DU_LIVRE as steps } from '../etapes';
 
 export function EditBookPage() {
   const { id } = useParams<{ id: string }>();
@@ -190,19 +184,10 @@ export function EditBookPage() {
           {!steps[step].requis && (
             <p className="mt-1 text-sm text-on-surface-muted">Vous pouvez passer et y revenir plus tard.</p>
           )}
-          <div
-            className="mt-5 h-1 overflow-hidden rounded-full bg-surface-container-high"
-            role="progressbar"
-            aria-valuenow={step + 1}
-            aria-valuemin={1}
-            aria-valuemax={steps.length}
-            aria-label={`Étape ${step + 1} sur ${steps.length}`}
-          >
-            <div
-              className="h-full rounded-full bg-primary transition-[width] duration-300"
-              style={{ width: `${((step + 1) / steps.length) * 100}%` }}
-            />
-          </div>
+          {/* Tout est déjà rempli : l'ordre n'a plus rien à protéger, et
+              l'auteur qui vient corriger son prix ne doit pas traverser quatre
+              écrans pour l'atteindre — ni quatre autres pour enregistrer. */}
+          <Etapes etapes={steps} courante={step} atteignable={() => true} onAller={setStep} />
         </header>
 
         {error && (

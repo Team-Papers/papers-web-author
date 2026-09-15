@@ -5,30 +5,24 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { FileDropzone } from '@/components/ui/FileDropzone';
+import { Etapes } from '@/components/atelier/Etapes';
 import { createBook, getCategories, uploadCover, uploadBookFile } from '@/lib/api/books';
 import { cn } from '@/lib/utils/cn';
 import { formatCurrency } from '@/lib/utils/formatters';
 import type { Category } from '@/types/models';
-
-/**
- * Les cinq etapes, dites par ce qu'elles demandent.
- *
- * « Informations », « Details », « Resume » nommaient des rubriques de
- * formulaire. Un auteur ne sait pas ce qu'on attend de lui sous « Details » ;
- * il sait repondre a « Ce qu'il faut savoir ». Chaque etape porte donc une
- * question, et une phrase qui dit si elle est obligatoire.
- */
-const steps = [
-  { label: 'Le livre', demande: 'De quoi parle-t-il, et combien coûte-t-il ?', requis: true },
-  { label: 'Les détails', demande: 'Langue, nombre de pages, ISBN.', requis: false },
-  { label: 'La couverture', demande: "C'est elle qu'on voit d'abord.", requis: false },
-  { label: 'Le fichier', demande: 'Le manuscrit, en PDF ou ePub.', requis: false },
-  { label: 'Relecture', demande: 'Vérifiez avant d’enregistrer.', requis: true },
-];
+import { ETAPES_DU_LIVRE as steps } from '../etapes';
 
 export function NewBookPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
+  /**
+   * L'étape la plus loin où l'auteur soit allé.
+   *
+   * On publie dans l'ordre — on ne téléverse pas un manuscrit avant de
+   * l'avoir nommé — mais revenir corriger le prix ne doit pas coûter quatre
+   * clics pour retrouver sa place. Ce qui a été franchi reste ouvert.
+   */
+  const [atteint, setAtteint] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -103,12 +97,22 @@ export function NewBookPage() {
     }
   };
 
+  // La première étape est la seule obligatoire : tant qu'elle n'est pas
+  // remplie, rien n'est enregistrable, et sauter par-dessus laisserait
+  // l'auteur à la relecture d'un livre sans titre.
+  const debutRempli = Boolean(title && description && price && selectedCats.length > 0);
+
   const canNext = () => {
-    if (step === 0) return title && description && price && selectedCats.length > 0;
+    if (step === 0) return debutRempli;
     if (step === 1) return true; // details optional
     if (step === 2) return true; // cover optional
     if (step === 3) return true; // file optional for draft
     return true;
+  };
+
+  const allerA = (index: number) => {
+    setAtteint((max) => Math.max(max, index));
+    setStep(index);
   };
 
   return (
@@ -117,7 +121,10 @@ export function NewBookPage() {
         Trois dispositifs disaient la meme chose : une barre de progression, un
         pourcentage, et cinq pastilles de 48 px reliees par des traits. Sur un
         telephone, les pastilles mangeaient un quart de l'ecran pour repeter ce
-        que « Etape 2 sur 5 » dit en trois mots. Il en reste un.
+        que « Etape 2 sur 5 » dit en trois mots.
+
+        Il en reste une rangee d'etiquettes, qui tient sur une ligne et dit ce
+        que la barre ne disait pas : ce qui vient apres, et par ou revenir.
       */}
       <div className="mx-auto w-full max-w-2xl px-4 pb-32 lg:max-w-3xl lg:px-8 lg:pb-8">
         <header className="pt-8 pb-6">
@@ -134,19 +141,14 @@ export function NewBookPage() {
             </p>
           )}
 
-          <div
-            className="mt-5 h-1 overflow-hidden rounded-full bg-surface-container-high"
-            role="progressbar"
-            aria-valuenow={step + 1}
-            aria-valuemin={1}
-            aria-valuemax={steps.length}
-            aria-label={`Étape ${step + 1} sur ${steps.length}`}
-          >
-            <div
-              className="h-full rounded-full bg-primary transition-[width] duration-300"
-              style={{ width: `${((step + 1) / steps.length) * 100}%` }}
-            />
-          </div>
+          <Etapes
+            etapes={steps}
+            courante={step}
+            // On publie dans l'ordre : une étape jamais atteinte reste fermée.
+            // Et tant que le début n'est pas rempli, on n'en sort pas.
+            atteignable={(i) => i <= atteint && (i === 0 || debutRempli)}
+            onAller={allerA}
+          />
         </header>
 
         {/* Le message du serveur porte la raison exacte — titre deja pris,
@@ -332,7 +334,7 @@ export function NewBookPage() {
         <div className="mx-auto flex max-w-2xl items-center gap-3 lg:max-w-3xl lg:px-0">
           <Button
             variant="outlined"
-            onClick={() => (step > 0 ? setStep(step - 1) : navigate('/books'))}
+            onClick={() => (step > 0 ? allerA(step - 1) : navigate('/books'))}
             leftIcon={<ChevronLeft className="h-4 w-4" />}
           >
             {step === 0 ? 'Annuler' : 'Précédent'}
@@ -342,7 +344,7 @@ export function NewBookPage() {
 
           {step < 4 ? (
             <Button
-              onClick={() => setStep(step + 1)}
+              onClick={() => allerA(step + 1)}
               disabled={!canNext()}
               rightIcon={<ChevronRight className="h-4 w-4" />}
             >
