@@ -24,6 +24,7 @@ vi.mock('@/lib/api/series', () => ({
 
 const getMyBooks = vi.fn();
 vi.mock('@/lib/api/books', () => ({
+  uploadCover: vi.fn(),
   getMyBooks: (...args: unknown[]) => getMyBooks(...args),
 }));
 

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router';
-import { CalendarClock, ChevronLeft, Plus, Trash2 } from 'lucide-react';
+import { CalendarClock, ChevronLeft, ImagePlus, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
 import { Modal } from '@/components/ui/Modal';
 import { useAsyncData } from '@/hooks/useAsyncData';
-import { getMyBooks } from '@/lib/api/books';
+import { getMyBooks, uploadCover } from '@/lib/api/books';
 import {
   attachEpisode,
   detachEpisode,
@@ -51,6 +51,7 @@ export function SeriesDetailPage() {
   );
 
   const [ouvert, setOuvert] = useState(false);
+  const [envoiCouverture, setEnvoiCouverture] = useState(false);
   const [programmation, setProgrammation] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<string | null>(null);
@@ -66,6 +67,25 @@ export function SeriesDetailPage() {
       await recharger();
     } catch (e) {
       setErreur(messageDe(e));
+    }
+  }
+
+  /**
+   * La couverture de la serie est l'image que Facebook, WhatsApp et le site
+   * montrent quand on partage la serie : sans elle, la carte est generique.
+   * On reutilise le televersement des couvertures de livre.
+   */
+  async function changerCouverture(fichier: File) {
+    setErreur(null);
+    setEnvoiCouverture(true);
+    try {
+      const nom = await uploadCover(fichier);
+      await updateSeries(id, { coverUrl: nom });
+      await recharger();
+    } catch (e) {
+      setErreur(messageDe(e));
+    } finally {
+      setEnvoiCouverture(false);
     }
   }
 
@@ -150,6 +170,36 @@ export function SeriesDetailPage() {
           </span>
         </p>
       </header>
+
+      <section className="mb-6 flex items-center gap-4">
+        <div className="h-24 w-16 shrink-0 overflow-hidden rounded-md bg-surface-container-high">
+          {serie.coverUrl ? (
+            <img src={serie.coverUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-[10px] text-on-surface-muted">Sans image</div>
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm text-on-surface">
+            {serie.coverUrl ? 'Couverture de la série' : 'Aucune couverture : le partage montrera une carte générique.'}
+          </p>
+          <label className="mt-2 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-outline bg-surface px-4 text-sm font-medium text-on-surface hover:bg-surface-dim">
+            <ImagePlus className="h-4 w-4" aria-hidden />
+            {envoiCouverture ? 'Envoi…' : serie.coverUrl ? 'Changer la couverture' : 'Ajouter une couverture'}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="sr-only"
+              disabled={envoiCouverture}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void changerCouverture(f);
+                e.target.value = '';
+              }}
+            />
+          </label>
+        </div>
+      </section>
 
       {confirmation && (
         <p

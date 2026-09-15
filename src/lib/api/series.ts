@@ -43,7 +43,7 @@ export async function createSeries(data: {
 
 export async function updateSeries(
   id: string,
-  data: { title?: string; description?: string | null; completed?: boolean },
+  data: { title?: string; description?: string | null; completed?: boolean; coverUrl?: string | null },
 ): Promise<Series> {
   const res = await apiClient.patch<ApiResponse<Series>>(`/series/${id}`, data);
   return res.data.data as Series;
@@ -72,6 +72,7 @@ export async function getSeriesDetail(id: string): Promise<{
   id: string;
   title: string;
   description: string | null;
+  coverUrl?: string | null;
   completed: boolean;
   episodes: Array<{
     id: string;
