@@ -7,9 +7,13 @@ import { BookStatus } from '@/types/models';
  * résultent *avant* de confirmer, sinon il découvre après coup que le
  * chapitre 6 sort à Noël. Le calcul reprend la règle du serveur — premier
  * épisode non paru au départ, puis un tous les N jours dans l'ordre des
- * numéros — et les mêmes exclusions : un épisode refusé n'est pas programmé,
- * un épisode en examen est laissé à l'administration. Le serveur reste la
- * référence ; ici on ne fait que l'annoncer.
+ * numéros — et la même exclusion : un épisode refusé n'est pas programmé.
+ * Le serveur reste la référence ; ici on ne fait que l'annoncer.
+ *
+ * Et il faut l'annoncer en entier : dater un chapitre qui n'a pas encore été
+ * relu l'envoie en relecture. Il garde sa date, mais il ne paraîtra que si
+ * l'administration l'accepte — l'auteur doit le savoir avant de confirmer,
+ * pas le découvrir sur la liste une minute plus tard.
  */
 
 export interface EpisodeACalendrier {
@@ -20,8 +24,14 @@ export interface EpisodeACalendrier {
 }
 
 export type LigneDeCalendrier =
-  | { episode: EpisodeACalendrier; sort: 'programme'; publishAt: Date }
-  | { episode: EpisodeACalendrier; sort: 'refuse' | 'en-examen' };
+  | {
+      episode: EpisodeACalendrier;
+      sort: 'programme';
+      publishAt: Date;
+      /** Vrai quand ce chapitre part en relecture en recevant sa date. */
+      relecture: boolean;
+    }
+  | { episode: EpisodeACalendrier; sort: 'refuse' };
 
 /**
  * `statuts` vient de la liste des livres de l'auteur : la fiche de la série
@@ -43,10 +53,12 @@ export function calendrierDeSortie(
   return aVenir.map((episode) => {
     const statut = statuts.get(episode.id);
     if (statut === BookStatus.REJECTED) return { episode, sort: 'refuse' };
-    if (statut === BookStatus.PENDING) return { episode, sort: 'en-examen' };
     const publishAt = new Date(depart.getTime() + rang * pas);
     rang += 1;
-    return { episode, sort: 'programme', publishAt };
+    // Un chapitre déjà accepté garde son statut ; un brouillon part en
+    // relecture. Un chapitre déjà en examen y reste : il change de date,
+    // pas de file.
+    return { episode, sort: 'programme', publishAt, relecture: statut === BookStatus.DRAFT };
   });
 }
 

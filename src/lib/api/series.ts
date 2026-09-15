@@ -98,14 +98,26 @@ export interface EpisodeProgramme {
   title: string;
   episodeNumber: number | null;
   publishAt: string;
+  /**
+   * Ce qu'il est devenu en recevant sa date : `PENDING` quand il part en
+   * relecture, son statut d'avant quand il avait déjà été accepté. On le lit
+   * plutôt que de rejouer la règle du serveur, qui finirait par diverger.
+   */
+  status: Book['status'];
 }
 
-/** Un épisode que la programmation a laissé de côté, et pourquoi. */
+/**
+ * Un épisode que la programmation a laissé de côté, et pourquoi.
+ *
+ * Une décision les a écartés, et changer une date ne la défait pas. Un
+ * chapitre en examen, lui, n'est plus laissé de côté : il reçoit sa date et
+ * reste en relecture.
+ */
 export interface EpisodeIgnore {
   id: string;
   title: string;
   episodeNumber: number | null;
-  status: 'REJECTED' | 'SUSPENDED' | 'PENDING';
+  status: 'REJECTED' | 'SUSPENDED';
 }
 
 /**

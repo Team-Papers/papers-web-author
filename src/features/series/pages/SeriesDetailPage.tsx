@@ -140,8 +140,20 @@ export function SeriesDetailPage() {
       const dernier = jourEtHeure(new Date(episodes[episodes.length - 1].publishAt));
       phrases.push(`${episodes.length} épisodes programmés, du ${premier} au ${dernier}.`);
     }
+
+    // Le serveur dit ce que chaque chapitre est devenu : on le rapporte plutôt
+    // que de laisser croire que tout est acquis.
+    const enRelecture = episodes.filter((e) => e.status === BookStatus.PENDING);
+    if (enRelecture.length > 0) {
+      phrases.push(
+        enRelecture.length === 1
+          ? '1 part en relecture et paraîtra le jour dit une fois accepté.'
+          : `${enRelecture.length} partent en relecture et paraîtront le jour dit une fois acceptés.`,
+      );
+    }
+
     if (ignores.length > 0) {
-      const motifs = { REJECTED: 'refusé', SUSPENDED: 'suspendu', PENDING: 'en examen' } as const;
+      const motifs = { REJECTED: 'refusé', SUSPENDED: 'suspendu' } as const;
       phrases.push(
         `Laissé de côté : ${ignores.map((i) => `${i.title} (${motifs[i.status]})`).join(', ')}.`,
       );
@@ -254,7 +266,7 @@ export function SeriesDetailPage() {
               <LigneDEpisode
                 key={episode.id}
                 episode={episode}
-                refuse={statuts.get(episode.id) === BookStatus.REJECTED}
+                statut={statuts.get(episode.id)}
                 onRetirer={() => retirer(episode.id)}
               />
             ))}
@@ -265,7 +277,8 @@ export function SeriesDetailPage() {
               l'auteur regarde après avoir rangé ses chapitres. */}
           <p className="mt-3 text-sm text-on-surface-muted">
             Le plus simple : programmez la sortie, et chaque épisode à venir reçoit sa date d’un
-            coup. Un épisode ajouté sans date reste à publier vous-même.
+            coup. Un chapitre qui n’a pas encore été relu part en relecture en gardant sa date. Un
+            épisode ajouté sans date reste à publier vous-même.
           </p>
 
           {/* Les actions viennent apres la liste, pas avant : on lit la
@@ -371,6 +384,7 @@ function ProgrammerLaSortie({
   const calendrier =
     departValide && pasValide ? calendrierDeSortie(episodes, statuts, dateDeDepart, pas) : [];
   const programmes = calendrier.filter((l) => l.sort === 'programme');
+  const aRelire = programmes.filter((l) => l.relecture);
 
   async function soumettre(e: React.FormEvent) {
     e.preventDefault();
@@ -442,19 +456,32 @@ function ProgrammerLaSortie({
                 </span>
                 <span className="min-w-0 flex-1 truncate text-on-surface">{ligne.episode.title}</span>
                 {ligne.sort === 'programme' ? (
-                  <span className="shrink-0 text-on-surface-variant">{jourEtHeure(ligne.publishAt)}</span>
-                ) : ligne.sort === 'refuse' ? (
-                  <span className="shrink-0" style={{ color: 'var(--color-etat-refuse)' }}>
-                    Refusé, laissé de côté
+                  <span className="shrink-0 text-right text-on-surface-variant">
+                    {jourEtHeure(ligne.publishAt)}
+                    {ligne.relecture && (
+                      <span className="block text-xs" style={{ color: 'var(--color-etat-examen)' }}>
+                        après relecture
+                      </span>
+                    )}
                   </span>
                 ) : (
-                  <span className="shrink-0" style={{ color: 'var(--color-etat-examen)' }}>
-                    En examen, laissé de côté
+                  <span className="shrink-0" style={{ color: 'var(--color-etat-refuse)' }}>
+                    Refusé, laissé de côté
                   </span>
                 )}
               </li>
             ))}
           </ol>
+          {/* Dater n'est pas publier pour un chapitre qui n'a pas encore été
+              relu : le dire ici évite d'annoncer une sortie qui n'est pas
+              acquise, une heure avant de la découvrir. */}
+          {aRelire.length > 0 && (
+            <p className="mt-2 text-sm text-on-surface-variant">
+              {aRelire.length === 1
+                ? '1 chapitre part en relecture avec sa date : il paraîtra le jour dit une fois accepté.'
+                : `${aRelire.length} chapitres partent en relecture avec leur date : ils paraîtront le jour dit une fois acceptés.`}
+            </p>
+          )}
           {calendrier.length > 0 && programmes.length === 0 && (
             <p className="mt-2 text-sm text-on-surface-muted">Aucun épisode ne peut recevoir de date.</p>
           )}
@@ -473,46 +500,67 @@ function ProgrammerLaSortie({
   );
 }
 
-/** L'état d'un épisode : ce que le lecteur verra, et la teinte de sa tranche. */
-function etatDEpisode(episode: Episode, refuse: boolean) {
+/**
+ * L'état d'un épisode : ce que le lecteur verra, et la teinte de sa tranche.
+ *
+ * « Programmé » et « En examen » portent la même date et n'ont pas la même
+ * valeur : le premier paraîtra, le second paraîtra *si* il est accepté. Les
+ * dire pareil laisserait l'auteur annoncer une sortie qui n'est pas acquise.
+ */
+function etatDEpisode(episode: Episode, statut: BookStatus | undefined) {
   if (episode.paru) {
     return { mot: 'Paru', teinte: 'var(--color-etat-paru)', suite: null };
   }
   // Un chapitre refusé ne recevra pas de date, quoi qu'on lui donne : lui
   // proposer d'en choisir une enverrait l'auteur dans un mur. Il attend une
   // correction, comme sur la liste des livres.
-  if (refuse) {
+  if (statut === BookStatus.REJECTED) {
     return {
       mot: 'Refusé',
       teinte: 'var(--color-etat-refuse)',
       suite: 'Corrigez-le avant de lui donner une date',
     };
   }
-  if (!episode.publishAt) {
+
+  const date = episode.publishAt
+    ? new Date(episode.publishAt).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    : null;
+
+  // En relecture : rien n'attend l'auteur, d'où la teinte de l'examen et non
+  // le rouge de la correction.
+  if (statut === BookStatus.PENDING) {
+    return {
+      mot: 'En examen',
+      teinte: 'var(--color-etat-examen)',
+      suite: date ? `Paraîtra le ${date}, une fois relu` : 'Notre équipe le relit',
+    };
+  }
+
+  if (!date) {
     return {
       mot: 'Sans date',
       teinte: 'var(--color-etat-refuse)',
       suite: 'Publiez-le vous-même, ou donnez-lui une date',
     };
   }
-  const date = new Date(episode.publishAt).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+
   return { mot: 'Programmé', teinte: 'var(--color-etat-programme)', suite: `Paraît le ${date}` };
 }
 
 function LigneDEpisode({
   episode,
-  refuse,
+  statut,
   onRetirer,
 }: {
   episode: Episode;
-  refuse: boolean;
+  statut: BookStatus | undefined;
   onRetirer: () => void;
 }) {
-  const etat = etatDEpisode(episode, refuse);
+  const etat = etatDEpisode(episode, statut);
 
   return (
     <li className="flex min-h-[72px] items-stretch gap-3 rounded-lg border border-outline bg-surface py-3 pr-1 pl-3">
@@ -637,7 +685,7 @@ function AjouterUnEpisode({
           type="datetime-local"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          helper="Laissez vide pour publier vous-même. Sinon, l'épisode paraît tout seul à cette date."
+          helper="Laissez vide pour publier vous-même. Sinon, le chapitre part en relecture et paraît tout seul à cette date, une fois accepté."
         />
 
         <div className="flex justify-end gap-2">
