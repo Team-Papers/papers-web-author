@@ -45,6 +45,7 @@ export function SettingsPage() {
   const [bio, setBio] = useState('');
   const [website, setWebsite] = useState('');
   const [twitter, setTwitter] = useState('');
+  const [metaPixelId, setMetaPixelId] = useState('');
   const [mtnNumber, setMtnNumber] = useState('');
   const [omNumber, setOmNumber] = useState('');
 
@@ -61,6 +62,7 @@ export function SettingsPage() {
         setBio(p.bio || '');
         setWebsite(p.website || '');
         setTwitter(p.twitter || '');
+        setMetaPixelId(p.metaPixelId || '');
         setMtnNumber(p.mtnNumber || '');
         setOmNumber(p.omNumber || '');
       })
@@ -74,7 +76,7 @@ export function SettingsPage() {
     setError('');
     setSuccess('');
     try {
-      await updateMyProfile({ penName, bio, website, twitter, mtnNumber, omNumber });
+      await updateMyProfile({ penName, bio, website, twitter, mtnNumber, omNumber, metaPixelId });
       await fetchAuthorProfile();
       setSuccess('Profil enregistré.');
     } catch (err) {
@@ -168,6 +170,30 @@ export function SettingsPage() {
             <Textarea label="Biographie" value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Qui vous êtes, ce que vous écrivez." />
             <Input label="Site web" type="url" inputMode="url" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://" />
             <Input label="X (Twitter)" value={twitter} onChange={(e) => setTwitter(e.target.value)} placeholder="@" />
+          </div>
+        </Rubrique>
+
+        {/* La publicite que l'auteur paie lui-meme.
+            Sans pixel a lui, une annonce vers sa page optimise au mieux le
+            clic — Facebook ne sait pas qui, parmi ceux qui ont clique, est
+            reste lire. Le champ n'accepte qu'un identifiant, jamais un bout de
+            code : c'est nous qui composons le traceur. */}
+        <Rubrique titre="Votre publicité Facebook">
+          <div className="space-y-4 rounded-xl border border-outline bg-surface p-5">
+            <Input
+              label="Identifiant de votre pixel Meta"
+              value={metaPixelId}
+              onChange={(e) => setMetaPixelId(e.target.value.replace(/\D/g, ''))}
+              inputMode="numeric"
+              placeholder="15 ou 16 chiffres"
+              maxLength={16}
+            />
+            <p className="text-sm text-on-surface-muted">
+              Si vous faites vos propres publicités vers votre page d’auteur, votre pixel y
+              mesurera les visites et vous permettra de recibler ceux qui sont passés. Il ne se
+              déclenche que sur votre page : les fiches de livres et le paiement sont partagés
+              avec les autres auteurs. Laissez vide si vous n’en avez pas.
+            </p>
           </div>
         </Rubrique>
 

@@ -61,6 +61,11 @@ export interface AuthorProfile {
   website?: string;
   twitter?: string;
   facebook?: string;
+  /**
+   * L'identifiant du pixel Meta de l'auteur, pour ses propres publicites.
+   * Quinze ou seize chiffres ; vide quand il n'en a pas.
+   */
+  metaPixelId?: string | null;
   status: AuthorStatus;
   mtnNumber?: string;
   omNumber?: string;
