@@ -57,4 +57,17 @@ describe('L’historique, dit en français', () => {
     expect(resume).toContain('description');
     expect(resume).not.toContain('suspensionReason');
   });
+
+  /**
+   * Une série suit un champ qu'aucun livre ne porte. « true → false » ne se
+   * lit pas ; « terminée → en cours », si.
+   */
+  it("dit l'état d'une série en français, pas en booléen", () => {
+    expect(decrire('completed', { avant: false, apres: true })).toBe(
+      'état de la série : en cours → terminée',
+    );
+    expect(decrire('completed', { avant: true, apres: false })).toBe(
+      'état de la série : terminée → en cours',
+    );
+  });
 });

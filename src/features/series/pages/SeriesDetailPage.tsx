@@ -27,6 +27,7 @@ import {
   updateSeries,
   type EpisodeIgnore,
   type EpisodeProgramme,
+  getSeriesRevisions,
 } from '@/lib/api/series';
 import { cn } from '@/lib/utils/cn';
 import { messageDe } from '@/lib/utils/erreurs';
@@ -35,6 +36,7 @@ import { BookStatus, type Book } from '@/types/models';
 import { calendrierDeSortie, demainHuitHeures, jourEtHeure } from '../calendrier';
 import { etatDeSerie } from '../etat';
 import { pageDeLaSerie } from '@/lib/site';
+import { CeQuiAChange } from '@/components/atelier/CeQuiAChange';
 
 type Detail = Awaited<ReturnType<typeof getSeriesDetail>>;
 type Episode = Detail['episodes'][number];
@@ -375,6 +377,15 @@ export function SeriesDetailPage() {
           )}
         </>
       )}
+
+      {/* Le journal de la fiche. `updatedAt` dit quand, jamais quoi : un
+          auteur qui ne retrouve pas le titre qu'il croit avoir corrigé, ou qui
+          se demande quand sa série est passée en « terminée », n'avait aucune
+          trace à lire. */}
+      <CeQuiAChange
+        charger={async () => (await getSeriesRevisions(id, { limit: 5 })).data}
+        vide="Rien depuis la création de cette série."
+      />
 
       {/* Monté à l'ouverture seulement : ses champs partent des valeurs de la
           série telle qu'elle est maintenant, pas telle qu'elle était au

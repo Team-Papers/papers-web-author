@@ -42,6 +42,8 @@ const NOMS: Record<string, string> = {
   fileSize: 'taille du fichier',
   previewPercent: 'extrait gratuit',
   categories: 'catégories',
+  // Une série, pas un livre : même journal, champs en plus.
+  completed: 'état de la série',
 };
 
 /**
@@ -61,6 +63,8 @@ const LANGUES: Record<string, string> = {
 };
 
 function valeurLisible(champ: string, valeur: ValeurDeChamp): string {
+  // « terminée → en cours » se lit ; « true → false », non.
+  if (champ === 'completed') return valeur ? 'terminée' : 'en cours';
   if (valeur === null || valeur === '') return 'rien';
   if (champ === 'price') return formatCurrency(Number(valeur));
   if (champ === 'language') return LANGUES[String(valeur)] ?? String(valeur);
@@ -77,6 +81,7 @@ const AVEC_LES_VALEURS = new Set([
   'previewPercent',
   'title',
   'categories',
+  'completed',
 ]);
 
 /** « prix : 0 F → 500 F », ou simplement « description ». */

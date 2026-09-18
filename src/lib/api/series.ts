@@ -1,4 +1,5 @@
-import type { ApiResponse } from '@/types/api';
+import { toPaginated, type ApiPaginatedRaw, type ApiResponse, type PaginatedResponse } from '@/types/api';
+import type { Revision } from '@/features/books/historique';
 import type { Book } from '@/types/models';
 import apiClient from './client';
 
@@ -142,4 +143,18 @@ export async function scheduleSeries(
     data,
   );
   return res.data.data as { episodes: EpisodeProgramme[]; ignores: EpisodeIgnore[] };
+}
+
+/**
+ * L'historique de la fiche d'une serie.
+ *
+ * Meme forme que celui d'un livre : ce qui change d'un sujet a l'autre est la
+ * liste des champs suivis, pas la facon de les lire.
+ */
+export async function getSeriesRevisions(
+  id: string,
+  params: { page?: number; limit?: number } = {},
+): Promise<PaginatedResponse<Revision>> {
+  const res = await apiClient.get<ApiPaginatedRaw<Revision>>(`/series/${id}/revisions`, { params });
+  return toPaginated(res.data);
 }
