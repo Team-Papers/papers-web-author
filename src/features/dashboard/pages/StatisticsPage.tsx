@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { Spinner } from '@/components/ui/Spinner';
 import { Tranche } from '@/components/atelier/Tranche';
+import { Audience } from '../components/Audience';
 import { getMyStats } from '@/lib/api/authors';
 import { getMyBooks } from '@/lib/api/books';
 import { formatCurrency, toNumber } from '@/lib/utils/formatters';
@@ -122,6 +123,10 @@ export function StatisticsPage() {
           </ol>
         )}
       </section>
+
+      {/* Ce qui se vend ne dit pas ce qui attire : un livre peut etre beaucoup
+          regarde et peu achete, et c'est cet ecart qui se corrige. */}
+      <Audience />
     </div>
   );
 }

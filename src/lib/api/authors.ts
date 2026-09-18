@@ -22,6 +22,38 @@ export async function getMyStats(): Promise<AuthorStats> {
   return res.data.data;
 }
 
+/** Une oeuvre, vue par ce qu'elle attire. */
+export interface LigneDAudience {
+  id: string;
+  titre: string;
+  /** Visites de la page sur la fenetre observee. */
+  visites: number;
+  /** Personnes distinctes qui en ont lu au moins une page. */
+  lecteurs: number;
+  pagesLues: number;
+}
+
+export interface Audience {
+  jours: number;
+  livres: LigneDAudience[];
+  /** Les series : visites de leur page, lectures de leurs episodes. */
+  series: LigneDAudience[];
+  sources: Array<{ source: string; visites: number }>;
+  parJour: Array<{ jour: string; visites: number }>;
+}
+
+/**
+ * Ce que le public fait des oeuvres de l'auteur.
+ *
+ * A cote de `getMyStats`, qui parle d'argent : les deux ne repondent pas a la
+ * meme question. L'une dit ce qu'on a gagne, l'autre ce qui attire — et c'est
+ * la seconde qui decide ou remettre de la publicite.
+ */
+export async function getMyAudience(jours = 30): Promise<Audience> {
+  const res = await apiClient.get<ApiResponse<Audience>>(`/authors/me/audience?jours=${jours}`);
+  return res.data.data;
+}
+
 export interface WithdrawalRequest {
   id: string;
   amount: string;
