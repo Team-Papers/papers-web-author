@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router';
 import {
   CalendarClock,
   Check,
+  CheckCircle2,
   ChevronLeft,
   Copy,
   ExternalLink,
@@ -370,6 +371,20 @@ export function SeriesDetailPage() {
               {serie.completed ? 'Rouvrir la série' : 'Marquer la série terminée'}
             </button>
           </div>
+          {/* Une série se marque terminée à la main, et l'oubli ne se voit
+              nulle part : côté lecteur, celui qui arrive au dernier épisode
+              s'entend dire qu'il n'est que le dernier « à ce jour » et attend
+              une suite qui ne viendra pas. On le signale ici, au moment où
+              c'est vrai — tous les épisodes parus, aucun en attente. */}
+          {aVenir.length === 0 && n > 0 && !serie.completed && (
+            <p className="mt-2 flex items-start gap-2 text-sm text-on-surface-variant">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary-lisible" aria-hidden />
+              <span>
+                Tous vos épisodes sont parus et aucun n’est programmé. Si l’histoire est finie,
+                marquez la série terminée : vos lecteurs sauront qu’ils sont arrivés au bout.
+              </span>
+            </p>
+          )}
           {disponibles.length === 0 && (
             <p className="mt-2 text-sm text-on-surface-muted">
               Tous vos livres sont déjà rangés : il n’y a rien à ranger de plus.
