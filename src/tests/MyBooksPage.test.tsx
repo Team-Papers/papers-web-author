@@ -11,9 +11,9 @@ import type { Book } from '@/types/models';
  * une requête, pas une de plus — et vérifie que le rangement par état répond
  * bien aux trois questions qu'un auteur se pose.
  */
-const getMyBooks = vi.fn();
+const getAllMyBooks = vi.fn();
 vi.mock('@/lib/api/books', () => ({
-  getMyBooks: (...args: unknown[]) => getMyBooks(...args),
+  getAllMyBooks: (...args: unknown[]) => getAllMyBooks(...args),
 }));
 
 function livre(titre: string, status: BookStatus): Book {
@@ -35,7 +35,7 @@ const BIBLIOTHEQUE = [
 ];
 
 async function afficher() {
-  getMyBooks.mockResolvedValue({ data: BIBLIOTHEQUE, total: 4, page: 1, limit: 100, totalPages: 1 });
+  getAllMyBooks.mockResolvedValue(BIBLIOTHEQUE);
   const { MyBooksPage } = await import('@/features/books/pages/MyBooksPage');
   render(
     <MemoryRouter>
@@ -59,7 +59,7 @@ describe('MyBooksPage — une requête, puis le rangement par état', () => {
     fireEvent.change(screen.getByPlaceholderText('Rechercher un titre'), { target: { value: 'fleuve' } });
     fireEvent.change(screen.getByPlaceholderText('Rechercher un titre'), { target: { value: 'fleuv' } });
 
-    expect(getMyBooks).toHaveBeenCalledTimes(1);
+    expect(getAllMyBooks).toHaveBeenCalledTimes(1);
     expect(titres()).toHaveLength(1);
     expect(screen.getByText('Brouillon du fleuve')).toBeDefined();
   });

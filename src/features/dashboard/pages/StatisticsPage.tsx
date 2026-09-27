@@ -4,7 +4,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { Tranche } from '@/components/atelier/Tranche';
 import { Audience } from '../components/Audience';
 import { getMyStats } from '@/lib/api/authors';
-import { getMyBooks } from '@/lib/api/books';
+import { getAllMyBooks } from '@/lib/api/books';
 import { formatCurrency, toNumber } from '@/lib/utils/formatters';
 import type { AuthorStats, Book } from '@/types/models';
 
@@ -26,11 +26,13 @@ export function StatisticsPage() {
   useEffect(() => {
     Promise.all([
       getMyStats().catch(() => null),
-      getMyBooks({ limit: 100 }).catch(() => ({ data: [] as Book[] })),
+      // Tout, sans plafond : une statistique calculee sur une partie du
+      // catalogue est fausse sans le dire.
+      getAllMyBooks().catch(() => [] as Book[]),
     ])
       .then(([s, b]) => {
         if (s) setStats(s);
-        setLivres(b.data);
+        setLivres(b);
       })
       .finally(() => setChargement(false));
   }, []);

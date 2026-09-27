@@ -22,10 +22,10 @@ vi.mock('@/lib/api/series', () => ({
   updateSeries: vi.fn(),
 }));
 
-const getMyBooks = vi.fn();
+const getAllMyBooks = vi.fn();
 vi.mock('@/lib/api/books', () => ({
   uploadCover: vi.fn(),
-  getMyBooks: (...args: unknown[]) => getMyBooks(...args),
+  getAllMyBooks: (...args: unknown[]) => getAllMyBooks(...args),
 }));
 
 function episode(n: number, titre: string, paru = false) {
@@ -70,7 +70,7 @@ const LIVRES = SERIE.episodes.map((e) => ({
 
 async function afficher() {
   getSeriesDetail.mockResolvedValue(SERIE);
-  getMyBooks.mockResolvedValue({ data: LIVRES, total: LIVRES.length, page: 1, limit: 100, totalPages: 1 });
+  getAllMyBooks.mockResolvedValue(LIVRES);
   const { SeriesDetailPage } = await import('@/features/series/pages/SeriesDetailPage');
   render(
     <MemoryRouter initialEntries={['/series/s1']}>
@@ -82,7 +82,7 @@ async function afficher() {
   await screen.findByRole('heading', { name: 'Les nuits de Douala', level: 1 }, { timeout: 5000 });
   // La liste des livres arrive par une autre requête : sans elle, le refusé
   // ne serait pas encore reconnu.
-  await waitFor(() => expect(getMyBooks).toHaveBeenCalled());
+  await waitFor(() => expect(getAllMyBooks).toHaveBeenCalled());
 }
 
 async function ouvrirLeFormulaire() {

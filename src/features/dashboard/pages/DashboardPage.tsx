@@ -7,7 +7,7 @@ import { Tranche } from '@/components/atelier/Tranche';
 import { ceQuiVousAttend, etatDe } from '@/components/atelier/etat';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { getMyStats, getMyEarnings } from '@/lib/api/authors';
-import { getMyBooks } from '@/lib/api/books';
+import { getAllMyBooks } from '@/lib/api/books';
 import { formatCurrency, toNumber } from '@/lib/utils/formatters';
 import type { AuthorStats, Book } from '@/types/models';
 
@@ -37,17 +37,13 @@ export function DashboardPage() {
         const [s, e, b] = await Promise.all([
           getMyStats().catch(() => null),
           getMyEarnings().catch(() => ({ balance: 0, transactions: [] })),
-          getMyBooks({ limit: 100 }).catch(() => ({
-            data: [],
-            total: 0,
-            page: 1,
-            limit: 100,
-            totalPages: 0,
-          })),
+          // Tout le catalogue, pas les cent premiers : les compteurs du
+          // tableau de bord portent sur l'oeuvre entiere de l'auteur.
+          getAllMyBooks().catch(() => [] as Book[]),
         ]);
         if (s) setStats(s);
         setSolde(toNumber(e.balance));
-        setLivres(b.data);
+        setLivres(b);
       } finally {
         setChargement(false);
       }

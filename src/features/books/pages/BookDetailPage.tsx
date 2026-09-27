@@ -9,7 +9,7 @@ import { Tranche } from '@/components/atelier/Tranche';
 import { etatDe } from '@/components/atelier/etat';
 import {
   getBookRevisions,
-  getMyBooks,
+  getBookById,
   submitBook,
   deleteBook,
   unpublishBook,
@@ -40,7 +40,9 @@ export function BookDetailPage() {
   } = useAsyncData<Book | null>(
     () => {
       if (!id) return Promise.resolve(null);
-      return getMyBooks({ limit: 100 }).then((res) => res.data.find((b) => b.id === id) ?? null);
+      // `getBookById` parcourt les pages : la fiche du cent-unieme livre
+      // repondait « introuvable » sans dire pourquoi.
+      return getBookById(id).catch(() => null);
     },
     [id],
     null,

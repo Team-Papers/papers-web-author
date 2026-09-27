@@ -9,6 +9,32 @@ export async function getMyBooks(params: Record<string, unknown> = {}): Promise<
   return toPaginated(res.data);
 }
 
+/**
+ * Toutes les oeuvres de l'auteur, sans plafond.
+ *
+ * `getMyBooks({ limit: 100 })` etait appele tel quel par le tableau de bord,
+ * les statistiques, la liste des livres et l'ecran d'une serie. Cent est un
+ * plafond muet : un auteur qui publie davantage voyait ses gains et ses
+ * compteurs calcules sur une partie de son catalogue, sans rien qui le dise.
+ * Se tromper sur l'argent de quelqu'un est le genre d'erreur qu'on ne repare
+ * pas apres coup, parce qu'elle ne se remarque pas.
+ *
+ * Une seule requete tant que l'auteur reste sous la centaine — le cas de
+ * presque tous aujourd'hui — et autant que necessaire au-dela.
+ */
+export async function getAllMyBooks(params: Record<string, unknown> = {}): Promise<Book[]> {
+  const parPage = 100;
+  const tout: Book[] = [];
+
+  for (let page = 1; ; page += 1) {
+    const res = await getMyBooks({ ...params, limit: parPage, page });
+    tout.push(...res.data);
+    if (page >= res.totalPages || res.data.length === 0) break;
+  }
+
+  return tout;
+}
+
 export interface CreateBookData {
   title: string;
   description?: string;
@@ -47,12 +73,31 @@ export async function updateBook(id: string, data: UpdateBookData): Promise<Book
   return res.data.data;
 }
 
+/**
+ * Un livre de l'auteur, par son identifiant.
+ *
+ * Il n'existe pas de route dediee : `GET /books/:id` est publique et ne rend
+ * que ce qui est paru, alors que l'auteur ouvre surtout des brouillons et des
+ * chapitres en relecture. On passe donc par sa propre liste.
+ *
+ * Elle etait demandee une fois, cent livres au plus, et filtree ici. Un auteur
+ * qui en publie davantage voyait sa fiche cent-unieme repondre « introuvable »
+ * — et rien, dans ce message, n'aurait laisse deviner pourquoi. On parcourt
+ * maintenant les pages jusqu'a le trouver : une seule requete tant que
+ * l'auteur reste sous la centaine, ce qui est le cas de presque tous, et la
+ * fiche continue de s'ouvrir pour les autres.
+ */
 export async function getBookById(id: string): Promise<Book> {
-  // Use getMyBooks and filter - there's no dedicated endpoint for single book fetch by author
-  const res = await getMyBooks({ limit: 100 });
-  const book = res.data.find((b) => b.id === id);
-  if (!book) throw new Error('Book not found');
-  return book;
+  const parPage = 100;
+
+  for (let page = 1; ; page += 1) {
+    const res = await getMyBooks({ limit: parPage, page });
+    const book = res.data.find((b) => b.id === id);
+    if (book) return book;
+    if (page >= res.totalPages || res.data.length === 0) break;
+  }
+
+  throw new Error('Book not found');
 }
 
 export async function deleteBook(id: string): Promise<void> {

@@ -21,10 +21,10 @@ vi.mock('@/lib/api/series', () => ({
   updateSeries: vi.fn(),
 }));
 
-const getMyBooks = vi.fn();
+const getAllMyBooks = vi.fn();
 vi.mock('@/lib/api/books', () => ({
   uploadCover: vi.fn(),
-  getMyBooks: (...args: unknown[]) => getMyBooks(...args),
+  getAllMyBooks: (...args: unknown[]) => getAllMyBooks(...args),
 }));
 
 function episode(n: number, titre: string, options: { paru?: boolean; publishAt?: string } = {}) {
@@ -66,13 +66,7 @@ const LIVRES = [
 
 async function afficher() {
   getSeriesDetail.mockResolvedValue(SERIE);
-  getMyBooks.mockResolvedValue({
-    data: LIVRES,
-    total: LIVRES.length,
-    page: 1,
-    limit: 100,
-    totalPages: 1,
-  });
+  getAllMyBooks.mockResolvedValue(LIVRES);
   const { SeriesDetailPage } = await import('@/features/series/pages/SeriesDetailPage');
   render(
     <MemoryRouter initialEntries={['/series/s1']}>
@@ -82,7 +76,7 @@ async function afficher() {
     </MemoryRouter>,
   );
   await screen.findByRole('heading', { name: 'Triple Ambiance', level: 1 }, { timeout: 5000 });
-  await waitFor(() => expect(getMyBooks).toHaveBeenCalled());
+  await waitFor(() => expect(getAllMyBooks).toHaveBeenCalled());
 }
 
 function ligneDe(titre: string) {

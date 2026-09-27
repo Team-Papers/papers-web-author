@@ -13,10 +13,10 @@ const formatCurrency = (n: number) => fc(n).replace(/\s/g, ' ');
  * était inventé. L'API calcule le net réellement versé, livre par livre ;
  * c'est lui, et lui seul, que l'auteur doit lire.
  */
-const getMyBooks = vi.fn();
+const getBookById = vi.fn();
 const getBookRevisions = vi.fn();
 vi.mock('@/lib/api/books', () => ({
-  getMyBooks: () => getMyBooks(),
+  getBookById: (...a: unknown[]) => getBookById(...a),
   getBookRevisions: (...a: unknown[]) => getBookRevisions(...a),
   submitBook: vi.fn(),
   deleteBook: vi.fn(),
@@ -42,7 +42,7 @@ function livre(extra: Partial<Book>): Book {
 }
 
 async function afficher(b: Book) {
-  getMyBooks.mockResolvedValue({ data: [b], total: 1, page: 1, limit: 100, totalPages: 1 });
+  getBookById.mockResolvedValue(b);
   const { BookDetailPage } = await import('@/features/books/pages/BookDetailPage');
   render(
     <MemoryRouter initialEntries={['/books/l1']}>

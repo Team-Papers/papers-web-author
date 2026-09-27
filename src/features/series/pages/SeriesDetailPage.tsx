@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Spinner } from '@/components/ui/Spinner';
 import { Modal } from '@/components/ui/Modal';
 import { useAsyncData } from '@/hooks/useAsyncData';
-import { getMyBooks, uploadCover } from '@/lib/api/books';
+import { getAllMyBooks, uploadCover } from '@/lib/api/books';
 import {
   attachEpisode,
   detachEpisode,
@@ -63,7 +63,7 @@ export function SeriesDetailPage() {
   );
 
   const { data: livres } = useAsyncData<Book[]>(
-    () => getMyBooks({ limit: 100 }).then((r) => r.data),
+    () => getAllMyBooks(),
     [],
     [],
   );

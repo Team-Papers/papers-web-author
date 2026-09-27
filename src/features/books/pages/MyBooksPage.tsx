@@ -4,7 +4,7 @@ import { Plus, Search } from 'lucide-react';
 import { Spinner } from '@/components/ui/Spinner';
 import { Tranche } from '@/components/atelier/Tranche';
 import { etatDe } from '@/components/atelier/etat';
-import { getMyBooks } from '@/lib/api/books';
+import { getAllMyBooks } from '@/lib/api/books';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import { formatCurrency } from '@/lib/utils/formatters';
 import { cn } from '@/lib/utils/cn';
@@ -35,7 +35,7 @@ export function MyBooksPage() {
   const [recherche, setRecherche] = useState('');
 
   const { data: livres, loading } = useAsyncData<Book[]>(
-    () => getMyBooks({ limit: 100 }).then((res) => res.data),
+    () => getAllMyBooks(),
     [],
     [],
   );

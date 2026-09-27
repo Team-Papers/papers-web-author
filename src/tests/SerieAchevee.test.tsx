@@ -26,7 +26,7 @@ vi.mock('@/lib/api/series', () => ({
 
 vi.mock('@/lib/api/books', () => ({
   uploadCover: vi.fn(),
-  getMyBooks: vi.fn().mockResolvedValue({ data: [], total: 0, page: 1, limit: 100, totalPages: 1 }),
+  getAllMyBooks: vi.fn().mockResolvedValue([]),
 }));
 
 function episode(numero: number, paru: boolean, publishAt: string | null = null) {
