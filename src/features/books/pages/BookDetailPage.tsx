@@ -73,10 +73,17 @@ export function BookDetailPage() {
 
   const handleDelete = async () => {
     if (!book) return;
+    setError('');
     setActionLoading(true);
     try {
       await deleteBook(book.id);
       navigate('/books');
+    } catch {
+      // Sans ce filet, une suppression refusee ne laissait rien : le bouton
+      // reprenait son etat, la page ne bougeait pas, et l'auteur ne savait
+      // pas si son livre etait parti ou non.
+      setError("Le livre n'a pas pu être supprimé. Il est toujours là.");
+      setShowDelete(false);
     } finally {
       setActionLoading(false);
     }

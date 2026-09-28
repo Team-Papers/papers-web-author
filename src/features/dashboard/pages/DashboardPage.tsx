@@ -27,7 +27,15 @@ import type { AuthorStats, Book } from '@/types/models';
 export function DashboardPage() {
   const profil = useAuthStore((s) => s.authorProfile);
   const [stats, setStats] = useState<AuthorStats | null>(null);
-  const [solde, setSolde] = useState(0);
+  /**
+   * Le solde, ou `null` quand on n'a pas pu le lire.
+   *
+   * Il se lisait avec un repli a zero : un auteur dont les gains ne
+   * repondaient pas voyait « 0 F » a la place de son revenu. C'est le chiffre
+   * pour lequel il ouvre cette page, et le seul qu'il ne faut jamais inventer
+   * — un zero se lit comme une information, pas comme une panne.
+   */
+  const [solde, setSolde] = useState<number | null>(null);
   const [livres, setLivres] = useState<Book[]>([]);
   const [chargement, setChargement] = useState(true);
 
@@ -36,13 +44,13 @@ export function DashboardPage() {
       try {
         const [s, e, b] = await Promise.all([
           getMyStats().catch(() => null),
-          getMyEarnings().catch(() => ({ balance: 0, transactions: [] })),
+          getMyEarnings().catch(() => null),
           // Tout le catalogue, pas les cent premiers : les compteurs du
           // tableau de bord portent sur l'oeuvre entiere de l'auteur.
           getAllMyBooks().catch(() => [] as Book[]),
         ]);
         if (s) setStats(s);
-        setSolde(toNumber(e.balance));
+        setSolde(e ? toNumber(e.balance) : null);
         setLivres(b);
       } finally {
         setChargement(false);
@@ -201,7 +209,7 @@ function PremierLivre() {
  * regarder un solde plutot que pour travailler. Mais c'est la raison d'etre
  * du reste, alors il a sa couleur a lui, qui ne sert nulle part ailleurs.
  */
-function Argent({ solde, ventes }: { solde: number; ventes: number }) {
+function Argent({ solde, ventes }: { solde: number | null; ventes: number }) {
   return (
     <section className="mb-4">
       <h2 className="mb-3 text-sm font-semibold text-on-surface-variant">Ce que vous avez gagné</h2>
@@ -212,9 +220,15 @@ function Argent({ solde, ventes }: { solde: number; ventes: number }) {
           className="flex flex-1 flex-col justify-center rounded-lg border border-outline bg-surface px-4 py-4 transition-colors hover:bg-surface-dim focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <span className="text-xs text-on-surface-muted">Disponible</span>
-          <span className="mt-1 font-display text-2xl font-semibold tabular-nums text-accent-lisible">
-            {formatCurrency(solde)}
-          </span>
+          {solde === null ? (
+            <span className="mt-1 text-sm text-on-surface-muted">
+              Montant indisponible — réessayez dans un instant
+            </span>
+          ) : (
+            <span className="mt-1 font-display text-2xl font-semibold tabular-nums text-accent-lisible">
+              {formatCurrency(solde)}
+            </span>
+          )}
         </Link>
 
         <div className="flex flex-1 flex-col justify-center rounded-lg border border-outline bg-surface px-4 py-4">

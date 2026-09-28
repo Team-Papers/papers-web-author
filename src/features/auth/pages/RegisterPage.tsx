@@ -80,12 +80,12 @@ export function RegisterPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
-          <Input label="Prénom" value={form.firstName} onChange={update('firstName')} leftIcon={<User className="h-4 w-4" />} required />
-          <Input label="Nom" value={form.lastName} onChange={update('lastName')} required />
+          <Input label="Prénom" name="firstName" autoComplete="given-name" value={form.firstName} onChange={update('firstName')} leftIcon={<User className="h-4 w-4" />} required />
+          <Input label="Nom" name="lastName" autoComplete="family-name" value={form.lastName} onChange={update('lastName')} required />
         </div>
-        <Input label="Email" type="email" value={form.email} onChange={update('email')} leftIcon={<Mail className="h-4 w-4" />} required />
-        <Input label="Mot de passe" type="password" value={form.password} onChange={update('password')} leftIcon={<Lock className="h-4 w-4" />} required />
-        <Input label="Confirmer" type="password" value={form.confirm} onChange={update('confirm')} leftIcon={<Lock className="h-4 w-4" />} required />
+        <Input label="Email" name="email" type="email" autoComplete="email" spellCheck={false} value={form.email} onChange={update('email')} leftIcon={<Mail className="h-4 w-4" />} required />
+        <Input label="Mot de passe" name="password" type="password" autoComplete="new-password" value={form.password} onChange={update('password')} leftIcon={<Lock className="h-4 w-4" />} required />
+        <Input label="Confirmer" name="confirm" type="password" autoComplete="new-password" value={form.confirm} onChange={update('confirm')} leftIcon={<Lock className="h-4 w-4" />} required />
         <Button type="submit" fullWidth isLoading={loading} rightIcon={<ArrowRight className="h-4 w-4" />}>Créer mon compte</Button>
       </form>
 

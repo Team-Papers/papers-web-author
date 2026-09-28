@@ -80,7 +80,10 @@ export function LoginPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           label="Email"
+          name="email"
           type="email"
+          autoComplete="email"
+          spellCheck={false}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           leftIcon={<Mail className="h-4 w-4" />}
@@ -88,7 +91,9 @@ export function LoginPage() {
         />
         <Input
           label="Mot de passe"
+          name="password"
           type="password"
+          autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           leftIcon={<Lock className="h-4 w-4" />}
