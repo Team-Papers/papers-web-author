@@ -186,6 +186,17 @@ function FormulaireDeCoffret({
   const [description, setDescription] = useState(coffret?.description ?? '');
   const [prix, setPrix] = useState(String(coffret?.price ?? ''));
   const [couverture, setCouverture] = useState(coffret?.coverUrl ?? '');
+  /**
+   * Ce qu'on montre, qui n'est pas ce qu'on envoie.
+   *
+   * Le téléversement rend un *nom de fichier* — c'est ce que l'API range et
+   * ce que le site transforme en adresse au moment de servir. Le donner tel
+   * quel à `<img src>` affichait une image cassée : l'auteur venait de
+   * choisir sa couverture et voyait l'icône du navigateur pour un fichier
+   * introuvable. L'aperçu vient donc du fichier local, comme sur le
+   * formulaire d'un livre.
+   */
+  const [apercu, setApercu] = useState(coffret?.coverUrl ?? '');
   const [choisis, setChoisis] = useState<string[]>(coffret?.books.map((l) => l.id) ?? []);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -210,10 +221,12 @@ function FormulaireDeCoffret({
 
   async function televerser(fichier: File) {
     setErreur(null);
+    setApercu(URL.createObjectURL(fichier));
     try {
       setCouverture(await uploadCover(fichier));
     } catch (e) {
       setErreur(messageDe(e));
+      setApercu(coffret?.coverUrl ?? '');
     }
   }
 
@@ -326,6 +339,11 @@ function FormulaireDeCoffret({
                 <li key={livre.id}>
                   <button
                     type="button"
+                    // Un bouton qui ne dit pas s'il est enfoncé ne dit rien :
+                    // celui-ci s'annonçait « bouton, Volume I », coché ou
+                    // non, et rien dans la page ne permettait de retrouver la
+                    // sélection autrement qu'en regardant la couleur.
+                    aria-pressed={coche}
                     disabled={fige}
                     onClick={() => basculer(livre.id)}
                     className={cn(
@@ -400,8 +418,8 @@ function FormulaireDeCoffret({
           </span>
           <div className="flex items-center gap-3">
             <span className="flex h-20 w-14 flex-none items-center justify-center overflow-hidden rounded-md bg-surface-container-high">
-              {couverture ? (
-                <img src={couverture} alt="" className="h-full w-full object-cover" />
+              {apercu ? (
+                <img src={apercu} alt="" className="h-full w-full object-cover" />
               ) : (
                 <Layers className="h-5 w-5 text-on-surface-muted" aria-hidden />
               )}
