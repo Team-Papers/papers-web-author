@@ -66,6 +66,11 @@ export interface AuthorProfile {
    * Quinze ou seize chiffres ; vide quand il n'en a pas.
    */
   metaPixelId?: string | null;
+  /**
+   * Quand cet auteur a accepté les conditions de Blue Papers. Nul tant qu'il
+   * ne les a pas acceptées : aucun de ses livres ne peut alors y entrer.
+   */
+  bluePapersAcceptedAt?: string | null;
   status: AuthorStatus;
   mtnNumber?: string;
   omNumber?: string;
@@ -102,6 +107,18 @@ export interface Book {
   totalRevenue: number;
   /** Fiches servies au public. Absent tant que l'API n'est pas a jour. */
   views?: number;
+  /**
+   * Ce livre est dans Blue Papers : l'abonnement l'ouvre, et il rapporte au
+   * prorata des pages lues en plus de ses ventes à l'unité.
+   */
+  bluePapers?: boolean;
+  /**
+   * La série dont ce livre est un épisode, nulle pour un livre isolé. Un
+   * épisode ne se vend pas seul et n'entre pas seul dans l'abonnement : sa
+   * série décide pour tous ses chapitres.
+   */
+  seriesId?: string | null;
+  episodeNumber?: number | null;
   averageRating: number;
   reviewCount: number;
   createdAt: string;

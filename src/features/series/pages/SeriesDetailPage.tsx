@@ -29,7 +29,9 @@ import {
   type EpisodeIgnore,
   type EpisodeProgramme,
   getSeriesRevisions,
+  rejoindreBluePapersSerie,
 } from '@/lib/api/series';
+import { CarteBluePapers } from '@/features/bluePapers/CarteBluePapers';
 import { cn } from '@/lib/utils/cn';
 import { messageDe } from '@/lib/utils/erreurs';
 import { aEteModifie, formatDate } from '@/lib/utils/formatters';
@@ -259,6 +261,21 @@ export function SeriesDetailPage() {
       </section>
 
       <AdressePublique serie={serie} />
+
+      {/* Blue Papers : la série entière, épisodes compris.
+          Le geste est au niveau de la série et non de chaque chapitre — la
+          moitié d'un roman dans l'abonnement arrêterait le lecteur au milieu —
+          et les épisodes ajoutés ensuite en héritent. */}
+      <div className="mb-6">
+        <CarteBluePapers
+          dedans={Boolean(serie.bluePapers)}
+          sujet="série"
+          onRejoindre={async () => {
+            await rejoindreBluePapersSerie(serie.id);
+            await recharger();
+          }}
+        />
+      </div>
 
       {confirmation && (
         <p

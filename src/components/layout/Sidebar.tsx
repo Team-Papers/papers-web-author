@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router';
-import { LayoutDashboard, Bell, BookOpen, Layers, PlusCircle, Wallet, BarChart3, Settings, LogOut, Presentation, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Bell, BookOpen, Layers, Package, PlusCircle, Wallet, BarChart3, Settings, LogOut, Presentation, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { pagePublique } from '@/lib/site';
 import { useAuthStore } from '@/features/auth/store/authStore';
@@ -12,6 +12,7 @@ const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Atelier' },
   { to: '/books', icon: BookOpen, label: 'Mes livres' },
   { to: '/series', icon: Layers, label: 'Mes séries' },
+  { to: '/coffrets', icon: Package, label: 'Mes coffrets' },
   { to: '/books/new', icon: PlusCircle, label: 'Nouveau livre' },
   { to: '/earnings', icon: Wallet, label: 'Revenus' },
   { to: '/statistics', icon: BarChart3, label: 'Ce qui se vend' },

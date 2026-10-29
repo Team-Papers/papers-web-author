@@ -17,6 +17,8 @@ export interface Series {
   coverUrl: string | null;
   status: Book['status'];
   completed: boolean;
+  /** La série est dans Blue Papers : l'abonnement ouvre ses épisodes. */
+  bluePapers?: boolean;
   createdAt: string;
   updatedAt: string;
   _count?: { books: number };
@@ -78,6 +80,8 @@ export async function getSeriesDetail(id: string): Promise<{
   description: string | null;
   coverUrl?: string | null;
   completed: boolean;
+  /** La série est dans Blue Papers : l'abonnement ouvre ses épisodes. */
+  bluePapers?: boolean;
   createdAt: string;
   /** Quand l'auteur y a touché pour la dernière fois. */
   updatedAt: string;
@@ -157,4 +161,20 @@ export async function getSeriesRevisions(
 ): Promise<PaginatedResponse<Revision>> {
   const res = await apiClient.get<ApiPaginatedRaw<Revision>>(`/series/${id}/revisions`, { params });
   return toPaginated(res.data);
+}
+
+/**
+ * Faire entrer une série et tous ses épisodes dans Blue Papers.
+ *
+ * Un seul geste pour un roman de trente chapitres, et les épisodes ajoutés
+ * ensuite en héritent : la moitié d'un roman dans le programme arrêterait le
+ * lecteur au milieu.
+ */
+export async function rejoindreBluePapersSerie(
+  id: string,
+): Promise<{ bluePapers: boolean; episodesInscrits: number }> {
+  const res = await apiClient.post<ApiResponse<{ bluePapers: boolean; episodesInscrits: number }>>(
+    `/series/${id}/blue-papers`,
+  );
+  return res.data.data as { bluePapers: boolean; episodesInscrits: number };
 }

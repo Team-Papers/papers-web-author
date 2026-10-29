@@ -148,3 +148,17 @@ export async function getBookRevisions(
   const res = await apiClient.get<ApiPaginatedRaw<Revision>>(`/books/${id}/revisions`, { params });
   return toPaginated(res.data);
 }
+
+/**
+ * Faire entrer ce livre dans Blue Papers, donc dans l'abonnement.
+ *
+ * Une route à part de `PUT /books/:id` : un livre publié ne se modifie plus,
+ * et c'est précisément un livre publié qu'un auteur veut mettre dans
+ * l'abonnement. Le retrait n'existe pas ici — il appartient à
+ * l'administration, pour qu'un abonné au milieu d'un livre ne le voie pas se
+ * refermer du jour au lendemain.
+ */
+export async function rejoindreBluePapers(bookId: string): Promise<Book> {
+  const res = await apiClient.post<ApiResponse<Book>>(`/books/${bookId}/blue-papers`);
+  return res.data.data;
+}

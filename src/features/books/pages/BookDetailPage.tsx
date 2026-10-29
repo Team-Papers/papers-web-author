@@ -13,7 +13,9 @@ import {
   submitBook,
   deleteBook,
   unpublishBook,
+  rejoindreBluePapers,
 } from '@/lib/api/books';
+import { CarteBluePapers } from '@/features/bluePapers/CarteBluePapers';
 import { CeQuiAChange } from '@/components/atelier/CeQuiAChange';
 import { aEteModifie, formatCurrency, formatDate } from '@/lib/utils/formatters';
 import type { BookCategoryLink, Book } from '@/types/models';
@@ -272,6 +274,26 @@ export function BookDetailPage() {
         <Rubrique titre="Résumé">
           <p className="text-sm leading-relaxed whitespace-pre-line text-on-surface">{book.description}</p>
         </Rubrique>
+      )}
+
+      {/* Blue Papers, seulement sur un livre publié.
+          Un brouillon n'a rien à faire dans l'abonnement : il n'est lisible
+          par personne, et la question se pose au moment où le livre est en
+          vente — c'est là qu'un auteur compare ce que l'unité lui rapporte à
+          ce que les pages lues rapporteraient. Un épisode de série n'est pas
+          concerné non plus : sa série porte la décision pour tous ses
+          chapitres. */}
+      {book.status === BookStatus.PUBLISHED && !book.seriesId && (
+        <div className="mt-8">
+          <CarteBluePapers
+            dedans={Boolean(book.bluePapers)}
+            sujet="livre"
+            onRejoindre={async () => {
+              const maj = await rejoindreBluePapers(book.id);
+              setBook({ ...book, bluePapers: maj.bluePapers ?? true });
+            }}
+          />
+        </div>
       )}
 
       {/* Seulement si le livre a bougé : proposer d'ouvrir un journal vide sur

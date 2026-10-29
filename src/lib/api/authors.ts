@@ -98,3 +98,18 @@ export async function requestWithdrawal(data: {
   const res = await apiClient.post<ApiResponse<WithdrawalRequest>>('/authors/me/withdraw', data);
   return res.data.data;
 }
+
+/**
+ * Accepter les conditions de Blue Papers.
+ *
+ * Entrer dans le programme, c'est accepter d'être payé au prorata des pages
+ * lues sur la cagnotte des abonnements, plutôt qu'au prix du livre à chaque
+ * vente. Tant que cette date est nulle, aucun livre de cet auteur ne peut y
+ * entrer. Idempotent : la date du premier accord est conservée.
+ */
+export async function accepterBluePapers(): Promise<{ bluePapersAcceptedAt: string }> {
+  const res = await apiClient.post<ApiResponse<{ bluePapersAcceptedAt: string }>>(
+    '/authors/me/blue-papers',
+  );
+  return res.data.data;
+}
